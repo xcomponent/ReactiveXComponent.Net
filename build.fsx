@@ -13,7 +13,7 @@ Target "Clean" (fun _ ->
 )
 
 Target "Compile" (fun _ ->    
-    trace ("Compiling XCClientLib project")
+    trace ("Compiling ReactiveXComponent project")
     !! "./ReactiveXComponent/**/*.csproj"
     |> MSBuildRelease buildReleaseDir "Build"
     |> Log "Compiling Output: "

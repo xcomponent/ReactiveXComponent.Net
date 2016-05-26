@@ -7,8 +7,8 @@
     <ProjectGuid>{C5DC5337-3E5B-4038-87A3-B57272226659}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>XCClientLib</RootNamespace>
-    <AssemblyName>XCClientLib</AssemblyName>
+    <RootNamespace>ReactiveXComponent</RootNamespace>
+    <AssemblyName>ReactiveXComponent</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

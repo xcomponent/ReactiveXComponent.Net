@@ -5,7 +5,7 @@
 open Fake
 open Fake.XMLHelper
 
-let buildReleaseDir = "./XCClientLib/obj/Release/"
+let buildReleaseDir = "./ReactiveXComponent/obj/Release/"
 
 Target "Clean" (fun _ ->    
     trace ("Cleaning")
@@ -14,7 +14,7 @@ Target "Clean" (fun _ ->
 
 Target "Compile" (fun _ ->    
     trace ("Compiling XCClientLib project")
-    !! "./XCClientLib/**/*.csproj"
+    !! "./ReactiveXComponent/**/*.csproj"
     |> MSBuildRelease buildReleaseDir "Build"
     |> Log "Compiling Output: "
 )

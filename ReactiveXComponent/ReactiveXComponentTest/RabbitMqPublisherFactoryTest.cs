@@ -11,7 +11,6 @@ namespace ReactiveXComponentTest
         [TestCase()]
         public void Send_Sucess_Test()
         {
-            const string exchangeName = "";
             const string routingKey = "";
             var header = Substitute.For<Header>();
             var message = new object();

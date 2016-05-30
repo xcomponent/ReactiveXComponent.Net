@@ -11,9 +11,6 @@ namespace ReactiveXComponentTest
         [TestCase()]
         public void StartExchange_Sucess_Test()
         {
-            const string exchangeName = "";
-            const string routingKey = "";
-        
             var rabbitMqConnection = Substitute.For<IRabbitMqConnection>();
             var connection = Substitute.For<IConnection>();
             var model = Substitute.For<IModel>();
@@ -36,9 +33,6 @@ namespace ReactiveXComponentTest
         [TestCase()]
         public void EndExchange_Sucess_Test()
         {
-            const string exchangeName = "";
-            const string routingKey = "";
-        
             var rabbitMqConnection = Substitute.For<IRabbitMqConnection>();
             var connection = Substitute.For<IConnection>();
             var model = Substitute.For<IModel>();

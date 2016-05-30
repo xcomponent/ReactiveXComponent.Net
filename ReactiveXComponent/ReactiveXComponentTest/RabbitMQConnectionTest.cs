@@ -12,9 +12,9 @@ using ReactiveXComponent.RabbitMQ;
 namespace ReactiveXComponent
 {
     [TestFixture]
-    public class RabbitMQConnectionTest
+    public class RabbitMqConnectionTest
     {
-        BusDetails busInfos = new BusDetails
+        BusDetails _busInfos = new BusDetails
         {
             Host = "localhost",
             Username = "",
@@ -27,11 +27,11 @@ namespace ReactiveXComponent
         public void CreateConnection_Sucess_test(string username, string password)
         {
             //Arrange
-            busInfos.Username = username;
-            busInfos.Password = password;
+            _busInfos.Username = username;
+            _busInfos.Password = password;
             
             //Act
-            var connect = new RabbitMqConnection(busInfos);
+            var connect = new RabbitMqConnection(_busInfos);
             var connection = connect.GetConnection();
             var isOpen = connection.IsOpen;
 

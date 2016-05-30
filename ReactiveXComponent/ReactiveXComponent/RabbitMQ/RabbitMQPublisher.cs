@@ -15,23 +15,23 @@ namespace ReactiveXComponent.RabbitMQ
 
     public class RabbitMQPublisher : IRabbitMQPublisher
     {
-        private IModel publisherChannel;
-        private readonly string exchangeName;        
+        private IModel _publisherChannel;
+        private readonly string _exchangeName;
 
         public RabbitMQPublisher(string exchangeName, IRabbitMqConnection rabbitMqConnection)
         {            
-            this.exchangeName = exchangeName;
+            _exchangeName = exchangeName;
             var connection = rabbitMqConnection.GetConnection();
             if (connection != null && connection.IsOpen)
             {
-                this.publisherChannel = connection.CreateModel();                
-                this.publisherChannel.ExchangeDeclare(this.exchangeName, global::RabbitMQ.Client.ExchangeType.Topic);                
+                _publisherChannel = connection.CreateModel();                
+                _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);                
             }
         }
 
         public void Send(Header header, object message, string routingKey)
         {            
-            var prop = this.publisherChannel.CreateBasicProperties();
+            var prop = this._publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMQHeaderConverter.ConvertHeader(header);
 
             if (message == null)
@@ -47,7 +47,7 @@ namespace ReactiveXComponent.RabbitMQ
             byte[] messageBytes;
             using (var stream = new MemoryStream())
             {
-                this.Serialize(stream, message);
+                Serialize(stream, message);
                 messageBytes = stream.ToArray();
             }
 
@@ -56,7 +56,7 @@ namespace ReactiveXComponent.RabbitMQ
 
             try
             {
-                this.publisherChannel.BasicPublish(this.exchangeName, routingKey, properties, messageBytes);
+                _publisherChannel.BasicPublish(_exchangeName, routingKey, properties, messageBytes);
             }            
             catch (Exception exception)
             {
@@ -76,12 +76,12 @@ namespace ReactiveXComponent.RabbitMQ
 
         public void Close()
         {
-            this.publisherChannel.Close();            
+            _publisherChannel.Close();            
         }
 
         public void Dispose()
         {
-            this.Close();
+            Close();
         }
     }
 }

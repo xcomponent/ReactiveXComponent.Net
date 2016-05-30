@@ -18,7 +18,6 @@ namespace ReactiveXComponent.RabbitMQ
 
         public IRabbitMQPublisher Create(string componentName)
         {
-        
             return new RabbitMQPublisher(HashcodeHelper.GetXcHashCode(componentName).ToString(), this.connection);       
         }
     }

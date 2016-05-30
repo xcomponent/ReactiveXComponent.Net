@@ -57,7 +57,9 @@
   <ItemGroup>
     <Compile Include="RabbitMqConnectionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RabbitMqConsumerFactoryTest.cs" />
     <Compile Include="RabbitMqConsumerTest.cs" />
+    <Compile Include="RabbitMqPublisherFactoryTest.cs" />
     <Compile Include="RabbitMqPublisherTest.cs" />
   </ItemGroup>
   <ItemGroup>

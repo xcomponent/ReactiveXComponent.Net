@@ -20,7 +20,7 @@ namespace ReactiveXComponentTest
             var queue = new QueueDeclareOk("", 0, 0);
             model.QueueDeclare().Returns(queue);
         
-            var rabbitMqConsumerFactory = new SingleKeyRabbitMQConsumerFactory(rabbitMqConnection);
+            var rabbitMqConsumerFactory = new SingleKeyRabbitMqConsumerFactory(rabbitMqConnection);
         
             var rabbitMqConsumer = rabbitMqConsumerFactory.Create("","") as SingleKeyRabbitMqConsumer;
             var isStarted = rabbitMqConsumer.IsStarted;
@@ -42,7 +42,7 @@ namespace ReactiveXComponentTest
             var queue = new QueueDeclareOk("", 0, 0);
             model.QueueDeclare().Returns(queue);
 
-            var rabbitMqConsumerFactory = new SingleKeyRabbitMQConsumerFactory(rabbitMqConnection);
+            var rabbitMqConsumerFactory = new SingleKeyRabbitMqConsumerFactory(rabbitMqConnection);
 
             var rabbitMqConsumer = rabbitMqConsumerFactory.Create("", "") as SingleKeyRabbitMqConsumer;
             var isStarted = rabbitMqConsumer.IsStarted;

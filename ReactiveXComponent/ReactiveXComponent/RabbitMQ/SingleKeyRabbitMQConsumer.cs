@@ -6,7 +6,7 @@
 
     using global::RabbitMQ.Client.Events;
 
-    public class SingleKeyRabbitMqConsumer : AbstractRabbitMQConsumer
+    public class SingleKeyRabbitMqConsumer : AbstractRabbitMqConsumer
     {
         private readonly string routingKey;        
 
@@ -27,7 +27,7 @@
 
             var obj = binaryFormater.Deserialize(new MemoryStream(e.Body));
             var msgEventArgs = new MessageEventArgs(
-                RabbitMQHeaderConverter.ConvertHeader(e.BasicProperties.Headers),
+                RabbitMqHeaderConverter.ConvertHeader(e.BasicProperties.Headers),
                 obj);
             this.OnMessageReceived(msgEventArgs);         
         }

@@ -1,14 +1,14 @@
-﻿namespace ReactiveXComponent.RabbitMQ
+﻿using ReactiveXComponent.Common;
+
+namespace ReactiveXComponent.RabbitMQ
 {
     using System.Globalization;
 
-    using XComponent.Common.Helper;
-
-    public class SingleKeyRabbitMQConsumerFactory : IRabbitMQConsumerFactory
+    public class SingleKeyRabbitMqConsumerFactory : IRabbitMqConsumerFactory
     {
         private readonly IRabbitMqConnection connection;
 
-        public SingleKeyRabbitMQConsumerFactory(IRabbitMqConnection connection)
+        public SingleKeyRabbitMqConsumerFactory(IRabbitMqConnection connection)
         {
             this.connection = connection;
         }

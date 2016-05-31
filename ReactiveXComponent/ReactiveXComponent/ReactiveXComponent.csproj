@@ -48,21 +48,21 @@
     <Compile Include="Common\HashcodeHelper.cs" />
     <Compile Include="Common\Visibility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RabbitMQ\AbstractRabbitMQConsumer.cs" />
+    <Compile Include="RabbitMQ\AbstractRabbitMqConsumer.cs" />
     <Compile Include="RabbitMQ\BusDetails.cs" />
     <Compile Include="RabbitMQ\Header.cs" />
     <Compile Include="RabbitMQ\HeaderElement.cs" />
     <Compile Include="RabbitMQ\IConsumer.cs" />
     <Compile Include="RabbitMQ\IRabbitMqConnection.cs" />
-    <Compile Include="RabbitMQ\IRabbitMQConsumerFactory.cs" />
+    <Compile Include="RabbitMQ\IRabbitMqConsumerFactory.cs" />
     <Compile Include="RabbitMQ\IRabbitMqPublisherFactory.cs" />
     <Compile Include="RabbitMQ\MessageEventArgs.cs" />
-    <Compile Include="RabbitMQ\RabbitMQConnection.cs" />
-    <Compile Include="RabbitMQ\RabbitMQHeaderConverter.cs" />
-    <Compile Include="RabbitMQ\RabbitMQPublisher.cs" />
+    <Compile Include="RabbitMQ\RabbitMqConnection.cs" />
+    <Compile Include="RabbitMQ\RabbitMqHeaderConverter.cs" />
+    <Compile Include="RabbitMQ\RabbitMqPublisher.cs" />
     <Compile Include="RabbitMQ\RabbitMqPublisherFactory.cs" />
-    <Compile Include="RabbitMQ\SingleKeyRabbitMQConsumer.cs" />
-    <Compile Include="RabbitMQ\SingleKeyRabbitMQConsumerFactory.cs" />
+    <Compile Include="RabbitMQ\SingleKeyRabbitMqConsumer.cs" />
+    <Compile Include="RabbitMQ\SingleKeyRabbitMqConsumerFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

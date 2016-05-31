@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ReactiveXComponent.Common;
 
 namespace ReactiveXComponent.RabbitMQ
 {
-    using XComponent.Common.Helper;
-
     public class RabbitMqPublisherFactory : IRabbitMqPublisherFactory
     {
         private readonly IRabbitMqConnection connection;
@@ -18,7 +13,7 @@ namespace ReactiveXComponent.RabbitMQ
 
         public IRabbitMQPublisher Create(string componentName)
         {
-            return new RabbitMQPublisher(HashcodeHelper.GetXcHashCode(componentName).ToString(), this.connection);       
+            return new RabbitMqPublisher(HashcodeHelper.GetXcHashCode(componentName).ToString(), this.connection);       
         }
     }
 }

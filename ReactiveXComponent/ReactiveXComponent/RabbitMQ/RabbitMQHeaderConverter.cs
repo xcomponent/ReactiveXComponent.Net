@@ -6,7 +6,7 @@ namespace ReactiveXComponent.RabbitMQ
     using System.Collections;
     using System.Collections.Generic;
 
-    public static class RabbitMQHeaderConverter
+    public static class RabbitMqHeaderConverter
     {
         public static Dictionary<string, object> ConvertHeader(Header header)
         {
@@ -28,8 +28,7 @@ namespace ReactiveXComponent.RabbitMQ
                                {HeaderElement.IncomingEventType, 0},
                                {HeaderElement.AgentId, DefaultValue },
                                {HeaderElement.PublishTopic, header.PublishTopic != null ? encoding.GetBytes(header.PublishTopic) : encoding.GetBytes(string.Empty) },
-                               {HeaderElement.MessageType, header.MessageType != null ? encoding.GetBytes(header.MessageType) : encoding.GetBytes(string.Empty)},
-                              //{HeaderElement.SessionData, header.SessionData != null ? encoding.GetBytes(header.SessionData.Value) : encoding.GetBytes(string.Empty)}
+                               {HeaderElement.MessageType, header.MessageType != null ? encoding.GetBytes(header.MessageType) : encoding.GetBytes(string.Empty)}
                            };
             return dico;
         }
@@ -37,20 +36,18 @@ namespace ReactiveXComponent.RabbitMQ
         public static Header ConvertHeader(IDictionary<string,object> header)
         {
             var encoding = new UnicodeEncoding();
-            var stateCode = -1; // int
-            long stateMachineId = -1; //long
-            int stateMachineCode = -1; //int
-            int componentCode = -1; //int
-            int engineCode = -1; //int
-            int eventType = -1; //int
-            long[] probes = {-1}; //array            
-            int messageHashCode = -1; //int
-            bool isContainsHashCode = false; //bool
-            var incomingEventType = -1; // int
-            var agentId = -1; // int
-            var publishTopic = encoding.GetBytes(string.Empty); //string
-            var messageType = encoding.GetBytes(string.Empty); // string
-            //var sessionData = encoding.GetBytes(string.Empty); //string 
+            var stateCode = -1;
+            long stateMachineId = -1;
+            var stateMachineCode = -1;
+            var componentCode = -1;
+            var engineCode = -1;
+            var eventType = -1;           
+            var messageHashCode = -1;
+            var isContainsHashCode = false;
+            var incomingEventType = -1;
+            var agentId = -1;
+            var publishTopic = string.Empty;
+            var messageType = string.Empty;
 
             if (header.ContainsKey(HeaderElement.StateMachineId))
                 stateMachineId = Convert.ToInt64(header[HeaderElement.StateMachineId]);
@@ -65,35 +62,26 @@ namespace ReactiveXComponent.RabbitMQ
             if (header.ContainsKey(HeaderElement.MessageHashCode))
                 messageHashCode = Convert.ToInt32(header[HeaderElement.MessageHashCode]);
             if (header.ContainsKey(HeaderElement.IsContainsHashCode))
-                isContainsHashCode = Convert.ToBoolean(header[HeaderElement.IsContainsHashCode]);            
-
+                isContainsHashCode = Convert.ToBoolean(header[HeaderElement.IsContainsHashCode]);
             if (header.ContainsKey(HeaderElement.StateCode))
-            {
                 stateCode = Convert.ToInt32(header[HeaderElement.StateCode]);
-            }
-
             if (header.ContainsKey(HeaderElement.IncomingEventType))
-            {
                 incomingEventType = Convert.ToInt32(header[HeaderElement.IncomingEventType]);
-            }
-
             if (header.ContainsKey(HeaderElement.AgentId))
-            {
                 agentId = Convert.ToInt32(header[HeaderElement.AgentId]);
-            }
             if (header.ContainsKey(HeaderElement.PublishTopic))
-                publishTopic = encoding.GetBytes(header[HeaderElement.PublishTopic].ToString());
+                publishTopic = encoding.GetString(header[HeaderElement.PublishTopic] as byte[]);
             if (header.ContainsKey(HeaderElement.MessageType))
-                messageType = encoding.GetBytes(header[HeaderElement.MessageType].ToString());
-            //if (header.ContainsKey(HeaderElement.SessionData))
-            //    sessionData = Convert.ToString(header[HeaderElement.SessionData]);
-            
+                messageType = encoding.GetString(header[HeaderElement.MessageType] as byte[]);
 
-            return new Header { ComponentCode = componentCode,
+            return new Header
+            {
                 StateMachineCode = stateMachineCode,
+                ComponentCode = componentCode,
                 EngineCode = engineCode ,
-                PublishTopic = publishTopic.ToString(),
-                MessageType  = messageType.ToString()
+                EventCode = eventType,
+                MessageType  = messageType,
+                PublishTopic = publishTopic
             };                
         }
     }

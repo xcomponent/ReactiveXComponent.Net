@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using global::RabbitMQ.Client;
-using NSubstitute;
+﻿using NUnit.Framework;
 using ReactiveXComponent.RabbitMQ;
 
-
-namespace ReactiveXComponent
+namespace ReactiveXComponentTest
 {
     [TestFixture]
     public class RabbitMqConnectionTest

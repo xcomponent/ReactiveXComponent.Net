@@ -12,7 +12,7 @@
 
     public delegate void ConnectionFailure(string reason);
 
-    public abstract class AbstractRabbitMQConsumer : IConsumer
+    public abstract class AbstractRabbitMqConsumer : IConsumer
     {
         protected readonly string ExchangeName;
 
@@ -38,7 +38,7 @@
             }
         }
 
-        protected AbstractRabbitMQConsumer(string exchangeName, IRabbitMqConnection rabbitMqConnection)
+        protected AbstractRabbitMqConsumer(string exchangeName, IRabbitMqConnection rabbitMqConnection)
         {
             this.rabbitMqConnection = rabbitMqConnection;
             this.ExchangeName = exchangeName;

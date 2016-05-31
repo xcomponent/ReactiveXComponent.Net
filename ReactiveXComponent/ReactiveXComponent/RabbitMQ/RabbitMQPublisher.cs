@@ -13,12 +13,12 @@ namespace ReactiveXComponent.RabbitMQ
         void Close();
     }
 
-    public class RabbitMQPublisher : IRabbitMQPublisher
+    public class RabbitMqPublisher : IRabbitMQPublisher
     {
         private IModel _publisherChannel;
         private readonly string _exchangeName;
 
-        public RabbitMQPublisher(string exchangeName, IRabbitMqConnection rabbitMqConnection)
+        public RabbitMqPublisher(string exchangeName, IRabbitMqConnection rabbitMqConnection)
         {            
             _exchangeName = exchangeName;
             var connection = rabbitMqConnection.GetConnection();
@@ -32,7 +32,7 @@ namespace ReactiveXComponent.RabbitMQ
         public void Send(Header header, object message, string routingKey)
         {            
             var prop = this._publisherChannel.CreateBasicProperties();
-            prop.Headers = RabbitMQHeaderConverter.ConvertHeader(header);
+            prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
 
             if (message == null)
             {

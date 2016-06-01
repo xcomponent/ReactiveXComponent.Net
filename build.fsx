@@ -5,15 +5,10 @@
 open Fake
 open Fake.XMLHelper
 
-let buildReleaseDir = "./ReactiveXComponent/obj/Release/"
+let buildRelease = "./ReactiveXComponent/obj/Release/"
 let releaseConfig = "release"
-let company = "XComponent"
-let copyright = "Copyright XComponent"
 let configuration = getBuildParamOrDefault "config" releaseConfig
-let getMSBuildFn =
-    let properties = [("Configuration", configuration);("AssemblyCompany", company);("AssemblyCopyright", copyright);]
-    fun (outputPath:string) targets projects ->            
-            MSBuild outputPath targets properties projects
+
 
 
 // Targets
@@ -27,13 +22,13 @@ Target "RestorePackages" (fun _ ->
 
 Target "Clean" (fun _ ->    
     trace ("Cleaning")
-    CleanDir buildReleaseDir
+    CleanDir buildRelease
 )
-//ReactiveXComponent/**/*.csproj
+
 Target "Compile" (fun _ ->    
     trace ("Compiling ReactiveXComponent Solution")
     !! "./ReactiveXComponent.sln"
-    |> getMSBuildFn "" "Rebuild"
+    |> MSBuildRelease "" "Build"
     |> Log "MSBuild build Output: "
 )
 
@@ -47,6 +42,7 @@ Target "RunTests" (fun _ ->
              DisableShadowCopy = true;
              OutputFile = "./TestResults.xml" })
 )
+
 
 Target "All" DoNothing
 

@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Common\HashcodeHelper.cs" />
     <Compile Include="Common\Visibility.cs" />
+    <Compile Include="Parser\DeploymentParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMQ\AbstractRabbitMqConsumer.cs" />
     <Compile Include="RabbitMQ\BusDetails.cs" />

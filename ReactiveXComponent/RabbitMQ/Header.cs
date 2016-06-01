@@ -17,17 +17,17 @@ namespace ReactiveXComponent.RabbitMQ
         public override bool Equals(object obj)
         {
             var toCompareWith = obj as Header;
-
+        
             return toCompareWith != null && Equals(toCompareWith);
         }
-
+        
         protected bool Equals(Header other)
         {
             return StateMachineCode == other.StateMachineCode && ComponentCode == other.ComponentCode &&
                    EngineCode == other.EngineCode && EventCode == other.EventCode &&
                    string.Equals(MessageType, other.MessageType) && string.Equals(PublishTopic, other.PublishTopic);
         }
-
+        
         public override int GetHashCode()
         {
             unchecked
@@ -42,18 +42,5 @@ namespace ReactiveXComponent.RabbitMQ
             }
         }
 
-        //public override bool Equals(object obj)
-        //{
-        //    var toCompareWith = obj as Header;
-        //    if (toCompareWith == null)
-        //        return false;
-        //    else
-        //        return (StateMachineCode == toCompareWith.StateMachineCode
-        //                && ComponentCode == toCompareWith.ComponentCode
-        //                && EngineCode == toCompareWith.EngineCode
-        //                && EventCode == toCompareWith.EventCode
-        //                && MessageType == toCompareWith.MessageType
-        //                && PublishTopic == toCompareWith.PublishTopic);
-        //}
     }
 }

@@ -16,15 +16,15 @@
     {
         protected readonly string ExchangeName;
 
-        protected readonly IRabbitMqConnection rabbitMqConnection;
+        protected readonly IRabbitMqConnection RabbitMqConnection;
 
         protected IModel Channel;
 
         protected string QueueName;        
 
-        private IModel replyChannel;
+        private IModel _replyChannel;
 
-        private QueueingBasicConsumer consumer;
+        private QueueingBasicConsumer _consumer;
 
         public event EventHandler<MessageEventArgs> MessageReceived;
 
@@ -32,16 +32,13 @@
         protected void OnMessageReceived(MessageEventArgs e)
         {
             EventHandler<MessageEventArgs> handler = this.MessageReceived;
-            if (handler != null)
-            {
-                handler(this, e);
-            }
+            handler?.Invoke(this, e);
         }
 
         protected AbstractRabbitMqConsumer(string exchangeName, IRabbitMqConnection rabbitMqConnection)
         {
-            this.rabbitMqConnection = rabbitMqConnection;
-            this.ExchangeName = exchangeName;
+            RabbitMqConnection = rabbitMqConnection;
+            ExchangeName = exchangeName;
         }
 
         protected abstract void SpecificStart();
@@ -60,22 +57,22 @@
             {
                 if (!IsStarted)
                 {
-                    var connection = rabbitMqConnection.GetConnection();
+                    var connection = RabbitMqConnection.GetConnection();
                     if (connection != null && connection.IsOpen)
                     {
-                        this.Channel = connection.CreateModel();
-                        this.Channel.ModelShutdown += ChannelOnModelShutdown;
-                        this.Channel.ExchangeDeclare(this.ExchangeName, global::RabbitMQ.Client.ExchangeType.Topic);
-                        this.QueueName = this.Channel.QueueDeclare().QueueName;
+                        Channel = connection.CreateModel();
+                        Channel.ModelShutdown += ChannelOnModelShutdown;
+                        Channel.ExchangeDeclare(this.ExchangeName, global::RabbitMQ.Client.ExchangeType.Topic);
+                        QueueName = this.Channel.QueueDeclare().QueueName;
 
-                        this.consumer = new QueueingBasicConsumer(this.Channel);
-                        this.Channel.BasicConsume(this.QueueName, false, this.consumer);
+                        _consumer = new QueueingBasicConsumer(this.Channel);
+                        Channel.BasicConsume(this.QueueName, false, this._consumer);
 
-                        this.SpecificStart();
+                        SpecificStart();
 
-                        this.replyChannel = connection.CreateModel();
-                        this.replyChannel.ModelShutdown += ChannelOnModelShutdown;
-                        this.IsStarted = true;
+                        _replyChannel = connection.CreateModel();
+                        _replyChannel.ModelShutdown += ChannelOnModelShutdown;
+                        IsStarted = true;
                         var thread = new Thread(this.Listen);
                         thread.Start();
                     }
@@ -90,7 +87,7 @@
 
         private void ChannelOnModelShutdown(object sender, ShutdownEventArgs shutdownEventArgs)
         {
-            if (this.ConnectionFailed != null) this.ConnectionFailed(shutdownEventArgs.ReplyText);
+            ConnectionFailed?.Invoke(shutdownEventArgs.ReplyText);
         }
 
         /// <summary>
@@ -98,14 +95,14 @@
         /// </summary>
         public void Stop()
         {
-            this.IsStarted = false;
-            this.Channel.ModelShutdown -= ChannelOnModelShutdown;
-            this.replyChannel.ModelShutdown -= ChannelOnModelShutdown;
+            IsStarted = false;
+            Channel.ModelShutdown -= ChannelOnModelShutdown;
+            _replyChannel.ModelShutdown -= ChannelOnModelShutdown;
 
 
-             this.consumer.OnCancel();
-            this.Channel.Close();
-            this.Channel = null;
+            _consumer.OnCancel();
+            Channel.Close();
+            Channel = null;
         }
 
         #endregion
@@ -121,12 +118,12 @@
             {
                 try
                 {
-                    BasicDeliverEventArgs e = consumer.Queue.Dequeue() as BasicDeliverEventArgs;
+                    BasicDeliverEventArgs e = _consumer.Queue.Dequeue() as BasicDeliverEventArgs;
                     if (e != null)
                     {
-                        this.Channel.BasicAck(e.DeliveryTag, false);
+                        Channel.BasicAck(e.DeliveryTag, false);
 
-                        this.DispatchMessage(e);
+                        DispatchMessage(e);
                     }
                    
                 }
@@ -135,9 +132,9 @@
                     // The consumer was cancelled, the model closed, or the
                     // connection went away.
                     // throw new ConnectionFailureException("Consumer has been interrupted", ex);
-                    this.IsStarted = false;
+                    IsStarted = false;
 
-                    if (this.ConnectionFailed != null) this.ConnectionFailed("Consumer has been interrupted : " + ex.Message);
+                    ConnectionFailed?.Invoke("Consumer has been interrupted : " + ex.Message);
                 }
             }
         }

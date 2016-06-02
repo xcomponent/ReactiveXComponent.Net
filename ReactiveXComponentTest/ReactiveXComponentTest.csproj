@@ -70,6 +70,7 @@
     <Compile Include="RabbitMqTests\RabbitMqConsumerTest.cs" />
     <Compile Include="RabbitMqTests\RabbitMqPublisherFactoryTest.cs" />
     <Compile Include="RabbitMqTests\RabbitMqPublisherTest.cs" />
+    <Compile Include="XCApiTests\XComponentApiTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -80,6 +81,9 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="XCApiTests\PerseusApi.xcApi">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -13,7 +13,7 @@ let configuration = getBuildParamOrDefault "config" releaseConfig
 
 // Targets
 Target "RestorePackages" (fun _ -> 
-     "ReactiveXcomponent"
+     "ReactiveXComponent.sln"
      |> RestoreMSSolutionPackages (fun p ->
          { p with
              OutputPath = "./packages"

@@ -1,41 +1,64 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" total="10" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2016-06-01" time="18:12:22">
+<test-results name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" total="14" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2016-06-02" time="10:17:58">
   <environment nunit-version="2.6.4.14350" clr-version="2.0.50727.8689" os-version="Microsoft Windows NT 6.2.9200.0" platform="Win32NT" cwd="C:\Projet\ReactiveXComponent.Net" machine-name="PC-41" user="yahya.najar" user-domain="PC-41" />
   <culture-info current-culture="fr-FR" current-uiculture="fr-FR" />
-  <test-suite type="Assembly" name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" executed="True" result="Success" success="True" time="0.528" asserts="0">
+  <test-suite type="Assembly" name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" executed="True" result="Success" success="True" time="0.638" asserts="0">
     <results>
-      <test-suite type="Namespace" name="ReactiveXComponentTest" executed="True" result="Success" success="True" time="0.522" asserts="0">
+      <test-suite type="Namespace" name="ReactiveXComponentTest" executed="True" result="Success" success="True" time="0.632" asserts="0">
         <results>
-          <test-suite type="TestFixture" name="HeaderConverterTest" executed="True" result="Success" success="True" time="0.045" asserts="0">
+          <test-suite type="TestFixture" name="HeaderConverterTest" executed="True" result="Success" success="True" time="0.049" asserts="0">
             <results>
-              <test-suite type="ParameterizedTest" name="ConvertHeaderDicoToHeader_Sucess_Test" executed="True" result="Success" success="True" time="0.032" asserts="0">
+              <test-suite type="ParameterizedTest" name="ConvertHeaderDicoToHeader_Sucess_Test" executed="True" result="Success" success="True" time="0.035" asserts="0">
                 <results>
-                  <test-case name="ReactiveXComponentTest.HeaderConverterTest.ConvertHeaderDicoToHeader_Sucess_Test()" executed="True" result="Success" success="True" time="0.028" asserts="1" />
+                  <test-case name="ReactiveXComponentTest.HeaderConverterTest.ConvertHeaderDicoToHeader_Sucess_Test()" executed="True" result="Success" success="True" time="0.031" asserts="1" />
                 </results>
               </test-suite>
               <test-suite type="ParameterizedTest" name="ConvertHeaderToHeaderDico_Sucess_Test" executed="True" result="Success" success="True" time="0.005" asserts="0">
                 <results>
-                  <test-case name="ReactiveXComponentTest.HeaderConverterTest.ConvertHeaderToHeaderDico_Sucess_Test()" executed="True" result="Success" success="True" time="0.004" asserts="2" />
+                  <test-case name="ReactiveXComponentTest.HeaderConverterTest.ConvertHeaderToHeaderDico_Sucess_Test()" executed="True" result="Success" success="True" time="0.003" asserts="2" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="RabbitMqConnectionTest" executed="True" result="Success" success="True" time="0.157" asserts="0">
+          <test-suite type="Namespace" name="ParserTests" executed="True" result="Success" success="True" time="0.069" asserts="0">
             <results>
-              <test-suite type="ParameterizedTest" name="CreateConnection_Sucess_test" executed="True" result="Success" success="True" time="0.157" asserts="0">
+              <test-suite type="TestFixture" name="DeploymentParserTest" executed="True" result="Success" success="True" time="0.069" asserts="0">
                 <results>
-                  <test-case name="ReactiveXComponentTest.RabbitMqConnectionTest.CreateConnection_Sucess_test(&quot;test&quot;,&quot;test&quot;)" executed="True" result="Success" success="True" time="0.149" asserts="1" />
-                  <test-case name="ReactiveXComponentTest.RabbitMqConnectionTest.CreateConnection_Sucess_test(&quot;guest&quot;,&quot;guest&quot;)" executed="True" result="Success" success="True" time="0.003" asserts="1" />
+                  <test-suite type="ParameterizedTest" name="GetConsumerTopic_Sucess_Test" executed="True" result="Success" success="True" time="0.055" asserts="0">
+                    <results>
+                      <test-case name="ReactiveXComponentTest.ParserTests.DeploymentParserTest.GetConsumerTopic_Sucess_Test()" executed="True" result="Success" success="True" time="0.053" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite type="ParameterizedTest" name="GetPublisherTopic_Sucess_Test" executed="True" result="Success" success="True" time="0.003" asserts="0">
+                    <results>
+                      <test-case name="ReactiveXComponentTest.ParserTests.DeploymentParserTest.GetPublisherTopic_Sucess_Test()" executed="True" result="Success" success="True" time="0.001" asserts="1" />
+                    </results>
+                  </test-suite>
+                  <test-suite type="ParameterizedTest" name="ParseXML_Success_test" executed="True" result="Success" success="True" time="0.009" asserts="0">
+                    <results>
+                      <test-case name="ReactiveXComponentTest.ParserTests.DeploymentParserTest.ParseXML_Success_test()" executed="True" result="Success" success="True" time="0.007" asserts="1" />
+                    </results>
+                  </test-suite>
                 </results>
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="RabbitMqConsumerFactoryTest" executed="True" result="Success" success="True" time="0.240" asserts="0">
+          <test-suite type="TestFixture" name="RabbitMqConnectionTest" executed="True" result="Success" success="True" time="0.161" asserts="0">
             <results>
-              <test-suite type="ParameterizedTest" name="EndExchange_Sucess_Test" executed="True" result="Success" success="True" time="0.236" asserts="0">
+              <test-suite type="ParameterizedTest" name="CreateConnection_Sucess_test" executed="True" result="Success" success="True" time="0.160" asserts="0">
                 <results>
-                  <test-case name="ReactiveXComponentTest.RabbitMqConsumerFactoryTest.EndExchange_Sucess_Test()" executed="True" result="Success" success="True" time="0.235" asserts="1" />
+                  <test-case name="ReactiveXComponentTest.RabbitMqConnectionTest.CreateConnection_Sucess_test(&quot;test&quot;,&quot;test&quot;)" executed="True" result="Success" success="True" time="0.150" asserts="1" />
+                  <test-case name="ReactiveXComponentTest.RabbitMqConnectionTest.CreateConnection_Sucess_test(&quot;guest&quot;,&quot;guest&quot;)" executed="True" result="Success" success="True" time="0.006" asserts="1" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="RabbitMqConsumerFactoryTest" executed="True" result="Success" success="True" time="0.236" asserts="0">
+            <results>
+              <test-suite type="ParameterizedTest" name="EndExchange_Sucess_Test" executed="True" result="Success" success="True" time="0.233" asserts="0">
+                <results>
+                  <test-case name="ReactiveXComponentTest.RabbitMqConsumerFactoryTest.EndExchange_Sucess_Test()" executed="True" result="Success" success="True" time="0.231" asserts="1" />
                 </results>
               </test-suite>
               <test-suite type="ParameterizedTest" name="StartExchange_Sucess_Test" executed="True" result="Success" success="True" time="0.002" asserts="0">
@@ -45,34 +68,47 @@
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="RabbitMqConsumerTest" executed="True" result="Success" success="True" time="0.008" asserts="0">
+          <test-suite type="TestFixture" name="RabbitMqConsumerTest" executed="True" result="Success" success="True" time="0.005" asserts="0">
             <results>
-              <test-suite type="ParameterizedTest" name="EndExchange_Sucess_Test" executed="True" result="Success" success="True" time="0.003" asserts="0">
+              <test-suite type="ParameterizedTest" name="EndExchange_Sucess_Test" executed="True" result="Success" success="True" time="0.002" asserts="0">
                 <results>
-                  <test-case name="ReactiveXComponentTest.RabbitMqConsumerTest.EndExchange_Sucess_Test()" executed="True" result="Success" success="True" time="0.002" asserts="1" />
+                  <test-case name="ReactiveXComponentTest.RabbitMqConsumerTest.EndExchange_Sucess_Test()" executed="True" result="Success" success="True" time="0.001" asserts="1" />
                 </results>
               </test-suite>
-              <test-suite type="ParameterizedTest" name="StartExchange_Sucess_Test" executed="True" result="Success" success="True" time="0.003" asserts="0">
+              <test-suite type="ParameterizedTest" name="StartExchange_Sucess_Test" executed="True" result="Success" success="True" time="0.002" asserts="0">
                 <results>
                   <test-case name="ReactiveXComponentTest.RabbitMqConsumerTest.StartExchange_Sucess_Test()" executed="True" result="Success" success="True" time="0.001" asserts="1" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="RabbitMqPublisherFactoryTest" executed="True" result="Success" success="True" time="0.063" asserts="0">
+          <test-suite type="TestFixture" name="RabbitMqPublisherFactoryTest" executed="True" result="Success" success="True" time="0.057" asserts="0">
             <results>
-              <test-suite type="ParameterizedTest" name="Send_Sucess_Test" executed="True" result="Success" success="True" time="0.063" asserts="0">
+              <test-suite type="ParameterizedTest" name="Send_Sucess_Test" executed="True" result="Success" success="True" time="0.057" asserts="0">
                 <results>
-                  <test-case name="ReactiveXComponentTest.RabbitMqPublisherFactoryTest.Send_Sucess_Test()" executed="True" result="Success" success="True" time="0.062" asserts="0" />
+                  <test-case name="ReactiveXComponentTest.RabbitMqPublisherFactoryTest.Send_Sucess_Test()" executed="True" result="Success" success="True" time="0.055" asserts="0" />
                 </results>
               </test-suite>
             </results>
           </test-suite>
-          <test-suite type="TestFixture" name="RabbitMqPublisherTest" executed="True" result="Success" success="True" time="0.003" asserts="0">
+          <test-suite type="TestFixture" name="RabbitMqPublisherTest" executed="True" result="Success" success="True" time="0.004" asserts="0">
             <results>
               <test-suite type="ParameterizedTest" name="Send_Sucess_Test" executed="True" result="Success" success="True" time="0.002" asserts="0">
                 <results>
                   <test-case name="ReactiveXComponentTest.RabbitMqPublisherTest.Send_Sucess_Test()" executed="True" result="Success" success="True" time="0.001" asserts="0" />
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+          <test-suite type="Namespace" name="XCApiTests" executed="True" result="Success" success="True" time="0.041" asserts="0">
+            <results>
+              <test-suite type="TestFixture" name="XComponentApiTest" executed="True" result="Success" success="True" time="0.041" asserts="0">
+                <results>
+                  <test-suite type="ParameterizedTest" name="SendEvent_Sucess_Test" executed="True" result="Success" success="True" time="0.041" asserts="0">
+                    <results>
+                      <test-case name="ReactiveXComponentTest.XCApiTests.XComponentApiTest.SendEvent_Sucess_Test()" executed="True" result="Success" success="True" time="0.039" asserts="0" />
+                    </results>
+                  </test-suite>
                 </results>
               </test-suite>
             </results>

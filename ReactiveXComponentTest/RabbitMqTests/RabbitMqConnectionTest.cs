@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using NSubstitute;
+using NUnit.Framework;
+using RabbitMQ.Client;
 using ReactiveXComponent.RabbitMQ;
 
 namespace ReactiveXComponentTest
@@ -14,7 +16,6 @@ namespace ReactiveXComponentTest
             Port = 5672
         };
 
-        [TestCase("test", "test")]
         [TestCase("guest","guest")]
         public void CreateConnection_Sucess_test(string username, string password)
         {
@@ -23,8 +24,8 @@ namespace ReactiveXComponentTest
             _busInfos.Password = password;
             
             //Act
-            var connect = new RabbitMqConnection(_busInfos);
-            var connection = connect.GetConnection();
+            var rabbitMqconnection = Substitute.For<RabbitMqConnection>(_busInfos);
+            var connection = rabbitMqconnection.GetConnection();
             var isOpen = connection.IsOpen;
 
             //Assert

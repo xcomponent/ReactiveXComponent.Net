@@ -1,25 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using NFluent;
 using NUnit.Framework;
 using ReactiveXComponent.RabbitMQ;
 
-namespace ReactiveXComponentTest
+namespace ReactiveXComponentTest.RabbitMqTests
 {
     [TestFixture]
-    class HeaderConverterTest
+    [Category("Unit Tests")]
+    public class HeaderConverterTest
     {
-        [TestCase()]
-        public void ConvertHeaderToHeaderDico_Sucess_Test()
+        private Header _header;
+        private readonly UnicodeEncoding _encoding = new UnicodeEncoding();
+
+        [SetUp]
+        public void Setup()
         {
-            var encoding = new UnicodeEncoding();
-            const long userManagement = 1183299321;
             const long userSession = 1183299321;
+            const long userManagement = 1183299321;
             const long eventCode = 153;
             const long engineCode = -1805283946;
             const string Event = "XComponent.UserManagement.UserObject.GetSessionRequest";
             const string visibility = "Public";
 
-            var header = new Header()
+            _header = new Header()
             {
                 StateMachineCode = userSession,
                 ComponentCode = userManagement,
@@ -28,38 +33,26 @@ namespace ReactiveXComponentTest
                 MessageType = Event,
                 PublishTopic = visibility
             };
-
-            Dictionary<string, object> headerDico = RabbitMqHeaderConverter.ConvertHeader(header);
-
-            Assert.IsTrue(headerDico.ContainsValue(header.StateMachineCode));
-            Assert.AreEqual(headerDico["MessageType"], encoding.GetBytes(header.MessageType));
-
         }
 
         [TestCase()]
-        public void ConvertHeaderDicoToHeader_Sucess_Test()
+        public void ConvertHeader_GivenHeader_ShouldConvertHeaderToADico_Test()
         {
-            const long userManagement = 1183299321;
-            const long userSession = 1183299321;
-            const long eventCode = 153;
-            const long engineCode = -1805283946;
-            const string Event = "XComponent.UserManagement.UserObject.GetSessionRequest";
-            const string visibility = "Public";
-        
-            var header = new Header()
-            {
-                StateMachineCode = userSession,
-                ComponentCode = userManagement,
-                EventCode = eventCode,
-                EngineCode = engineCode,
-                MessageType = Event,
-                PublishTopic = visibility
-            };
-        
-            Dictionary<string, object> headerDico = RabbitMqHeaderConverter.ConvertHeader(header);        
-            Header headerValue = RabbitMqHeaderConverter.ConvertHeader(headerDico);
+            var headerDico = RabbitMqHeaderConverter.ConvertHeader(_header);
+
+            Check.That(headerDico.Values).Contains(_header.ComponentCode).And.Contains(_header.StateMachineCode).And.Contains(_header.EventCode).And.Contains(_header.EngineCode);
+            Assert.AreEqual(headerDico["PublishTopic"], _encoding.GetBytes(_header.PublishTopic));
+            Assert.AreEqual(headerDico["MessageType"], _encoding.GetBytes(_header.MessageType));
+        }
+
+        [TestCase()]
+        public void ConvertHeader_GivenADico_ShouldConvertDicoToAHeader_Test()
+        {
+            var headerDico = RabbitMqHeaderConverter.ConvertHeader(_header);
+            var headerExpected = _header;        
+            var headerValue = RabbitMqHeaderConverter.ConvertHeader(headerDico);
             
-            Assert.AreEqual(header, headerValue);
+            Assert.AreEqual(headerExpected, headerValue);
         }
     }
 }

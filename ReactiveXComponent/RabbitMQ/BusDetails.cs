@@ -16,8 +16,8 @@ namespace ReactiveXComponent.RabbitMQ
         
             return toCompareWith != null && Equals(toCompareWith);
         }
-        
-        protected bool Equals(BusDetails other)
+
+        private bool Equals(BusDetails other)
         {
             return string.Equals(Username, other.Username) && string.Equals(Password, other.Password) && string.Equals(Host, other.Host) && Port == other.Port;
         }
@@ -26,9 +26,9 @@ namespace ReactiveXComponent.RabbitMQ
         {
             unchecked
             {
-                var hashCode = (Username != null ? Username.GetHashCode() : 0);
-                hashCode = (hashCode*397) ^ (Password != null ? Password.GetHashCode() : 0);
-                hashCode = (hashCode*397) ^ (Host != null ? Host.GetHashCode() : 0);
+                var hashCode = Username?.GetHashCode() ?? 0;
+                hashCode = (hashCode*397) ^ (Password?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ (Host?.GetHashCode() ?? 0);
                 hashCode = (hashCode*397) ^ Port;
                 return hashCode;
             }

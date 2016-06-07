@@ -7,7 +7,7 @@ namespace ReactiveXComponent.Parser
 {
     public class DeploymentParser
     {
-        private XDocument _document;
+        private readonly XDocument _document;
         private BusDetails _busDetails;
 
         public DeploymentParser(string file)

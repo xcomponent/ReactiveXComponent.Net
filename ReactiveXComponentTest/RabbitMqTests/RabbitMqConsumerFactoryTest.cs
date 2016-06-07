@@ -6,52 +6,49 @@ using ReactiveXComponent.RabbitMQ;
 namespace ReactiveXComponentTest
 {
     [TestFixture]
-    class RabbitMqConsumerFactoryTest
+    [Category("Unit Tests")]
+    public class RabbitMqConsumerFactoryTest
     {
-        [TestCase()]
-        public void StartExchange_Sucess_Test()
+        private SingleKeyRabbitMqConsumer _rabbitMqConsumer;
+        private IConnection _connection;
+
+        [SetUp]
+        public void Setup()
         {
             var rabbitMqConnection = Substitute.For<IRabbitMqConnection>();
-            var connection = Substitute.For<IConnection>();
+            _connection = Substitute.For<IConnection>();
             var model = Substitute.For<IModel>();
-            rabbitMqConnection.GetConnection().Returns(connection);
-            connection.IsOpen.Returns(true);
-            connection.CreateModel().Returns(model);
+            rabbitMqConnection.GetConnection().Returns(_connection);
+            _connection.IsOpen.Returns(true);
+            _connection.CreateModel().Returns(model);
             var queue = new QueueDeclareOk("", 0, 0);
             model.QueueDeclare().Returns(queue);
-        
+
             var rabbitMqConsumerFactory = new SingleKeyRabbitMqConsumerFactory(rabbitMqConnection);
-        
-            var rabbitMqConsumer = rabbitMqConsumerFactory.Create("","") as SingleKeyRabbitMqConsumer;
-            var isStarted = rabbitMqConsumer.IsStarted;
-            rabbitMqConsumer.Start();
-            isStarted = rabbitMqConsumer.IsStarted;
-        
-            Assert.IsTrue(isStarted);
+            _rabbitMqConsumer = rabbitMqConsumerFactory.Create("", "") as SingleKeyRabbitMqConsumer;
+        }
+
+        [TestCase()]
+        public void Start_GivenNoArgs_ShouldCreateACommunicationChannel_Test()
+        {
+            _rabbitMqConsumer.Start();
+            _connection.ReceivedWithAnyArgs(2).CreateModel();
         }
         
         [TestCase()]
-        public void EndExchange_Sucess_Test()
+        public void Stop_GivenNoArgs_ShouldStopCommunicationAndCloseChanels_Test()
         {
-            var rabbitMqConnection = Substitute.For<IRabbitMqConnection>();
-            var connection = Substitute.For<IConnection>();
-            var model = Substitute.For<IModel>();
-            rabbitMqConnection.GetConnection().Returns(connection);
-            connection.IsOpen.Returns(true);
-            connection.CreateModel().Returns(model);
-            var queue = new QueueDeclareOk("", 0, 0);
-            model.QueueDeclare().Returns(queue);
-
-            var rabbitMqConsumerFactory = new SingleKeyRabbitMqConsumerFactory(rabbitMqConnection);
-
-            var rabbitMqConsumer = rabbitMqConsumerFactory.Create("", "") as SingleKeyRabbitMqConsumer;
-            var isStarted = rabbitMqConsumer.IsStarted;
-            rabbitMqConsumer.Start();
-            rabbitMqConsumer.Stop();
-            isStarted = rabbitMqConsumer.IsStarted;
+            _rabbitMqConsumer.Start();
+            _rabbitMqConsumer.Stop();
+            var isStarted = _rabbitMqConsumer.IsStarted;
         
             Assert.IsFalse(isStarted);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            _connection.Dispose();
+        }
     }
 }

@@ -15,6 +15,5 @@ namespace ReactiveXComponent.RabbitMQ
         public const string EventType = "EventType";
         public const string PublishTopic = "PublishTopic";
         public const string MessageType = "MessageType";
-        //public const string SessionData = "SessionData";
     }
 }

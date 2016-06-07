@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ReactiveXComponent</RootNamespace>
     <AssemblyName>ReactiveXComponent</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -48,8 +51,10 @@
   <ItemGroup>
     <Compile Include="Common\HashcodeHelper.cs" />
     <Compile Include="Common\Visibility.cs" />
+    <Compile Include="RabbitMQ\IRabbitMqPublisher.cs" />
     <Compile Include="XCApi\ConsumerKey.cs" />
-    <Compile Include="XCApi\IXComponentApi.cs" />
+    <Compile Include="XCApi\IXCConnection.cs" />
+    <Compile Include="XCApi\IXCConsumer.cs" />
     <Compile Include="Parser\DeploymentParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMQ\AbstractRabbitMqConsumer.cs" />
@@ -67,7 +72,16 @@
     <Compile Include="RabbitMQ\RabbitMqPublisherFactory.cs" />
     <Compile Include="RabbitMQ\SingleKeyRabbitMqConsumer.cs" />
     <Compile Include="RabbitMQ\SingleKeyRabbitMqConsumerFactory.cs" />
+    <Compile Include="XCApi\IXComponentApi.cs" />
+    <Compile Include="XCApi\IXCPublisher.cs" />
+    <Compile Include="XCApi\IXCSession.cs" />
+    <Compile Include="XCApi\IXCSessionFactory.cs" />
+    <Compile Include="XCApi\XCConnection.cs" />
+    <Compile Include="XCApi\XCConsumer.cs" />
     <Compile Include="XCApi\XComponentApi.cs" />
+    <Compile Include="XCApi\XCSessionFactory.cs" />
+    <Compile Include="XCApi\XCPublisher.cs" />
+    <Compile Include="XCApi\XCSession.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -5,9 +5,7 @@
     using System.Threading;
 
     using global::RabbitMQ.Client;
-
     using global::RabbitMQ.Client.Events;
-
     using global::RabbitMQ.Client.Exceptions;
 
     public delegate void ConnectionFailure(string reason);
@@ -24,7 +22,7 @@
 
         private IModel _replyChannel;
 
-        private QueueingBasicConsumer _consumer;
+        private EventingBasicConsumer _consumer;
 
         public event EventHandler<MessageEventArgs> MessageReceived;
 
@@ -45,7 +43,7 @@
 
         #region ICommunicator Members
 
-        public bool IsStarted { get; protected set; }
+        public bool IsStarted { get; private set; }
 
         /// <summary>
         /// Starts the current consumer, starting a thread that will listen to the specified exchange with the given routing key
@@ -63,10 +61,10 @@
                         Channel = connection.CreateModel();
                         Channel.ModelShutdown += ChannelOnModelShutdown;
                         Channel.ExchangeDeclare(this.ExchangeName, global::RabbitMQ.Client.ExchangeType.Topic);
-                        QueueName = this.Channel.QueueDeclare().QueueName;
+                        QueueName = Channel.QueueDeclare().QueueName;
 
-                        _consumer = new QueueingBasicConsumer(this.Channel);
-                        Channel.BasicConsume(this.QueueName, false, this._consumer);
+                        _consumer = new EventingBasicConsumer(Channel);
+                        Channel.BasicConsume(QueueName, false, _consumer);
 
                         SpecificStart();
 
@@ -118,14 +116,12 @@
             {
                 try
                 {
-                    BasicDeliverEventArgs e = _consumer.Queue.Dequeue() as BasicDeliverEventArgs;
-                    if (e != null)
+                    _consumer.Received += (o, e) =>
                     {
-                        Channel.BasicAck(e.DeliveryTag, false);
+                            Channel.BasicAck(e.DeliveryTag, false);
 
-                        DispatchMessage(e);
-                    }
-                   
+                            DispatchMessage(e);
+                    };
                 }
                 catch (EndOfStreamException ex)
                 {

@@ -6,16 +6,11 @@ namespace ReactiveXComponent.RabbitMQ
 
     using global::RabbitMQ.Client;
 
-    public interface IRabbitMQPublisher : IDisposable
+    public class RabbitMqPublisher : IRabbitMqPublisher
     {
-        void Send(Header header, object message, string routingKey);
+        private bool _disposed = false;
 
-        void Close();
-    }
-
-    public class RabbitMqPublisher : IRabbitMQPublisher
-    {
-        private IModel _publisherChannel;
+        private readonly IModel _publisherChannel;
         private readonly string _exchangeName;
 
         public RabbitMqPublisher(string exchangeName, IRabbitMqConnection rabbitMqConnection)
@@ -31,7 +26,7 @@ namespace ReactiveXComponent.RabbitMQ
 
         public void Send(Header header, object message, string routingKey)
         {            
-            var prop = this._publisherChannel.CreateBasicProperties();
+            var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
 
             if (message == null)
@@ -64,7 +59,7 @@ namespace ReactiveXComponent.RabbitMQ
             }
         }
 
-        public void Serialize(Stream stream, object message)
+        private void Serialize(Stream stream, object message)
         {
             if (message != null)
             {
@@ -79,9 +74,21 @@ namespace ReactiveXComponent.RabbitMQ
             _publisherChannel.Close();            
         }
 
+        private void Dispose(bool disposed)
+        {
+            if (disposed)
+                return;
+            else
+            {
+                Close();
+            }
+            _disposed = true;
+        }
+
         public void Dispose()
         {
-            Close();
+            Dispose(_disposed);
+            GC.SuppressFinalize(this);
         }
     }
 }

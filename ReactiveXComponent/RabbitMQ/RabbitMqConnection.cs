@@ -11,8 +11,11 @@ namespace ReactiveXComponent.RabbitMQ
 
         private const int TimeoutConnection = 10000;
 
-        private IConnection connection;
-        private ConnectionFactory factory;
+        private bool _disposed = false;
+
+        private IConnection _connection;
+        private ConnectionFactory _factory;
+        
 
         public RabbitMqConnection(BusDetails busDetails)
         {
@@ -21,17 +24,17 @@ namespace ReactiveXComponent.RabbitMQ
 
         public void Close()
         {
-            this.connection.Close();
+            this._connection.Close();
         }
 
         private void Init(BusDetails busDetails)
         {
             try
             {
-                this.factory = new ConnectionFactory()
+                this._factory = new ConnectionFactory()
                 {
-                    UserName = busDetails.Username != null ? busDetails.Username : "test",
-                    Password = busDetails.Password != null ? busDetails.Password : "test",
+                    UserName = busDetails.Username ?? "test",
+                    Password = busDetails.Password ?? "test",
                     VirtualHost = ConnectionFactory.DefaultVHost,
                     HostName = busDetails.Host,
                     Port = busDetails.Port,
@@ -40,23 +43,23 @@ namespace ReactiveXComponent.RabbitMQ
             }
             catch(Exception e)
             {
-                throw e;
+                throw new Exception( "RabbitMQ Connection init failed", e);
             }
         }
 
         public IConnection GetConnection()
         {
-            if (this.connection == null || !this.connection.IsOpen)
+            if (this._connection == null || !this._connection.IsOpen)
             {
-                this.connection = this.CreateConnection();
+                this._connection = this.CreateConnection();
             }
 
-            return this.connection;
+            return this._connection;
         }
 
         private IConnection CreateConnection()
         {
-            if (this.factory != null)
+            if (this._factory != null)
             {
                 var lockEvent = new AutoResetEvent(false);
                 string errorMessage = null;
@@ -64,7 +67,7 @@ namespace ReactiveXComponent.RabbitMQ
                     {
                         try
                         {
-                            this.connection = this.factory.CreateConnection();
+                            this._connection = this._factory.CreateConnection();
                             lockEvent.Set();
                         }
                         catch(Exception ex)
@@ -83,12 +86,24 @@ namespace ReactiveXComponent.RabbitMQ
                 }                                
             }
 
-            return this.connection;
+            return this._connection;
         }
 
+        private void Dispose(bool disposed)
+        {
+            if (disposed)
+                return;
+            else
+            {
+                Close();
+            }
+            _disposed = true;
+
+        } 
         public void Dispose()
         {
-            this.Close();
+            Dispose(_disposed);
+            GC.SuppressFinalize(this);
         }
     }
 }

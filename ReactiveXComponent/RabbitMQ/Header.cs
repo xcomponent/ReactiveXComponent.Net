@@ -36,8 +36,8 @@ namespace ReactiveXComponent.RabbitMQ
                 hashCode = (hashCode*397) ^ ComponentCode.GetHashCode();
                 hashCode = (hashCode*397) ^ EngineCode.GetHashCode();
                 hashCode = (hashCode*397) ^ EventCode.GetHashCode();
-                hashCode = (hashCode*397) ^ (MessageType != null ? MessageType.GetHashCode() : 0);
-                hashCode = (hashCode*397) ^ (PublishTopic != null ? PublishTopic.GetHashCode() : 0);
+                hashCode = (hashCode*397) ^ (MessageType?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ (PublishTopic?.GetHashCode() ?? 0);
                 return hashCode;
             }
         }

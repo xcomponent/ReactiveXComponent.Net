@@ -5,26 +5,52 @@
 open Fake
 open Fake.XMLHelper
 
-let buildReleaseDir = "./ReactiveXComponent/obj/Release/"
+let buildRelease = "./ReactiveXComponent/obj/Release/"
+let releaseConfig = "release"
+let configuration = getBuildParamOrDefault "config" releaseConfig
+
+
+
+// Targets
+Target "RestorePackages" (fun _ -> 
+     "ReactiveXComponent.sln"
+     |> RestoreMSSolutionPackages (fun p ->
+         { p with
+             OutputPath = "./packages"
+             Retries = 4 })
+)
 
 Target "Clean" (fun _ ->    
     trace ("Cleaning")
-    CleanDir buildReleaseDir
+    CleanDir buildRelease
 )
 
 Target "Compile" (fun _ ->    
-    trace ("Compiling ReactiveXComponent project")
-    !! "./ReactiveXComponent/**/*.csproj"
-    |> MSBuildRelease buildReleaseDir "Build"
-    |> Log "Compiling Output: "
+    trace ("Compiling ReactiveXComponent Solution")
+    !! "./ReactiveXComponent.sln"
+    |> MSBuildRelease "" "Build"
+    |> Log "MSBuild build Output: "
 )
-  
+
+Target "RunTests" (fun _ ->
+    trace ("Running tests...")
+    !! ("./ReactiveXComponentTest/**/bin/"+configuration+"/*ReactiveXComponentTest.dll")
+    |> NUnit (fun p ->
+          {p with
+             Framework = "v4.5.2";
+             StopOnError = true;
+             DisableShadowCopy = true;
+             OutputFile = "./TestResults.xml" })
+)
+
 
 Target "All" DoNothing
 
 // Dependencies
-"Clean"  
-  ==> "Compile"    
+"RestorePackages"
+  ==>"Clean"  
+  ==> "Compile" 
+  ==> "RunTests"
   ==> "All"
 
   

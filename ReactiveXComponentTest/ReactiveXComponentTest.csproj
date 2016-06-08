@@ -59,34 +59,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ParserTests\DeploymentParserTest.cs" />
-    <Compile Include="RabbitMqTests\HeaderConverterTest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="RabbitMqTests\RabbitMqConnectionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RabbitMqTests\RabbitMqConsumerFactoryTest.cs" />
-    <Compile Include="RabbitMqTests\RabbitMqPublisherFactoryTest.cs" />
-    <Compile Include="XCApiTests\XCConsumerTest.cs" />
-    <Compile Include="XCApiTests\XCPublisherTest.cs" />
-    <Compile Include="XCApiTests\XCSessionFactoryTest.cs" />
-    <Compile Include="XCApiTests\XCSessionTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="ParserTests\helloworldApi.xcApi">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="XCApiTests\PerseusApi.xcApi">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

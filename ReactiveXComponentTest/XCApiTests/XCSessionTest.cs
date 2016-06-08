@@ -4,7 +4,6 @@ using NUnit.Framework;
 using ReactiveXComponent.Parser;
 using ReactiveXComponent.RabbitMQ;
 using ReactiveXComponent.XCApi;
-using XComponent.UserManagement.UserObject;
 
 namespace ReactiveXComponentTest.XCApiTests
 {

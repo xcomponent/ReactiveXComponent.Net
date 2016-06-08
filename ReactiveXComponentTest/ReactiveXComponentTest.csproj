@@ -57,9 +57,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="XComponent.UserManagement.UserObject">
-      <HintPath>..\..\..\..\Users\yahya.najar\Documents\Visual Studio 2015\Projects\Electryon\ElectryonApi\xcassemblies\XComponent.UserManagement.UserObject.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ParserTests\DeploymentParserTest.cs" />

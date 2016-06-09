@@ -5,7 +5,6 @@
 open Fake
 open Fake.XMLHelper
 
-let buildRelease = "./ReactiveXComponent/obj/Release/"
 let releaseConfig = "release"
 let configuration = getBuildParamOrDefault "config" releaseConfig
 
@@ -22,7 +21,9 @@ Target "RestorePackages" (fun _ ->
 
 Target "Clean" (fun _ ->    
     trace ("Cleaning")
-    CleanDir buildRelease
+    !! "./ReactiveXComponent.sln"
+    |> MSBuild "" "Clean" []
+    |> Log "MSBuild Clean Output: "
 )
 
 Target "Compile" (fun _ ->    

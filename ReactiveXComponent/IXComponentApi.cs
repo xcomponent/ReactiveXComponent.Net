@@ -1,10 +1,10 @@
 ﻿using System;
-using System.IO;
+using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent
 {
     public interface IXComponentApi: IDisposable
     {
-        XCSession CreateSession();
+        IXCSession CreateSession();
     }
 }

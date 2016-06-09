@@ -49,13 +49,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IXCSession.cs" />
+    <Compile Include="Connection\ConnectionType.cs" />
+    <Compile Include="Connection\IXCConnection.cs" />
+    <Compile Include="Connection\IXCPublisher.cs" />
+    <Compile Include="Connection\IXCSession.cs" />
+    <Compile Include="Connection\IXCSessionFactory.cs" />
+    <Compile Include="Connection\XCConnection.cs" />
+    <Compile Include="Connection\XCPublisher.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IXComponentApi.cs" />
-    <Compile Include="IXCSessionFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="XCSession.cs" />
+    <Compile Include="Connection\XCSession.cs" />
     <Compile Include="XComponentApi.cs" />
-    <Compile Include="XCSessionFactory.cs" />
+    <Compile Include="Connection\XCSessionFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

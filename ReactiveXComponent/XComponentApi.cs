@@ -1,42 +1,45 @@
 ﻿using System;
 using System.IO;
+using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent
 {
     public class XComponentApi : IXComponentApi
     {
         private bool _disposed;
-        private readonly Stream _file;
-        private readonly IXCSessionFactory _sessionFactory;
+        private readonly IXCConnection _xcConnection;       
 
-        public XComponentApi(Stream file)
+        private XComponentApi(Stream xcApiStream)
         {
-            _file = file;
-            _sessionFactory = new XCSessionFactory();
+            _xcConnection = new XCConnection(xcApiStream);
         }
 
-        public XCSession CreateSession()
+        public static IXComponentApi CreateFromXCApi(Stream xcApiStream)
         {
-            return (_sessionFactory?.CreateSession(_file) as XCSession);
+            return new XComponentApi(xcApiStream);
         }
 
-        private void Close()
+        public IXCSession CreateSession()
         {
-            _file?.Close();
-            _sessionFactory?.Close();
+            return _xcConnection.CreateSession();
         }
 
-        private void Dispose(bool disposed)
+
+        protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
+            if (_disposed)
                 return;
-            Close();
-            _disposed = true;
+
+            if (disposing)
+            {
+                _xcConnection?.Dispose();
+            }
+            _disposed = true;            
         }
 
         public void Dispose()
         {
-            Dispose(_disposed);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 

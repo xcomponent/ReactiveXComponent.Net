@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" total="2" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2016-06-09" time="16:15:28">
+<test-results name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" total="2" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2016-06-09" time="16:21:24">
   <environment nunit-version="2.6.4.14350" clr-version="2.0.50727.8689" os-version="Microsoft Windows NT 6.2.9200.0" platform="Win32NT" cwd="C:\Projet\ReactiveXComponent.Net" machine-name="PC-41" user="yahya.najar" user-domain="PC-41" />
   <culture-info current-culture="fr-FR" current-uiculture="fr-FR" />
-  <test-suite type="Assembly" name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" executed="True" result="Success" success="True" time="0.043" asserts="0">
+  <test-suite type="Assembly" name="C:\Projet\ReactiveXComponent.Net\ReactiveXComponentTest\bin\release\ReactiveXComponentTest.dll" executed="True" result="Success" success="True" time="0.042" asserts="0">
     <results>
-      <test-suite type="Namespace" name="ReactiveXComponentTest" executed="True" result="Success" success="True" time="0.037" asserts="0">
+      <test-suite type="Namespace" name="ReactiveXComponentTest" executed="True" result="Success" success="True" time="0.036" asserts="0">
         <results>
-          <test-suite type="TestFixture" name="XComponentApiTest" executed="True" result="Success" success="True" time="0.036" asserts="0">
+          <test-suite type="TestFixture" name="XComponentApiTest" executed="True" result="Success" success="True" time="0.035" asserts="0">
             <results>
-              <test-suite type="ParameterizedTest" name="CreatePublicher_GivenNoArgs_ShouldReturnAValidPublisher" executed="True" result="Success" success="True" time="0.025" asserts="0">
+              <test-suite type="ParameterizedTest" name="CreatePublicher_GivenNoArgs_ShouldReturnAValidPublisher" executed="True" result="Success" success="True" time="0.024" asserts="0">
                 <results>
                   <test-case name="ReactiveXComponentTest.XComponentApiTest.CreatePublicher_GivenNoArgs_ShouldReturnAValidPublisher()" executed="True" result="Success" success="True" time="0.020" asserts="0" />
                 </results>

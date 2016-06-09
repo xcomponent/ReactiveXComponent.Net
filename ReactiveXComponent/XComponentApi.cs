@@ -11,7 +11,7 @@ namespace ReactiveXComponent
 
         private XComponentApi(Stream xcApiStream)
         {
-            _xcConnection = new XCConnection(xcApiStream);
+            _xcConnection = XCConnection.CreateConnection(xcApiStream);
         }
 
         public static IXComponentApi CreateFromXCApi(Stream xcApiStream)

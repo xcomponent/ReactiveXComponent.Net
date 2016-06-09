@@ -27,10 +27,36 @@ namespace ReactiveXComponentTest
             {
                 var session = xcApi?.CreateSession();
                 Check.That(session).IsInstanceOf<XCSession>();
+            }
+        }
+
+        [TestCase]
+        public void CreatePublicher_GivenNoArgs_ShouldReturnAValidPublisher()
+        {
+            var xcApi = XComponentApi.CreateFromXCApi(_xcApiStream) as XComponentApi;
+            using (xcApi)
+            {
+                var session = xcApi?.CreateSession();
                 using (session)
                 {
                     var publisher = session?.CreatePublisher(String.Empty);
                     Check.That(publisher).IsInstanceOf<XCPublisher>();
+                }
+            }
+        }
+
+        [TestCase]
+        public void CreateSession_GivenNoArgs_Should()
+        {
+            var xcApi = XComponentApi.CreateFromXCApi(_xcApiStream) as XComponentApi;
+            using (xcApi)
+            {
+                var session = xcApi?.CreateSession();
+                using (session)
+                {
+                    var publisher = session?.CreatePublisher(String.Empty);
+                    publisher?.InitPrivateCommunication("");
+                    Check.ThatCode(()=> publisher?.InitPrivateCommunication("")).ReceivedWithAnyArgs();
                 }
             }
         }

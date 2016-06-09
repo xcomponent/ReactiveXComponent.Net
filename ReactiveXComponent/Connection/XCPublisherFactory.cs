@@ -3,31 +3,29 @@ using System.IO;
 
 namespace ReactiveXComponent.Connection
 {
-    public class XCSession : IXCSession
+    public class XCPublisherFactory : IXCPublisherFactory
     {
         private bool _disposed;
         private readonly Stream _xcApiStream;
-        private readonly IXCPublisherFactory _publisherFactory; 
 
-        public XCSession(Stream xcApiStream)
+        public XCPublisherFactory(Stream xcApiStream)
         {
             _xcApiStream = xcApiStream;
-            _publisherFactory = new XCPublisherFactory(xcApiStream);
         }
 
         public IXCPublisher CreatePublisher(string component)
         {
-            return _publisherFactory.CreatePublisher(component);
+            return new XCPublisher(component, _xcApiStream);
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
                 return;
+
             if (disposing)
             {
                 _xcApiStream?.Dispose();
-                _publisherFactory?.Dispose();
             }
             _disposed = true;
         }

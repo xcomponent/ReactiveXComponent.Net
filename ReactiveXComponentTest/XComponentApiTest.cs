@@ -45,22 +45,6 @@ namespace ReactiveXComponentTest
             }
         }
 
-        [TestCase]
-        public void CreateSession_GivenNoArgs_Should()
-        {
-            var xcApi = XComponentApi.CreateFromXCApi(_xcApiStream) as XComponentApi;
-            using (xcApi)
-            {
-                var session = xcApi?.CreateSession();
-                using (session)
-                {
-                    var publisher = session?.CreatePublisher(String.Empty);
-                    publisher?.InitPrivateCommunication("");
-                    Check.ThatCode(()=> publisher?.InitPrivateCommunication("")).ReceivedWithAnyArgs();
-                }
-            }
-        }
-
         [TearDown]
         public void TearDown()
         {

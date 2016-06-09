@@ -38,7 +38,7 @@ Target "RunTests" (fun _ ->
     !! ("./ReactiveXComponentTest/**/bin/"+configuration+"/*ReactiveXComponentTest.dll")
     |> NUnit (fun p ->
           {p with
-             Framework = "v4.5.2";
+             Framework = "v4.5";
              StopOnError = true;
              DisableShadowCopy = true;
              OutputFile = "./TestResults.xml" })

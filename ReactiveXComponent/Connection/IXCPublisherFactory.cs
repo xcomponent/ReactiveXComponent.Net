@@ -2,8 +2,8 @@
 
 namespace ReactiveXComponent.Connection
 {
-    public interface IXCPublisherFactory : IDisposable
+    public interface IXCPublisherFactory
     {
-        IXCPublisher CreatePublisher(string component);
+        IXCPublisher CreatePublisher();
     }
 }

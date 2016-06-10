@@ -1,41 +1,26 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using ReactiveXComponent.Parser;
 
 namespace ReactiveXComponent.Connection
 {
     public class XCSession : IXCSession
     {
-        private bool _disposed;
-        private readonly Stream _xcApiStream;
-        private readonly IXCPublisherFactory _publisherFactory; 
+        private readonly IXCPublisherFactory _publisherFactory;
 
         public XCSession(Stream xcApiStream)
         {
-            _xcApiStream = xcApiStream;
-            _publisherFactory = new XCPublisherFactory(xcApiStream);
+            var parser = new DeploymentParser(xcApiStream);
+            _publisherFactory = new XCPublisherFactory(parser);
         }
 
-        public IXCPublisher CreatePublisher(string component)
+        public void InitPrivateCommunicationIdentifier(string privateCommunicationIdentifier)
         {
-            return _publisherFactory.CreatePublisher(component);
+            XCPublisher.PrivateCommunicationIdentifier = privateCommunicationIdentifier;
         }
 
-        protected virtual void Dispose(bool disposing)
+        public IXCPublisher CreatePublisher()
         {
-            if (_disposed)
-                return;
-            if (disposing)
-            {
-                _xcApiStream?.Dispose();
-                _publisherFactory?.Dispose();
-            }
-            _disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            return _publisherFactory.CreatePublisher();
         }
     }
 }

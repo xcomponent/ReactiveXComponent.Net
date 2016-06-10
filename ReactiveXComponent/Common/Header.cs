@@ -6,8 +6,6 @@ namespace ReactiveXComponent.Common
 
         public long ComponentCode { get; set; }
 
-        public long EngineCode { get; set; }
-
         public long EventCode { get; set; }
 
         public string MessageType { get; set; }
@@ -20,12 +18,12 @@ namespace ReactiveXComponent.Common
         
             return toCompareWith != null && Equals(toCompareWith);
         }
-        
-        protected bool Equals(Header other)
+
+        private bool Equals(Header other)
         {
             return StateMachineCode == other.StateMachineCode && ComponentCode == other.ComponentCode &&
-                   EngineCode == other.EngineCode && EventCode == other.EventCode &&
-                   string.Equals(MessageType, other.MessageType) && string.Equals(PublishTopic, other.PublishTopic);
+                   EventCode == other.EventCode && string.Equals(MessageType, other.MessageType) && 
+                   string.Equals(PublishTopic, other.PublishTopic);
         }
         
         public override int GetHashCode()
@@ -34,7 +32,6 @@ namespace ReactiveXComponent.Common
             {
                 var hashCode = StateMachineCode.GetHashCode();
                 hashCode = (hashCode*397) ^ ComponentCode.GetHashCode();
-                hashCode = (hashCode*397) ^ EngineCode.GetHashCode();
                 hashCode = (hashCode*397) ^ EventCode.GetHashCode();
                 hashCode = (hashCode*397) ^ (MessageType?.GetHashCode() ?? 0);
                 hashCode = (hashCode*397) ^ (PublishTopic?.GetHashCode() ?? 0);

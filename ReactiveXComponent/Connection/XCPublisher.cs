@@ -1,61 +1,33 @@
-﻿using System;
-using System.IO;
-using ReactiveXComponent.Common;
+﻿using ReactiveXComponent.Common;
+using ReactiveXComponent.Parser;
 
 namespace ReactiveXComponent.Connection
 {
     public class XCPublisher : IXCPublisher
     {
-        private bool _disposed;
-        private string _privateCommunicationIdentifier;
-        //private readonly string _component;
-        //private readonly DeploymentParser _parser
+        public static string PrivateCommunicationIdentifier;
+        private readonly DeploymentParser _parser;
 
-        public XCPublisher(string component, Stream xcApiStream)
+        public DeploymentParser Parser => _parser;
+
+        public XCPublisher(DeploymentParser parser)
         {
-            //_component = component;
-            //_parser = new DeploymentParser(xcApiStream);
+            _parser = parser;
         }
 
-        public void InitPrivateCommunication(string privateCommunicationIdentifier)
+        public void SendEvent(string component, string stateMachine, object message, Visibility visibility)
         {
-            _privateCommunicationIdentifier = privateCommunicationIdentifier;
-        }
-
-        public void SendEvent(string engine, string component, string stateMachine, int eventCode, string messageType, object message, Visibility visibility)
-        {
+            var messageType = message?.GetType().ToString();
             var header = new Header()
             {
-                ComponentCode = HashcodeHelper.GetXcHashCode(component),
-                EngineCode = HashcodeHelper.GetXcHashCode(engine),
-                StateMachineCode = HashcodeHelper.GetXcHashCode(stateMachine),
+                StateMachineCode = _parser.GetStateMachineCode(component, stateMachine),
+                ComponentCode = _parser.GetComponentCode(component),
                 MessageType = messageType,
-                EventCode = eventCode,
-                PublishTopic = string.Empty
+                EventCode = _parser.GetPublisherEventCode(messageType),
+                PublishTopic = visibility == Visibility.Private? PrivateCommunicationIdentifier : string.Empty
             };
-
-            if (visibility == Visibility.Private)
-            {
-                header.PublishTopic = _privateCommunicationIdentifier;
-            }
             //Send to RabbitMQ
             //_publisher.Send(header, message, _parser.GetPublisherTopic(component, stateMachine, eventCode));
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-            if (disposing)
-            {
-                
-            }
-            _disposed = true;
-        }
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

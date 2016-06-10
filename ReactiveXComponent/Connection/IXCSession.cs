@@ -1,9 +1,8 @@
-﻿using System;
-
-namespace ReactiveXComponent.Connection
+﻿namespace ReactiveXComponent.Connection
 {
-    public interface IXCSession : IDisposable
+    public interface IXCSession
     {
-        IXCPublisher CreatePublisher(string component);
+        IXCPublisher CreatePublisher();
+        void InitPrivateCommunicationIdentifier(string privateCommunicationIdentifier);
     }
 }

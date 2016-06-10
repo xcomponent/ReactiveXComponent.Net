@@ -1,39 +1,21 @@
 ﻿using System;
 using System.IO;
+using ReactiveXComponent.Parser;
 
 namespace ReactiveXComponent.Connection
 {
     public class XCPublisherFactory : IXCPublisherFactory
     {
-        private bool _disposed;
-        private readonly Stream _xcApiStream;
+        private readonly DeploymentParser _parser;
 
-        public XCPublisherFactory(Stream xcApiStream)
+        public XCPublisherFactory(DeploymentParser parser)
         {
-            _xcApiStream = xcApiStream;
+            _parser = parser;
         }
 
-        public IXCPublisher CreatePublisher(string component)
+        public IXCPublisher CreatePublisher()
         {
-            return new XCPublisher(component, _xcApiStream);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            if (disposing)
-            {
-                _xcApiStream?.Dispose();
-            }
-            _disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            return new XCPublisher(_parser);
         }
     }
 }

@@ -1,54 +1,31 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using System.Xml.Linq;
 using NFluent;
 using NSubstitute;
 using NUnit.Framework;
 using ReactiveXComponent;
 using ReactiveXComponent.Connection;
+using ReactiveXComponentTest.ParserTests;
 
 namespace ReactiveXComponentTest
 {
     [TestFixture]
-    public class XComponentApiTest
+    [Category("Unit Tests")]
+    public class XComponentApiTest : XCTestBase 
     {
-        private Stream _xcApiStream;
-
-        [SetUp]
-        public void Setup()
+        [Test]
+        public void CreateFromXCApi_GivenXCApiStreamFile_ShouldReturnNewInstanceOfXCApi()
         {
-            _xcApiStream = Stream.Null;   
+            var xcApi = XComponentApi.CreateFromXCApi(XCApiStream);
+            Check.That(xcApi).IsInstanceOf<XComponentApi>();
         }
 
-        [TestCase]
-        public void CreateSession_GivenNoArgs_ShouldReturnAValidSession()
+        [Test]
+        public void CreateSession_GivenXCApiStreamFile_ShouldReturnNewInstanceSession()
         {
-            var xcApi = XComponentApi.CreateFromXCApi(_xcApiStream) as XComponentApi;
-            using (xcApi)
-            {
-                var session = xcApi?.CreateSession();
-                Check.That(session).IsInstanceOf<XCSession>();
-            }
-        }
-
-        [TestCase]
-        public void CreatePublicher_GivenNoArgs_ShouldReturnAValidPublisher()
-        {
-            var xcApi = XComponentApi.CreateFromXCApi(_xcApiStream) as XComponentApi;
-            using (xcApi)
-            {
-                var session = xcApi?.CreateSession();
-                using (session)
-                {
-                    var publisher = session?.CreatePublisher(String.Empty);
-                    Check.That(publisher).IsInstanceOf<XCPublisher>();
-                }
-            }
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _xcApiStream?.Dispose();
+            var xcApi = XComponentApi.CreateFromXCApi(XCApiStream) as XComponentApi;
+            var session = xcApi?.CreateSession();
+            Check.That(session).IsInstanceOf<XCSession>();
         }
     }
 }

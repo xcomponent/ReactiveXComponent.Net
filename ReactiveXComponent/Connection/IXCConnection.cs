@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
-
-namespace ReactiveXComponent.Connection
+﻿namespace ReactiveXComponent.Connection
 {
-    public interface IXCConnection :IDisposable
+    public interface IXCConnection
     {
         IXCSession CreateSession();
     }

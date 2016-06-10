@@ -3,7 +3,7 @@ using System.IO;
 
 namespace ReactiveXComponent.Connection
 {
-    public interface IXCSessionFactory: IDisposable
+    public interface IXCSessionFactory
     {
         IXCSession CreateSession();
     }

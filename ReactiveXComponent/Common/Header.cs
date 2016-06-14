@@ -21,9 +21,11 @@ namespace ReactiveXComponent.Common
 
         private bool Equals(Header other)
         {
-            return StateMachineCode == other.StateMachineCode && ComponentCode == other.ComponentCode &&
-                   EventCode == other.EventCode && string.Equals(MessageType, other.MessageType) && 
-                   string.Equals(PublishTopic, other.PublishTopic);
+            return StateMachineCode == other.StateMachineCode && 
+                   ComponentCode == other.ComponentCode &&
+                   EventCode == other.EventCode && 
+                   MessageType == other.MessageType && 
+                   PublishTopic == other.PublishTopic;
         }
         
         public override int GetHashCode()

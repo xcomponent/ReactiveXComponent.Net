@@ -3,6 +3,5 @@
     public interface IXCSession
     {
         IXCPublisher CreatePublisher();
-        void InitPrivateCommunicationIdentifier(string privateCommunicationIdentifier);
     }
 }

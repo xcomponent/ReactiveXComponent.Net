@@ -1,21 +1,19 @@
-﻿using System;
-using System.IO;
-using ReactiveXComponent.Parser;
+﻿using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Connection
 {
     public class XCPublisherFactory : IXCPublisherFactory
     {
-        private readonly DeploymentParser _parser;
+        private readonly XCConfiguration _xcConfiguration;
 
-        public XCPublisherFactory(DeploymentParser parser)
+        public XCPublisherFactory(XCConfiguration configuration)
         {
-            _parser = parser;
+            _xcConfiguration = configuration;
         }
 
         public IXCPublisher CreatePublisher()
         {
-            return new XCPublisher(_parser);
+            return new XCPublisher(_xcConfiguration);
         }
     }
 }

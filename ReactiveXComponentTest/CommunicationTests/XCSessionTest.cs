@@ -1,6 +1,8 @@
 ﻿using NFluent;
 using NUnit.Framework;
+using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
+using ReactiveXComponent.Parser;
 using ReactiveXComponentTest.ParserTests;
 
 namespace ReactiveXComponentTest.CommunicationTests
@@ -9,22 +11,13 @@ namespace ReactiveXComponentTest.CommunicationTests
     [Category("Unit Tests")]
     public class XCSessionTest : XCTestBase
     {
+        
         [Test]
-        public void CreatePublicher_GivenNoArgs_ShouldReturnAValidPublisher()
+        public void CreatePublisher_GivenNoArgs_ShouldReturnAValidPublisher()
         {
-            var session = new XCSession(XCApiStream);
+            var session = new XCSession(XCConfiguration);
             var publisher = session?.CreatePublisher();
             Check.That(publisher).IsInstanceOf<XCPublisher>();
-        }
-
-        [Test]
-        public void
-            InitPrivateCommunicationIdentifier_GivenAnIdentifier_ShouldInitPublisherPrivateIdentificationIdentifier()
-        {
-            var session = new XCSession(XCApiStream);
-            const string privateCommunicationId = "id";
-            session?.InitPrivateCommunicationIdentifier(privateCommunicationId);
-            Check.That(XCPublisher.PrivateCommunicationIdentifier).IsEqualTo(privateCommunicationId);
         }
     }
 }

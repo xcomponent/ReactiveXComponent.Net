@@ -1,18 +1,16 @@
 ﻿using ReactiveXComponent.Common;
-using ReactiveXComponent.Parser;
+using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Connection
 {
     public class XCPublisher : IXCPublisher
     {
         public static string PrivateCommunicationIdentifier;
-        private readonly DeploymentParser _parser;
+        private readonly XCConfiguration _configuration;
 
-        public DeploymentParser Parser => _parser;
-
-        public XCPublisher(DeploymentParser parser)
+        public XCPublisher(XCConfiguration configuration)
         {
-            _parser = parser;
+            _configuration = configuration;
         }
 
         public void SendEvent(string component, string stateMachine, object message, Visibility visibility)
@@ -20,14 +18,12 @@ namespace ReactiveXComponent.Connection
             var messageType = message?.GetType().ToString();
             var header = new Header()
             {
-                StateMachineCode = _parser.GetStateMachineCode(component, stateMachine),
-                ComponentCode = _parser.GetComponentCode(component),
+                StateMachineCode = _configuration.GetStateMachineCode(component, stateMachine),
+                ComponentCode = _configuration.GetComponentCode(component),
                 MessageType = messageType,
-                EventCode = _parser.GetPublisherEventCode(messageType),
+                EventCode = _configuration.GetPublisherEventCode(messageType),
                 PublishTopic = visibility == Visibility.Private? PrivateCommunicationIdentifier : string.Empty
             };
-            //Send to RabbitMQ
-            //_publisher.Send(header, message, _parser.GetPublisherTopic(component, stateMachine, eventCode));
         }
     }
 }

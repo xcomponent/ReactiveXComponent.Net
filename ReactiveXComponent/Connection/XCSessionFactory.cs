@@ -1,20 +1,19 @@
-﻿using System;
-using System.IO;
+﻿using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Connection
 {
     public class XCSessionFactory : IXCSessionFactory
     {
-        private readonly Stream _xcApiStream;
+        private readonly XCConfiguration _xcConfiguration;
 
-        public XCSessionFactory(Stream xcApiStream)
+        public XCSessionFactory(XCConfiguration xcConfiguration)
         {
-            _xcApiStream = xcApiStream;
+            _xcConfiguration = xcConfiguration;
         }
 
         public IXCSession CreateSession()
         {
-            return new XCSession(_xcApiStream);
+            return new XCSession(_xcConfiguration);
         }
     }
 }

@@ -60,7 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ParserTests\DeploymentParserTest.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="ParserTests\ParserTest.cs" />
     <Compile Include="XCTestBase.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

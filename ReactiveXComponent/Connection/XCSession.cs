@@ -1,5 +1,4 @@
-﻿using System.IO;
-using ReactiveXComponent.Parser;
+﻿using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Connection
 {
@@ -7,15 +6,9 @@ namespace ReactiveXComponent.Connection
     {
         private readonly IXCPublisherFactory _publisherFactory;
 
-        public XCSession(Stream xcApiStream)
+        public XCSession(XCConfiguration xcConfiguration)
         {
-            var parser = new DeploymentParser(xcApiStream);
-            _publisherFactory = new XCPublisherFactory(parser);
-        }
-
-        public void InitPrivateCommunicationIdentifier(string privateCommunicationIdentifier)
-        {
-            XCPublisher.PrivateCommunicationIdentifier = privateCommunicationIdentifier;
+            _publisherFactory = new XCPublisherFactory(xcConfiguration);
         }
 
         public IXCPublisher CreatePublisher()

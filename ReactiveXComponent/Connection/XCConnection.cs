@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Connection
 {
@@ -6,21 +6,18 @@ namespace ReactiveXComponent.Connection
     {
         private readonly IXCSessionFactory _sessionFactory;
 
-        private XCConnection(Stream xcApiStream)
+        public XCConnection(XCConfiguration configuration)
         {
-            _sessionFactory = new XCSessionFactory(xcApiStream);
-        }
-
-        public static IXCConnection CreateConnection(Stream xcApiStream)
-        {
-            //create a RabbitMQ or a webSocket Connection depending
-            //on the info given by xcApiStream
-            return new XCConnection(xcApiStream);
+            _sessionFactory = new XCSessionFactory(configuration);
         }
 
         public IXCSession CreateSession()
         {
             return _sessionFactory?.CreateSession();
+        }
+
+        public void Close()
+        {
         }
     }
 }

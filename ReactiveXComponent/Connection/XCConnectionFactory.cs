@@ -1,8 +1,9 @@
 ﻿using ReactiveXComponent.Configuration;
+using ReactiveXComponent.RabbitMq;
 
 namespace ReactiveXComponent.Connection
 {
-    public class XCConnectionFactory : IXCConnectionFactory
+    public class XCConnectionFactory : AbstractXCConnectionFactory
     {
         private readonly XCConfiguration _xcConfiguration; 
 
@@ -11,17 +12,9 @@ namespace ReactiveXComponent.Connection
             _xcConfiguration = xcConfiguration;        
         }
 
-        public IXCConnection CreateConnection()
+        public override IXCConnection CreateConnection()
         {
-            switch (_xcConfiguration.GetConnectionType())
-            {
-                case "bus":
-                    return new XCConnection(_xcConfiguration);
-                case "websocket":
-                    return new XCConnection(_xcConfiguration);
-                default:
-                    return null;
-            }
+            return new RabbitMqConnection(_xcConfiguration);
         }
     }
 }

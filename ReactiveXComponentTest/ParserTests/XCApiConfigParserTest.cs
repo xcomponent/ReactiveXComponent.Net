@@ -7,17 +7,15 @@ namespace ReactiveXComponentTest.ParserTests
 {
     [TestFixture]
     [Category("Unit Tests")]
-    public class ParserTest : XCTestBase
+    public class XCApiConfigParserTest : XCTestBase
     {
         private string _component;
         private string _stateMachine;
-        private Tags _tags;
 
         protected override void Setup()
         {
             _component = "HelloWorld";
             _stateMachine = "HelloWorldManager";
-            _tags = new Tags();
         }
 
         [Test]

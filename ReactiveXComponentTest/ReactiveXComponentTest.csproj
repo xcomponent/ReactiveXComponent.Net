@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ParserTests\ParserTest.cs" />
+    <Compile Include="ParserTests\XCApiConfigParserTest.cs" />
     <Compile Include="XCTestBase.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -70,8 +70,8 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XComponentApiTest.cs" />
-    <Compile Include="CommunicationTests\XCPublisherTest.cs" />
-    <Compile Include="CommunicationTests\XCSessionTest.cs" />
+    <Compile Include="RabbitMqTests\RabbitMqPublisherTest.cs" />
+    <Compile Include="RabbitMqTests\RabbitMqSessionTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

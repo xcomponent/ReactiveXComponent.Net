@@ -2,16 +2,14 @@
 
 namespace ReactiveXComponent.Parser
 {
-    public class XDocumentConverter
+    public class XCApiDescription
     {
         private readonly XmlDocument _doc;
         private readonly XmlNamespaceManager _xmlManager;
 
-        public XDocumentConverter(string document)
+        public XCApiDescription(XmlDocument document)
         {
-            _doc = new XmlDocument();
-            _doc.LoadXml(document.ToString());
-
+            _doc = document;
             _xmlManager = new XmlNamespaceManager(_doc.NameTable);
             _xmlManager.AddNamespace("xc", "http://xcomponent.com/DeploymentConfig.xsd");
         }
@@ -19,11 +17,6 @@ namespace ReactiveXComponent.Parser
         public XmlNodeList GetComponentsNode()
         {
             return _doc.SelectNodes("//xc:component", _xmlManager);
-        }
-
-        public XmlNodeList GetStateMachinesNode()
-        {
-            return _doc.SelectNodes("//xc:stateMachines", _xmlManager);
         }
 
         public XmlNodeList GetPublishersNode()
@@ -36,5 +29,9 @@ namespace ReactiveXComponent.Parser
             return _doc.SelectNodes("//xc:subscribe[@eventType='UPDATE']", _xmlManager); ;
         }
 
+        public XmlNodeList GetCommunicationNode()
+        {
+            return _doc.SelectNodes("//xc:communication", _xmlManager);
+        }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
+using ReactiveXComponent.Parser;
+using ReactiveXComponent.RabbitMq;
 
 namespace ReactiveXComponent
 {
@@ -9,19 +11,25 @@ namespace ReactiveXComponent
         private readonly IXCConnection _xcConnection;
         private readonly XCConfiguration _xcConfiguration;
 
-        private XComponentApi(Stream xcApiStream, string privateCommunicationIdentifier = null)
+        public static string PrivateCommunicationIdentifier;
+
+        private XComponentApi(Stream xcApiStream)
         {
-            var parser = new Parser.Parser(xcApiStream);
+            var parser = new XCApiConfigParser();
             _xcConfiguration = new XCConfiguration(parser);
-            _xcConfiguration.Init();
-            var connectionFactory = new XCConnectionFactory(_xcConfiguration);
+            _xcConfiguration.Init(xcApiStream);
+            AbstractXCConnectionFactory connectionFactory = new XCConnectionFactory(_xcConfiguration);
             _xcConnection = connectionFactory.CreateConnection();
-            XCPublisher.PrivateCommunicationIdentifier = privateCommunicationIdentifier;
         }
 
-        public static IXComponentApi CreateFromXCApi(Stream xcApiStream, string privateCommunicationIdentifier = null)
+        public static void InitPrivateCommunivation(string privateCommunicationIdentifier)
         {
-            return new XComponentApi(xcApiStream, privateCommunicationIdentifier);
+            PrivateCommunicationIdentifier = privateCommunicationIdentifier;
+        }
+
+        public static IXComponentApi CreateFromXCApi(Stream xcApiStream)
+        {
+            return new XComponentApi(xcApiStream);
         }
 
         public IXCSession CreateSession()

@@ -4,7 +4,7 @@
     {
         public long Component { get; set; }
         public long StateMachine { get; set; }
-        public long EventCode { get; set; }
+        public int EventCode { get; set; }
         public string TopicType { get; set; }
 
         public override bool Equals(object obj)

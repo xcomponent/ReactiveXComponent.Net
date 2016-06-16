@@ -1,20 +1,20 @@
-﻿
+﻿using System.IO;
+using ReactiveXComponent.Parser;
+
 namespace ReactiveXComponent.Configuration
 {
-    public class XCConfiguration
+    public class XCConfiguration : IXCConfiguration
     {
-        private readonly Parser.Parser _parser;
-        private readonly Tags _tags;
+        private readonly XCApiConfigParser _parser;
 
-        public XCConfiguration(Parser.Parser parser)
+        public XCConfiguration(Parser.XCApiConfigParser parser)
         {
             _parser = parser;
-            _tags = new Tags();
         }
 
-        public void Init()
+        public void Init(Stream xcApiStream)
         {
-            _parser.Parse(_tags);
+            _parser.Parse(xcApiStream);
         }
 
         public string GetConnectionType()
@@ -36,8 +36,6 @@ namespace ReactiveXComponent.Configuration
         {
             return _parser.GetPublisherEventCode(evnt);
         }
-
-
     }
 
    

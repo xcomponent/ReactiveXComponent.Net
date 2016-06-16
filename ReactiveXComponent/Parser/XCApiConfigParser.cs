@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml;
-using System.Xml.Linq;
 using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Parser
 {
-    public class Parser
+    public class XCApiConfigParser : IXCApiConfigParser
     {
-        private readonly XDocument _document;
-        private Tags _tags;
+        private XmlDocument _document;
+        private XCApiDescription _xcApiDescription;
         
         private Dictionary<string, long> _componentCodeByComponent;
         private Dictionary<string, Dictionary<string, long>> _stateMachineCodeByStateMachineAndComponent;
@@ -19,24 +17,22 @@ namespace ReactiveXComponent.Parser
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
         private Dictionary<TopicIdentifier, string> _consumerTopicByIdentifier;
 
-        public Parser(Stream file)
+        public XCApiConfigParser()
         {
-             var reader = XmlReader.Create(file);
-            _document = XDocument.Load(reader);
         }
 
-        public void Parse(Tags tags)
+        public void Parse(Stream xcApiStream)
         {
-            _tags = tags;
-            var xmlFromXDoc = new XDocumentConverter(_document.ToString());
+            var reader = XmlReader.Create(xcApiStream);
+            _document = new XmlDocument();
+            _document.Load(reader);
+            _xcApiDescription = new XCApiDescription(_document);
 
-            _componentCodeByComponent = CreateComponentCodeByNameDico(xmlFromXDoc.GetComponentsNode());
-            _stateMachineCodeByStateMachineAndComponent = CreateStateMachineCodeByNameAndComponentDico(xmlFromXDoc.GetComponentsNode(),
-                xmlFromXDoc.GetStateMachinesNode());
-            _eventCodeByEvent = CreateEventCodeByEventDico(xmlFromXDoc.GetPublishersNode());
-            _publisherTopicByIdentifier = CreatePublisherTopicByComponentStateMachineAndEvenCodeDico(xmlFromXDoc.GetPublishersNode());
-            _consumerTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeDico(xmlFromXDoc.GetConsumersNode());
-
+            _componentCodeByComponent = CreateComponentCodeByNameDico(_xcApiDescription.GetComponentsNode());
+            _stateMachineCodeByStateMachineAndComponent = CreateStateMachineCodeByNameAndComponentDico(_xcApiDescription.GetComponentsNode());
+            _eventCodeByEvent = CreateEventCodeByEventDico(_xcApiDescription.GetPublishersNode());
+            _publisherTopicByIdentifier = CreatePublisherTopicByComponentStateMachineAndEvenCodeDico(_xcApiDescription.GetPublishersNode());
+            _consumerTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeDico(_xcApiDescription.GetConsumersNode());
         }
 
         private Dictionary<string, long> CreateComponentCodeByNameDico(XmlNodeList components)
@@ -45,25 +41,33 @@ namespace ReactiveXComponent.Parser
 
             foreach (XmlElement component in components)
             {
-                componentCodeByName.Add(component.Attributes[_tags.Name].Value, Convert.ToInt64(component.Attributes[_tags.Id].Value));
+                AddComponentToDictionary(componentCodeByName, component);
             }
             return componentCodeByName; 
         }
 
-        private Dictionary<string, Dictionary<string, long>> CreateStateMachineCodeByNameAndComponentDico(XmlNodeList components, XmlNodeList stateMachines)
+        private void AddComponentToDictionary(Dictionary<String, long> dictionnary, XmlElement component)
+        {
+            dictionnary.Add(component.Attributes[XCApiTags.Name].Value, Convert.ToInt64(component.Attributes[XCApiTags.Id].Value));
+        } 
+
+        private Dictionary<string, Dictionary<string, long>> CreateStateMachineCodeByNameAndComponentDico(XmlNodeList components)
         {
             Dictionary<string, Dictionary<string, long>> stateMachineCodeDico = new Dictionary<string, Dictionary<string, long>>();
-            int i = 0;
             foreach (XmlElement component in components)
             {
-                stateMachineCodeDico.Add(component.Attributes[_tags.Name].Value, new Dictionary<string, long>());
-                foreach (XmlElement stateMachine in stateMachines[i])
-                {
-                    stateMachineCodeDico[component.Attributes[_tags.Name].Value].Add(stateMachine.Attributes[_tags.Name].Value, Convert.ToInt64(stateMachine.Attributes[_tags.Id].Value));
-                }
-                i++;
+                stateMachineCodeDico.Add(component.Attributes[XCApiTags.Name].Value, new Dictionary<string, long>());
+                AddStateMachineToDictionary(stateMachineCodeDico[component.Attributes[XCApiTags.Name].Value], component);
             }
             return stateMachineCodeDico;
+        }
+
+        private void AddStateMachineToDictionary(Dictionary<string, long> dictionary, XmlElement component)
+        {
+            foreach (XmlElement stateMachine in component.LastChild)
+            {
+                dictionary.Add(stateMachine.Attributes[XCApiTags.Name].Value, Convert.ToInt64(stateMachine.Attributes[XCApiTags.Id].Value));
+            }
         }
 
         private Dictionary<string, int> CreateEventCodeByEventDico(XmlNodeList publishNodes)
@@ -72,13 +76,18 @@ namespace ReactiveXComponent.Parser
 
             foreach (XmlNode node in publishNodes)
             {
-                if (!eventCodeByEvent.ContainsKey(node?.Attributes[_tags.EventName].Value))
-                {
-                    eventCodeByEvent.Add(node.Attributes[_tags.EventName].Value,
-                        Convert.ToInt32(node.Attributes[_tags.EventCode].Value));
-                }
+                AddEventCodeToDictionary(eventCodeByEvent, node);
             }
             return eventCodeByEvent;
+        }
+
+        private void AddEventCodeToDictionary(Dictionary<string, int> dictionary, XmlNode node)
+        {
+            if (!dictionary.ContainsKey(node?.Attributes[XCApiTags.EventName].Value))
+            {
+                dictionary.Add(node.Attributes[XCApiTags.EventName].Value,
+                    Convert.ToInt32(node.Attributes[XCApiTags.EventCode].Value));
+            }
         }
 
         private Dictionary<TopicIdentifier, string> CreatePublisherTopicByComponentStateMachineAndEvenCodeDico(XmlNodeList publishNodes)
@@ -87,20 +96,7 @@ namespace ReactiveXComponent.Parser
 
             foreach (XmlNode node in publishNodes)
             {
-                var topicIdentifier = new TopicIdentifier
-                {
-                    Component = Convert.ToInt64(node?.Attributes[_tags.ComponentCode]?.Value),
-                    StateMachine = Convert.ToInt64(node?.Attributes[_tags.StateMachineCode]?.Value),
-                    EventCode = Convert.ToInt64(node?.Attributes[_tags.EventCode]?.Value),
-                    TopicType = node?.Attributes[_tags.TopicType]?.Value
-                };
-                if (!topicByIdentifier.ContainsKey(topicIdentifier))
-                {
-                    foreach (XmlNode topicNode in node?.ChildNodes)
-                    {
-                        topicByIdentifier.Add(topicIdentifier, topicNode.InnerText);
-                    }
-                }
+                AddTopicToDictionary(topicByIdentifier, node);
             }
             return topicByIdentifier;
         }
@@ -111,32 +107,44 @@ namespace ReactiveXComponent.Parser
 
             foreach (XmlNode node in subscribeNodes)
             {
-                var topicIdentifier = new TopicIdentifier
-                {
-                    Component = Convert.ToInt64(node?.Attributes[_tags.ComponentCode]?.Value),
-                    StateMachine = Convert.ToInt64(node?.Attributes[_tags.StateMachineCode]?.Value),
-                    EventCode = 0,
-                    TopicType = node?.Attributes[_tags.TopicType]?.Value
-                };
-
-                                                         
-                if (!topicByIdentifier.ContainsKey(topicIdentifier))
-                {
-                    foreach (XmlNode topicNode in node?.ChildNodes)
-                    {
-                        topicByIdentifier.Add(topicIdentifier, topicNode.InnerText);
-                    }
-                }
+                AddTopicToDictionary(topicByIdentifier, node);
             }
             return topicByIdentifier;
         }
 
+        private void AddTopicToDictionary(Dictionary<TopicIdentifier, string> dictionary, XmlNode node)
+        {
+            var componentCode = Convert.ToInt64(node?.Attributes[XCApiTags.ComponentCode]?.Value);
+            var stateMachineCode = Convert.ToInt64(node?.Attributes[XCApiTags.StateMachineCode]?.Value);
+            var eventCode = node?.Attributes[XCApiTags.EventCode] == null
+                ? 0 : Convert.ToInt32(node.Attributes[XCApiTags.EventCode].Value);
+            var topicType = node?.Attributes[XCApiTags.TopicType]?.Value;
+
+            var topicIdentifier = CreateTopicIdentifier(componentCode, stateMachineCode, eventCode, topicType);
+
+            if (!dictionary.ContainsKey(topicIdentifier))
+            {
+                XmlNode topicNode = node?.FirstChild;
+                dictionary.Add(topicIdentifier, topicNode?.InnerText);
+            }
+        }
+
+        private TopicIdentifier CreateTopicIdentifier(long componentCode, long stateMachineCode, int eventCode, string topicType)
+        {
+            var topicIdentifier = new TopicIdentifier
+            {
+                Component = componentCode,
+                StateMachine = stateMachineCode,
+                EventCode = eventCode,
+                TopicType = topicType
+            };
+            return topicIdentifier;
+        }
 
         public string GetConnectionType()
         {
-            return (from communication in _document.Descendants()
-                    where communication?.Name.LocalName == _tags.Bus || communication?.Name.LocalName == _tags.Websocket
-                    select communication.Name.LocalName).FirstOrDefault();
+            XmlNode connection = _xcApiDescription.GetCommunicationNode()?.Item(0)?.FirstChild;
+            return connection?.LocalName;
         }
 
         public long GetComponentCode(string component)
@@ -172,7 +180,7 @@ namespace ReactiveXComponent.Parser
                 Component = componentCode,
                 StateMachine = stateMachineCode,
                 EventCode = eventCode,
-                TopicType = _tags.Output
+                TopicType = XCApiTags.Output
             };
             _publisherTopicByIdentifier.TryGetValue(topicId, out publisherTopic);
             return publisherTopic;
@@ -188,7 +196,7 @@ namespace ReactiveXComponent.Parser
                 Component = componentCode,
                 StateMachine = stateMachineCode,
                 EventCode = 0,
-                TopicType = _tags.Input
+                TopicType = XCApiTags.Input
             };
             _consumerTopicByIdentifier.TryGetValue(topicId, out consumerTopic);
             return consumerTopic;

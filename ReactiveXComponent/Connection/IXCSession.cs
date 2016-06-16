@@ -1,4 +1,6 @@
-﻿namespace ReactiveXComponent.Connection
+﻿using ReactiveXComponent.Connection;
+
+namespace ReactiveXComponent.Connection
 {
     public interface IXCSession
     {

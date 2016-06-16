@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using NSubstitute;
 using NUnit.Framework;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Parser;
@@ -9,20 +10,17 @@ namespace ReactiveXComponentTest
     public abstract class XCTestBase : IDisposable
     {
         private bool _disposed;
-        protected Stream XCApiStream;
-        private Tags _tags;
-        protected Parser Parser;
+        private Stream _xcApiStream;
+        protected XCApiConfigParser Parser;
         protected XCConfiguration XCConfiguration;
 
         [SetUp]
         public void PrivateSetup()
         {
-            XCApiStream = new FileStream("TestApi.xcApi", FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
-            _tags = new Tags();
-            Parser = new Parser(XCApiStream);
-            Parser.Parse(_tags);
+            _xcApiStream = new FileStream("TestApi.xcApi", FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
+            Parser = new XCApiConfigParser();
             XCConfiguration = new XCConfiguration(Parser);
-
+            XCConfiguration.Init(_xcApiStream);
             Setup();
         }
 
@@ -35,7 +33,7 @@ namespace ReactiveXComponentTest
 
             if (disposing)
             {
-                XCApiStream.Dispose();
+                _xcApiStream.Dispose();
             }
             _disposed = true;
         }

@@ -3,6 +3,7 @@ using NFluent;
 using NUnit.Framework;
 using ReactiveXComponent;
 using ReactiveXComponent.Connection;
+using ReactiveXComponent.RabbitMq;
 
 namespace ReactiveXComponentTest
 {
@@ -30,7 +31,7 @@ namespace ReactiveXComponentTest
         {
             var xcApi = XComponentApi.CreateFromXCApi(_xcApiStream) as XComponentApi;
             var session = xcApi?.CreateSession();
-            Check.That(session).IsInstanceOf<XCSession>();
+            Check.That(session).IsInstanceOf<RabbitMqSession>();
         }
 
         [TearDown]

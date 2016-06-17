@@ -59,9 +59,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="XComponent.HelloWorld.UserObject">
-      <HintPath>..\..\xcomponent-master\Examples\xc.helloworld\helloworld\HelloWorldClientApplication\HelloWorldClientApplication\bin\Debug\XComponent.HelloWorld.UserObject.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IntegrationTests\ConfiguartionTests\XCConfigutaionTest.cs" />

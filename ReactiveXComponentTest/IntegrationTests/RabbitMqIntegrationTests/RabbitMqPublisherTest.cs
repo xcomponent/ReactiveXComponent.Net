@@ -4,7 +4,6 @@ using NUnit.Framework;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.RabbitMq;
-using XComponent.HelloWorld.UserObject;
 
 namespace ReactiveXComponentTest.IntegrationTests.RabbitMqIntegrationTests
 {
@@ -13,29 +12,28 @@ namespace ReactiveXComponentTest.IntegrationTests.RabbitMqIntegrationTests
     public class RabbitMqPublisherTest : RabbitMqIntegrationTestBase
     {
         private string _component;
-        private string _stateMachine;
-        private object _message;
+        //private string _stateMachine;
+        //private object _message;
         private Visibility _visibility;
         private IXCSession _session;
-        private RabbitMqConnection _connection;
 
         [SetUp]
         protected override void Setup()
         {
             _component = "HelloWorld";
-            _stateMachine = "HelloWorldManager";
-            _message = new SayHello();
+            //_stateMachine = "HelloWorldManager";
+            //_message = new SayHello();
             _visibility = Visibility.Private;
-            _connection = new RabbitMqConnection(XCConfiguration);
-            _session = _connection.CreateSession();
+            var connection = new RabbitMqConnection(XCConfiguration);
+            _session = connection.CreateSession();
         }
 
-        [Test]
-        public void SendEvent_GivenAComponentAStateMachineAnObjectAVisibility_ShouldInitHeaderAndThrowNoException_Test()
-        {
-            var publisher = _session.CreatePublisher(_component);
-            Check.ThatCode(() => publisher.SendEvent(_component, _stateMachine, _message, _visibility)).DoesNotThrow();
-        }
+        //[Test]
+        //public void SendEvent_GivenAComponentAStateMachineAnObjectAVisibility_ShouldInitHeaderAndThrowNoException_Test()
+        //{
+        //    var publisher = _session.CreatePublisher(_component);
+        //    Check.ThatCode(() => publisher.SendEvent(_component, _stateMachine, _message, _visibility)).DoesNotThrow();
+        //}
 
         [Test]
         public void SendEvent_GivenAComponentAStateMachineAnObjectAVisibility_ShouldInitHeaderAndThrowFailedToPublishException_Test()
@@ -47,9 +45,8 @@ namespace ReactiveXComponentTest.IntegrationTests.RabbitMqIntegrationTests
         [TearDown]
         public void TearDown()
         {
-            _message = null;
+            //_message = null;
             _session = null;
-            _connection.Dispose();
         }
     }
 }

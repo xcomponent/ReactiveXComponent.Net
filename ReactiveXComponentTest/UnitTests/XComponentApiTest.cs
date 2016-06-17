@@ -1,16 +1,17 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using NFluent;
 using NUnit.Framework;
 using ReactiveXComponent;
-using ReactiveXComponent.Connection;
 using ReactiveXComponent.RabbitMq;
 
-namespace ReactiveXComponentTest
+namespace ReactiveXComponentTest.UnitTests
 {
     [TestFixture]
     [Category("Unit Tests")]
-    public class XComponentApiTest
+    public class XComponentApiTest : IDisposable
     {
+        private bool _disposed;
         private Stream _xcApiStream;
 
         [SetUp]
@@ -34,10 +35,24 @@ namespace ReactiveXComponentTest
             Check.That(session).IsInstanceOf<RabbitMqSession>();
         }
 
-        [TearDown]
-        public void TearDown()
+        private void Dispose(bool disposing)
         {
-            _xcApiStream?.Dispose();
-        } 
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _xcApiStream?.Dispose();
+            }
+            _disposed = true;
+
+        }
+
+        [TearDown]
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

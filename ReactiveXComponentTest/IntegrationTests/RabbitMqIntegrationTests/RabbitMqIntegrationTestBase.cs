@@ -1,26 +1,26 @@
 ﻿using System;
 using System.IO;
-using NSubstitute;
 using NUnit.Framework;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Parser;
 
-namespace ReactiveXComponentTest
+namespace ReactiveXComponentTest.IntegrationTests.RabbitMqIntegrationTests
 {
-    public abstract class XCTestBase : IDisposable
+    public abstract class RabbitMqIntegrationTestBase : IDisposable
     {
         private bool _disposed;
+        private XCApiConfigParser _parser;
         private Stream _xcApiStream;
-        protected XCApiConfigParser Parser;
         protected XCConfiguration XCConfiguration;
 
         [SetUp]
         public void PrivateSetup()
         {
+            _parser = new XCApiConfigParser();
+            XCConfiguration = new XCConfiguration(_parser);
             _xcApiStream = new FileStream("TestApi.xcApi", FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
-            Parser = new XCApiConfigParser();
-            XCConfiguration = new XCConfiguration(Parser);
             XCConfiguration.Init(_xcApiStream);
+            
             Setup();
         }
 

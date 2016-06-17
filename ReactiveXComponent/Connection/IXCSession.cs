@@ -1,9 +1,7 @@
-﻿using ReactiveXComponent.Connection;
-
-namespace ReactiveXComponent.Connection
+﻿namespace ReactiveXComponent.Connection
 {
     public interface IXCSession
     {
-        IXCPublisher CreatePublisher();
+        IXCPublisher CreatePublisher(string component);
     }
 }

@@ -52,30 +52,46 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="XComponent.HelloWorld.UserObject">
+      <HintPath>..\..\xcomponent-master\Examples\xc.helloworld\helloworld\HelloWorldClientApplication\HelloWorldClientApplication\bin\Debug\XComponent.HelloWorld.UserObject.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntegrationTests\ConfiguartionTests\XCConfigutaionTest.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ParserTests\XCApiConfigParserTest.cs" />
-    <Compile Include="XCTestBase.cs" />
+    <Compile Include="UnitTests\ParserTests\XCApiConfigParserTest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="XComponentApiTest.cs" />
-    <Compile Include="RabbitMqTests\RabbitMqPublisherTest.cs" />
-    <Compile Include="RabbitMqTests\RabbitMqSessionTest.cs" />
+    <Compile Include="IntegrationTests\RabbitMqIntegrationTests\RabbitMqConnectionTest.cs" />
+    <Compile Include="IntegrationTests\RabbitMqIntegrationTests\RabbitMqIntegrationTestBase.cs" />
+    <Compile Include="IntegrationTests\RabbitMqIntegrationTests\RabbitMqPublisherTest.cs" />
+    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqHeaderConverterTest.cs" />
+    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqConnectionTest.cs" />
+    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqPublisherTest.cs" />
+    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqSessionTest.cs" />
+    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqTestBase.cs" />
+    <Compile Include="UnitTests\XComponentApiTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
       <SubType>Designer</SubType>
+    </None>
+    <None Include="XCConfigIntegrationTests.xcApi">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="RabbitMqConnectionIntegrationTests.xcApi">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="TestApi.xcApi">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

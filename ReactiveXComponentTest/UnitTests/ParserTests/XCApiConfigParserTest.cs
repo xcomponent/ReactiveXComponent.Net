@@ -1,28 +1,33 @@
-﻿using NFluent;
+﻿using System.IO;
+using NFluent;
 using NUnit.Framework;
-using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Parser;
 
-namespace ReactiveXComponentTest.ParserTests
+namespace ReactiveXComponentTest.UnitTests.ParserTests
 {
     [TestFixture]
     [Category("Unit Tests")]
-    public class XCApiConfigParserTest : XCTestBase
+    public class XCApiConfigParserTest
     {
         private string _component;
         private string _stateMachine;
-
-        protected override void Setup()
+        private XCApiConfigParser _xcApiConfigParser;
+        
+        [SetUp]
+        public void Setup()
         {
             _component = "HelloWorld";
             _stateMachine = "HelloWorldManager";
+            var xcApiStream = new FileStream("TestApi.xcApi", FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
+            _xcApiConfigParser = new XCApiConfigParser();
+            _xcApiConfigParser.Parse(xcApiStream);
         }
 
         [Test]
         public void GetComponentCode_GivenComponent_ShouldReturnTheComponentIddentifier_Test()
         {
             const int expectedIdentifier = -69981087;
-            var componentCode = Parser.GetComponentCode(_component);
+            var componentCode = _xcApiConfigParser.GetComponentCode(_component);
 
             Check.That(componentCode).IsEqualTo(expectedIdentifier);
         }
@@ -31,7 +36,7 @@ namespace ReactiveXComponentTest.ParserTests
         public void GetStateMachineCode_GivenComponentAndStateMachine_ShouldReturnTheStateMachineIddentifier_Test()
         {
             const int expectedIdentifier = -829536631;
-            var stateMachineCode = Parser.GetStateMachineCode(_component, _stateMachine);
+            var stateMachineCode = _xcApiConfigParser.GetStateMachineCode(_component, _stateMachine);
 
             Check.That(stateMachineCode).IsEqualTo(expectedIdentifier);
         }
@@ -41,7 +46,7 @@ namespace ReactiveXComponentTest.ParserTests
         {
             const int expectedEventCode = 9;
             const string messageType = "XComponent.HelloWorld.UserObject.SayHello";
-            var eventCode = Parser.GetPublisherEventCode(messageType);
+            var eventCode = _xcApiConfigParser.GetPublisherEventCode(messageType);
 
             Check.That(eventCode).IsEqualTo(expectedEventCode);
         }
@@ -50,9 +55,9 @@ namespace ReactiveXComponentTest.ParserTests
         public void GetPublisherTopic_GiventComponentStateMachienAndEventCode_ShouldReturnAPublisherTopic_Test()
         {
             const string messageType = "XComponent.HelloWorld.UserObject.SayHello";
-            var eventCode = Parser.GetPublisherEventCode(messageType);
+            var eventCode = (int)_xcApiConfigParser.GetPublisherEventCode(messageType);
             const string expectedTopic = "input.1_0.HelloMicroservice.HelloWorld.HelloWorldManager";
-            var topic = Parser.GetPublisherTopic(_component, _stateMachine, eventCode);
+            var topic = _xcApiConfigParser.GetPublisherTopic(_component, _stateMachine, eventCode);
 
             Check.That(topic).IsEqualTo(expectedTopic);
         }
@@ -62,7 +67,7 @@ namespace ReactiveXComponentTest.ParserTests
         {
             const string stateMachine = "HelloResponse";
             const string expectedTopic = "output.1_0.HelloMicroservice.HelloWorld.HelloResponse";
-            var topic = Parser.GetConsumerTopic(_component, stateMachine);
+            var topic = _xcApiConfigParser.GetConsumerTopic(_component, stateMachine);
 
             Check.That(topic).IsEqualTo(expectedTopic);
         }

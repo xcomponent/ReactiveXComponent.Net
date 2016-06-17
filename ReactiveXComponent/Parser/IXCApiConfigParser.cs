@@ -1,4 +1,5 @@
 using System.IO;
+using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Parser
 {
@@ -6,6 +7,7 @@ namespace ReactiveXComponent.Parser
     {
         void Parse(Stream xcApiStream);
         string GetConnectionType();
+        BusDetails GetBusDetails();
         long GetComponentCode(string component);
         long GetStateMachineCode(string component, string stateMachine);
         int GetPublisherEventCode(string eventName);

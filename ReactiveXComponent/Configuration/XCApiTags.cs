@@ -1,32 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ReactiveXComponent.Configuration
+﻿namespace ReactiveXComponent.Configuration
 {
     public static class XCApiTags
     {
-        public static string Bus = "bus";
-        public static string Websocket = "websocket";
-        public static string Host = "host";
-        public static string User = "user";
-        public static string Password = "password";
-        public static string Port = "port";
-        public static string Name = "name";
-        public static string Id = "id";
-        public static string Publish = "publish";
-        public static string EventName = "event";
-        public static string EventCode = "eventCode";
-        public static string ComponentCode = "componentCode";
-        public static string StateMachineCode = "stateMachineCode";
-        public static string Topic = "type";
-        public static string Subscribe = "subscribe";
-        public static string EventType = "eventType";
-        public static string Update = "Update";
-        public static string TopicType = "topicType";
-        public static string Input = "input";
-        public static string Output = "output";
+        public const string Bus = "bus";
+        public const string Websocket = "websocket";
+        public const string Host = "host";
+        public const string User = "user";
+        public const string Password = "password";
+        public const string Port = "port";
+        public const string Name = "name";
+        public const string Id = "id";
+        public const string Publish = "publish";
+        public const string EventName = "event";
+        public const string EventCode = "eventCode";
+        public const string ComponentCode = "componentCode";
+        public const string StateMachineCode = "stateMachineCode";
+        public const string Topic = "type";
+        public const string Subscribe = "subscribe";
+        public const string EventType = "eventType";
+        public const string Update = "Update";
+        public const string TopicType = "topicType";
+        public const string Input = "input";
+        public const string Output = "output";
     }
 }

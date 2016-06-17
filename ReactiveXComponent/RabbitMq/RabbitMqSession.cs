@@ -1,20 +1,23 @@
-﻿using ReactiveXComponent.Configuration;
+﻿using RabbitMQ.Client;
+using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent.RabbitMq
 {
     public class RabbitMqSession : IXCSession
     {
-        private readonly IRabbitMqPublisherFactory _publisherFactory;
+        private readonly IXCConfiguration _xcConfiguration;
+        private readonly IConnection _connection;
 
-        public RabbitMqSession(XCConfiguration xcConfiguration)
+        public RabbitMqSession(IXCConfiguration xcConfiguration, IConnection connection)
         {
-            _publisherFactory = new RabbitMqPublisherFactory(xcConfiguration);
+            _xcConfiguration = xcConfiguration;
+            _connection = connection;
         }
 
-        public IXCPublisher CreatePublisher()
+        public IXCPublisher CreatePublisher(string component)
         {
-            return _publisherFactory.CreatePublisher();
+            return new RabbitMqPublisher(component, _xcConfiguration, _connection);
         }
     }
 }

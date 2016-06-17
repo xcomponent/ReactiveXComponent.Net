@@ -26,7 +26,7 @@ namespace ReactiveXComponent.Parser
 
         public XmlNodeList GetConsumersNode()
         {
-            return _doc.SelectNodes("//xc:subscribe[@eventType='UPDATE']", _xmlManager); ;
+            return _doc.SelectNodes("//xc:subscribe[@eventType='UPDATE']", _xmlManager);
         }
 
         public XmlNodeList GetCommunicationNode()

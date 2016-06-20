@@ -1,6 +1,8 @@
-﻿namespace ReactiveXComponent.Connection
+﻿using System;
+
+namespace ReactiveXComponent.Connection
 {
-    public interface IXCConnection
+    public interface IXCConnection : IDisposable
     {
         IXCSession CreateSession();
     }

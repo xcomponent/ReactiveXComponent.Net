@@ -26,9 +26,11 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
         [Test]
         public void CreateSession_GivenXCConfiguration_ShouldReturnAnInstanceOfRabbitMqSession_Test()
         {
-            var rabbitMqConnection = new RabbitMqConnection(XCConfiguration);
-            var rabbitMqSession = rabbitMqConnection.CreateSession();
-            Check.That(rabbitMqSession).IsInstanceOf<RabbitMqSession>();
+            using (var rabbitMqConnection = new RabbitMqConnection(XCConfiguration))
+            {
+                var rabbitMqSession = rabbitMqConnection.CreateSession();
+                Check.That(rabbitMqSession).IsInstanceOf<RabbitMqSession>();
+            }    
         }
     }
 }

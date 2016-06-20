@@ -25,15 +25,18 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
         [Test]
         public void SendEvent_GivenAComponentAStateMachineAnObjectAVisibility_ShouldInitHeaderAndThrowNoException_Test()
         {
-            var publisher = new RabbitMqPublisher("", XCConfiguration, Connection);
-            Check.ThatCode(() => publisher.SendEvent("", "", _message, Visibility.Private)).DoesNotThrow();
+            using (var publisher = new RabbitMqPublisher("", XCConfiguration, Connection))
+            {
+                Check.ThatCode(() => publisher.SendEvent("", _message, Visibility.Private)).DoesNotThrow();
+            }
         }
 
         [Test]
         public void SendEvent_GivenAComponentAStateMachineAnObjectAVisibility_ShouldInitAHeaderAndSendItToEngineThroughRabbitMqCallingBasicPublish_Test()
         {
             var publisher = new RabbitMqPublisher("", XCConfiguration, Connection);
-            Check.ThatCode(() =>_model.ReceivedWithAnyArgs().BasicPublish(null, null, null, null));
+            publisher.SendEvent("", _message, Visibility.Private);
+            Check.ThatCode(() =>_model.ReceivedWithAnyArgs(1).BasicPublish(null, null, null, null)).DoesNotThrow();
         }
 
         [TearDown]

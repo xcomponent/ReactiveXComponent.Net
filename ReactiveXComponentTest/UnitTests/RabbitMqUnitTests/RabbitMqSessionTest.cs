@@ -8,18 +8,11 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
     [Category("Unit Tests")]
     public class RabbitMqSessionTest : RabbitMqTestBase
     {
-        private string _component; 
-        [SetUp]
-        public void SetUp()
-        {
-            _component = "HelloWorld";
-        }
-
         [Test]
         public void CreatePublisher_GivenAConfigAndAConnection_ShouldReturnAValidPublisher()
         {
             var session = new RabbitMqSession(XCConfiguration, Connection);
-            var publisher = session?.CreatePublisher(_component);
+            var publisher = session.CreatePublisher(string.Empty);
             Check.That(publisher).IsInstanceOf<RabbitMqPublisher>();
         }
     }

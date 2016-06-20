@@ -61,7 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IntegrationTests\ConfiguartionTests\XCConfigutaionTest.cs" />
+    <Compile Include="UnitTests\ConfiguartionTests\XCConfigutaionTest.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="UnitTests\ParserTests\XCApiConfigParserTest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -70,25 +70,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IntegrationTests\RabbitMqIntegrationTests\RabbitMqConnectionTest.cs" />
-    <Compile Include="IntegrationTests\RabbitMqIntegrationTests\RabbitMqIntegrationTestBase.cs" />
-    <Compile Include="IntegrationTests\RabbitMqIntegrationTests\RabbitMqPublisherTest.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqHeaderConverterTest.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqConnectionTest.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqPublisherTest.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqSessionTest.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqTestBase.cs" />
-    <Compile Include="UnitTests\XComponentApiTest.cs" />
+    <Compile Include="IntegrationTests\RabbitMqCommunicationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
       <SubType>Designer</SubType>
-    </None>
-    <None Include="XCConfigIntegrationTests.xcApi">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="RabbitMqConnectionIntegrationTests.xcApi">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="TestApi.xcApi">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -22,5 +22,7 @@
         public const string TopicType = "topicType";
         public const string Input = "input";
         public const string Output = "output";
+        public const string DefaultUserName = "guest";
+        public const string DefaultPassword = "guest";
     }
 }

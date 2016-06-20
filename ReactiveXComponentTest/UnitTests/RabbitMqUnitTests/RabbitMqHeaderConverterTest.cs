@@ -16,16 +16,16 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
         [SetUp]
         public void Setup()
         {
-            const long userSession = 1183299321;
-            const long userManagement = 1183299321;
+            const long stateMachineCode = 1183299;
+            const long componentCode = 1183300;
             const int eventCode = 153;
-            const string Event = "XComponent.UserManagement.UserObject.GetSessionRequest";
+            const string Event = "GetSessionRequest";
             const string visibility = "Public";
 
             _header = new Header()
             {
-                StateMachineCode = userSession,
-                ComponentCode = userManagement,
+                StateMachineCode = stateMachineCode,
+                ComponentCode = componentCode,
                 EventCode = eventCode,
                 MessageType = Event,
                 PublishTopic = visibility

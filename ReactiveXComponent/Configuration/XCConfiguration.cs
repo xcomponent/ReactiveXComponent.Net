@@ -6,9 +6,9 @@ namespace ReactiveXComponent.Configuration
 {
     public class XCConfiguration : IXCConfiguration
     {
-        private readonly XCApiConfigParser _parser;
+        private readonly IXCApiConfigParser _parser;
 
-        public XCConfiguration(XCApiConfigParser parser)
+        public XCConfiguration(IXCApiConfigParser parser)
         {
             _parser = parser;
         }
@@ -19,9 +19,9 @@ namespace ReactiveXComponent.Configuration
             {
                 _parser.Parse(xcApiStream);
             }
-            catch (Exception ex)
+            catch (InitConfigurationException ex)
             {
-                throw new Exception("Failed to init configuration", ex);
+                throw new InitConfigurationException("Failed to init configuration", ex);
             }
         }
 

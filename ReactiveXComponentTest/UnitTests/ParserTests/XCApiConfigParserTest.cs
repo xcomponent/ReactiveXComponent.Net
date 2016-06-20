@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using NFluent;
 using NUnit.Framework;
+using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Parser;
 
 namespace ReactiveXComponentTest.UnitTests.ParserTests
@@ -22,6 +23,31 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
             _xcApiConfigParser = new XCApiConfigParser();
             _xcApiConfigParser.Parse(xcApiStream);
         }
+
+
+        [Test]
+        public void GetConnectionType_ShouldReturnConnectionTypeFromParsedStream()
+        {
+            const string expectedConnectionType = "bus";
+            var connectionType = _xcApiConfigParser.GetConnectionType();
+            Check.That(connectionType).IsEqualTo(expectedConnectionType);
+        }
+
+        [Test]
+        public void GetBusDetails_ShouldReturnBusInfosFromParsedStraem()
+        {
+            var expectedBusDetails = new BusDetails
+            {
+                Username = "guest",
+                Password = "guest",
+                Host = "127.0.0.1",
+                Port = 5672
+            };
+
+            var busDetails = _xcApiConfigParser.GetBusDetails();
+
+            Check.That(busDetails).IsEqualTo(expectedBusDetails);
+        } 
 
         [Test]
         public void GetComponentCode_GivenComponent_ShouldReturnTheComponentIddentifier_Test()
@@ -55,7 +81,7 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
         public void GetPublisherTopic_GiventComponentStateMachienAndEventCode_ShouldReturnAPublisherTopic_Test()
         {
             const string messageType = "XComponent.HelloWorld.UserObject.SayHello";
-            var eventCode = (int)_xcApiConfigParser.GetPublisherEventCode(messageType);
+            var eventCode = _xcApiConfigParser.GetPublisherEventCode(messageType);
             const string expectedTopic = "input.1_0.HelloMicroservice.HelloWorld.HelloWorldManager";
             var topic = _xcApiConfigParser.GetPublisherTopic(_component, _stateMachine, eventCode);
 

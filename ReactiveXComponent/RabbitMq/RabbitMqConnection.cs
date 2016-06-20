@@ -8,10 +8,6 @@ namespace ReactiveXComponent.RabbitMq
 {
     public class RabbitMqConnection : IXCConnection
     {
-        private const string CannotReachBroker = "Cannot connect to broker ";
-
-        private const int TimeoutConnection = 10000;
-
         private bool _disposed;
         private IConnection _connection;
         private ConnectionFactory _factory;
@@ -22,7 +18,7 @@ namespace ReactiveXComponent.RabbitMq
         {
             _xcConfiguration = configuration;
             Init(configuration.GetBusDetails());
-            _connection = CreateConnection();
+            _connection = CreateRabbitMqConnection();
         }
 
         private void Init(BusDetails busDetails)
@@ -31,8 +27,8 @@ namespace ReactiveXComponent.RabbitMq
             {
                 _factory = new ConnectionFactory()
                 {
-                    UserName = busDetails.Username ?? "guest",
-                    Password = busDetails.Password ?? "guest",
+                    UserName = busDetails.Username ?? XCApiTags.DefaultUserName,
+                    Password = busDetails.Password ?? XCApiTags.DefaultPassword,
                     VirtualHost = ConnectionFactory.DefaultVHost,
                     HostName = busDetails.Host,
                     Port = busDetails.Port,
@@ -45,33 +41,15 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
-        private IConnection CreateConnection()
+        private IConnection CreateRabbitMqConnection()
         {
-            if (_factory != null)
+            try
             {
-                var lockEvent = new AutoResetEvent(false);
-                string errorMessage = null;
-                ThreadPool.QueueUserWorkItem((obj) =>
-                {
-                    try
-                    {
-                        _connection = _factory.CreateConnection();
-                        lockEvent.Set();
-                    }
-                    catch (Exception ex)
-                    {
-                        errorMessage = ex.Message;
-                    }
-                });
-                if (!lockEvent.WaitOne(TimeoutConnection))
-                {
-                    throw new Exception(CannotReachBroker, null);
-                }
-
-                if (errorMessage != null)
-                {
-                    throw new Exception(errorMessage);
-                }
+                _connection = _factory?.CreateConnection();   
+            }
+            catch (CreateRabbitMqConnectionException ex)
+            {
+                throw new CreateRabbitMqConnectionException("Cannot connect to broker ", ex);
             }
             return _connection;
         }

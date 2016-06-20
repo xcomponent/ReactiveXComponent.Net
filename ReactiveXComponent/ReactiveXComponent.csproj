@@ -53,6 +53,7 @@
     <Compile Include="Common\HeaderElement.cs" />
     <Compile Include="Common\Visibility.cs" />
     <Compile Include="Configuration\BusDetails.cs" />
+    <Compile Include="Configuration\InitConfigurationException.cs" />
     <Compile Include="Configuration\IXCConfiguration.cs" />
     <Compile Include="Configuration\XCApiTags.cs" />
     <Compile Include="Configuration\XCConfiguration.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Parser\XCApiDescription.cs" />
     <Compile Include="Connection\IXCPublisher.cs" />
     <Compile Include="Connection\IXCSession.cs" />
+    <Compile Include="RabbitMq\CreateRabbitMqConnectionException.cs" />
     <Compile Include="RabbitMq\RabbitMqConnection.cs" />
     <Compile Include="Connection\XCConnectionFactory.cs" />
     <Compile Include="RabbitMq\RabbitMqHeaderConverter.cs" />

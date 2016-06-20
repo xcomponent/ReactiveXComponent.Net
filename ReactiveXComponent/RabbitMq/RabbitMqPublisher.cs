@@ -15,10 +15,14 @@ namespace ReactiveXComponent.RabbitMq
         private Header _header;
         private IModel _publisherChannel;
         private readonly string _exchangeName;
+        private readonly string _component;
 
-        public RabbitMqPublisher(string exchangeName, IXCConfiguration configuration, IConnection connection)
+        public IModel PublisherChanne => _publisherChannel;
+
+        public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection)
         {
-            _exchangeName = configuration?.GetComponentCode(exchangeName).ToString();
+            _component = component;
+            _exchangeName = configuration?.GetComponentCode(component).ToString();
             _configuration = configuration;
             CreatePublisherChannel(connection);
         }
@@ -32,11 +36,11 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
-        public void SendEvent(string component, string stateMachine, object message, Visibility visibility)
+        public void SendEvent(string stateMachine, object message, Visibility visibility)
         {
-            InitHeader(component, stateMachine, message, visibility);
+            InitHeader(_component, stateMachine, message, visibility);
 
-            var routingKey = _configuration.GetPublisherTopic(component, stateMachine, (int)_header?.EventCode);
+            var routingKey = _configuration.GetPublisherTopic(_component, stateMachine, (int)_header?.EventCode);
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.ConvertHeader(_header);
             message = message ?? 0;

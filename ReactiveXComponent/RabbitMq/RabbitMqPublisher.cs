@@ -59,8 +59,7 @@ namespace ReactiveXComponent.RabbitMq
                     ComponentCode = _configuration.GetComponentCode(component),
                     MessageType = messageType,
                     EventCode = _configuration.GetPublisherEventCode(messageType),
-                    PublishTopic =
-                    visibility == Visibility.Private ? XComponentApi.PrivateCommunicationIdentifier : string.Empty
+                    PublishTopic = visibility == Visibility.Private ? XComponentApi.PrivateCommunicationIdentifier : string.Empty
                 };
             }
             catch (NullReferenceException e)

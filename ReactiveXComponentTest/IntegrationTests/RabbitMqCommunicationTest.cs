@@ -138,8 +138,8 @@ namespace ReactiveXComponentTest.IntegrationTests
         private void PublishMessage(Visibility visibility)
         {
             string privateCommunicationIdentifier = visibility == Visibility.Private? "PrivateCommincationIdentifier" : string.Empty;
-            var rabbitMqConnection = new RabbitMqConnection(_xcConfiguration);
-            var session = rabbitMqConnection.CreateSession(privateCommunicationIdentifier);
+            var rabbitMqConnection = new RabbitMqConnection(_xcConfiguration, privateCommunicationIdentifier);
+            var session = rabbitMqConnection.CreateSession();
             const string component = "Component";
             const string stateMachine = "stateMachine";
 

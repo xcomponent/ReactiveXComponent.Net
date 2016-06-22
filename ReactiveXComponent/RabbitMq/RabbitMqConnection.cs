@@ -11,12 +11,13 @@ namespace ReactiveXComponent.RabbitMq
         private bool _disposed;
         private IConnection _connection;
         private ConnectionFactory _factory;
-
         private readonly IXCConfiguration _xcConfiguration;
+        private readonly string _privateCommunicationIdentifier;
 
-        public RabbitMqConnection(IXCConfiguration configuration)
+        public RabbitMqConnection(IXCConfiguration configuration, string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = configuration;
+            _privateCommunicationIdentifier = privateCommunicationIdentifier;
             Init(configuration.GetBusDetails());
             _connection = CreateRabbitMqConnection();
         }
@@ -54,9 +55,9 @@ namespace ReactiveXComponent.RabbitMq
             return _connection;
         }
 
-        public IXCSession CreateSession(string privateCommunicationIdentifier = null)
+        public IXCSession CreateSession()
         {
-            return new RabbitMqSession(_xcConfiguration, _connection, privateCommunicationIdentifier);
+            return new RabbitMqSession(_xcConfiguration, _connection, _privateCommunicationIdentifier);
         }
 
         private void Dispose(bool disposing)

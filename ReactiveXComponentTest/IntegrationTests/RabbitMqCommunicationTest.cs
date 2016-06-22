@@ -7,6 +7,7 @@ using NSubstitute;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using ReactiveXComponent;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.RabbitMq;
@@ -46,13 +47,12 @@ namespace ReactiveXComponentTest.IntegrationTests
             _xcConfiguration.GetPublisherTopic(null, null, 0).ReturnsForAnyArgs(_routinKey);
         }
 
-        [TestCase(Visibility.Private)]
-        [TestCase(Visibility.Public)]
-        public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectRoutingKeyAndExchangeName_Test(Visibility visibility)
+        [Test]
+        public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectRoutingKeyAndExchangeName_Test()
         {
             var consumer = CreateConsumer();
 
-            PublishMessage(visibility);
+            PublishMessage(Visibility.Public);
 
             string routingKey = string.Empty;
             string exchangeName = string.Empty;
@@ -78,13 +78,14 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TestCase(Visibility.Public)]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectHeader_Test(Visibility visibility)
         {
+            XComponentApi.PrivateCommunicationIdentifier = "CommincationIdentifier";
             var expectedHeader = new Header
             {
                 StateMachineCode = 0,
                 ComponentCode = Convert.ToInt32(_exchangeName),
                 MessageType = "System.String",
                 EventCode = 0,
-                PublishTopic = string.Empty
+                PublishTopic = visibility == Visibility.Private? XComponentApi.PrivateCommunicationIdentifier : string.Empty
             };
 
             var consumer = CreateConsumer();
@@ -109,13 +110,12 @@ namespace ReactiveXComponentTest.IntegrationTests
             Check.That(header).IsEqualTo(expectedHeader);
         }
 
-        [TestCase(Visibility.Private)]
-        [TestCase(Visibility.Public)]
-        public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMq_Test(Visibility visibility)
+        [Test]
+        public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMq_Test()
         {
             var consumer = CreateConsumer();
 
-            PublishMessage(visibility);
+            PublishMessage(Visibility.Public);
 
             byte[] msg = new byte[] {};
             const int timeoutReceive = 10000;

@@ -8,7 +8,6 @@ using ReactiveXComponent.RabbitMq;
 namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
 {
     [TestFixture]
-    [Category("Unit Tests")]
     public class RabbitMqPublisherTest : RabbitMqTestBase 
     {
         private object _message;

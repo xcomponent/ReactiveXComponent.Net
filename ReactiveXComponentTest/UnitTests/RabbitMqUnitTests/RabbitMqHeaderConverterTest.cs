@@ -7,7 +7,6 @@ using ReactiveXComponent.RabbitMq;
 namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
 {
     [TestFixture]
-    [Category("Unit Tests")]
     public class RabbitMqHeaderConverterTest
     {
         private Header _header;

@@ -8,7 +8,6 @@ using ReactiveXComponent.Parser;
 namespace ReactiveXComponentTest.UnitTests.ConfiguartionTests
 {
     [TestFixture]
-    [Category("Unit Tests")]
     public class XCConfigutaionTest
     {
         private IXCApiConfigParser _parser;

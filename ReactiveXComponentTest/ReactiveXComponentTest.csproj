@@ -71,9 +71,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqHeaderConverterTest.cs" />
-    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqConnectionTest.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqPublisherTest.cs" />
-    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqSessionTest.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqTestBase.cs" />
     <Compile Include="IntegrationTests\RabbitMqCommunicationTest.cs" />
   </ItemGroup>

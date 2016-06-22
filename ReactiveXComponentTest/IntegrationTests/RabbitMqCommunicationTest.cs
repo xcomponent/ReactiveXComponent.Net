@@ -78,14 +78,13 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TestCase(Visibility.Public)]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectHeader_Test(Visibility visibility)
         {
-            XComponentApi.PrivateCommunicationIdentifier = "CommincationIdentifier";
             var expectedHeader = new Header
             {
                 StateMachineCode = 0,
                 ComponentCode = Convert.ToInt32(_exchangeName),
                 MessageType = "System.String",
                 EventCode = 0,
-                PublishTopic = visibility == Visibility.Private? XComponentApi.PrivateCommunicationIdentifier : string.Empty
+                PublishTopic = visibility == Visibility.Private? "PrivateCommincationIdentifier" : string.Empty
             };
 
             var consumer = CreateConsumer();
@@ -138,8 +137,9 @@ namespace ReactiveXComponentTest.IntegrationTests
 
         private void PublishMessage(Visibility visibility)
         {
+            string privateCommunicationIdentifier = visibility == Visibility.Private? "PrivateCommincationIdentifier" : string.Empty;
             var rabbitMqConnection = new RabbitMqConnection(_xcConfiguration);
-            var session = rabbitMqConnection.CreateSession();
+            var session = rabbitMqConnection.CreateSession(privateCommunicationIdentifier);
             const string component = "Component";
             const string stateMachine = "stateMachine";
 

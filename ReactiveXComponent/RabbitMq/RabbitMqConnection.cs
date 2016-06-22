@@ -54,9 +54,9 @@ namespace ReactiveXComponent.RabbitMq
             return _connection;
         }
 
-        public IXCSession CreateSession()
+        public IXCSession CreateSession(string privateCommunicationIdentifier = null)
         {
-            return new RabbitMqSession(_xcConfiguration, _connection);
+            return new RabbitMqSession(_xcConfiguration, _connection, privateCommunicationIdentifier);
         }
 
         private void Dispose(bool disposing)

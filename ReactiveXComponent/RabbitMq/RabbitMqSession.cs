@@ -8,16 +8,18 @@ namespace ReactiveXComponent.RabbitMq
     {
         private readonly IXCConfiguration _xcConfiguration;
         private readonly IConnection _connection;
+        private readonly string _privateCommunicationIdentifier;
 
-        public RabbitMqSession(IXCConfiguration xcConfiguration, IConnection connection)
+        public RabbitMqSession(IXCConfiguration xcConfiguration, IConnection connection , string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = xcConfiguration;
             _connection = connection;
+            _privateCommunicationIdentifier = privateCommunicationIdentifier;
         }
 
         public IXCPublisher CreatePublisher(string component)
         {
-            return new RabbitMqPublisher(component, _xcConfiguration, _connection);
+            return new RabbitMqPublisher(component, _xcConfiguration, _connection, _privateCommunicationIdentifier);
         }
     }
 }

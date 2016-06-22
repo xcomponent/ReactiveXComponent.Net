@@ -9,7 +9,7 @@ namespace ReactiveXComponent
     {
         private readonly IXCConnection _xcConnection;
 
-        public static string PrivateCommunicationIdentifier;
+        private string _privateCommunicationIdentifier;
 
         private XComponentApi(Stream xcApiStream, string privateCommunicationIdentifier = null)
         {
@@ -18,17 +18,17 @@ namespace ReactiveXComponent
             xcConfiguration.Init(xcApiStream);
             AbstractXCConnectionFactory connectionFactory = new XCConnectionFactory(xcConfiguration);
             _xcConnection = connectionFactory.CreateConnection();
-            PrivateCommunicationIdentifier = privateCommunicationIdentifier;
+            _privateCommunicationIdentifier = privateCommunicationIdentifier;
         }
 
-        public static IXComponentApi CreateFromXCApi(Stream xcApiStream)
+        public static IXComponentApi CreateFromXCApi(Stream xcApiStream, string privateCommunicationIdentifier = null)
         {
             return new XComponentApi(xcApiStream);
         }
 
         public IXCSession CreateSession()
         {
-            return _xcConnection.CreateSession();
+            return _xcConnection.CreateSession(_privateCommunicationIdentifier);
         }
     }
 }

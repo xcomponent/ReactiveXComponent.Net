@@ -16,12 +16,14 @@ namespace ReactiveXComponent.RabbitMq
         private IModel _publisherChannel;
         private readonly string _exchangeName;
         private readonly string _component;
+        private readonly string _privateCommunicationIdentifier;
 
         public IModel PublisherChanne => _publisherChannel;
 
-        public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection)
+        public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, string privateCommunicationIdentifier = null)
         {
             _component = component;
+            _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _exchangeName = configuration?.GetComponentCode(component).ToString();
             _configuration = configuration;
             CreatePublisherChannel(connection);
@@ -29,11 +31,9 @@ namespace ReactiveXComponent.RabbitMq
 
         private void CreatePublisherChannel(IConnection connection)
         {
-            if (connection != null && connection.IsOpen)
-            {
-                _publisherChannel = connection.CreateModel();
-                _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
-            }
+            if (connection == null || !connection.IsOpen) return;
+            _publisherChannel = connection.CreateModel();
+            _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
         }
 
         public void SendEvent(string stateMachine, object message, Visibility visibility)
@@ -59,7 +59,7 @@ namespace ReactiveXComponent.RabbitMq
                     ComponentCode = _configuration.GetComponentCode(component),
                     MessageType = messageType,
                     EventCode = _configuration.GetPublisherEventCode(messageType),
-                    PublishTopic = visibility == Visibility.Private ? XComponentApi.PrivateCommunicationIdentifier : string.Empty
+                    PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty
                 };
             }
             catch (NullReferenceException e)

@@ -4,6 +4,6 @@ namespace ReactiveXComponent.Connection
 {
     public interface IXCConnection : IDisposable
     {
-        IXCSession CreateSession();
+        IXCSession CreateSession(string privateCommunicationIdentifier = null);
     }
 }

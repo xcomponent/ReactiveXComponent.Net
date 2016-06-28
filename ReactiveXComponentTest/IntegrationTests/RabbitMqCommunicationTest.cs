@@ -7,10 +7,11 @@ using NSubstitute;
 using NUnit.Framework;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using ReactiveXComponent;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
+using ReactiveXComponent.Connection;
 using ReactiveXComponent.RabbitMq;
+using ReactiveXComponent.RabbitMQ;
 
 namespace ReactiveXComponentTest.IntegrationTests
 {
@@ -27,6 +28,8 @@ namespace ReactiveXComponentTest.IntegrationTests
         private IConnection _connection;
         private IModel _channel;
 
+        private event Action<string> MessageReceived;
+
         [SetUp]
         public void Setup()
         {
@@ -39,12 +42,13 @@ namespace ReactiveXComponentTest.IntegrationTests
             };
             var random = new Random();
             _exchangeName = random.Next(100).ToString();
-            _routinKey = "routinKey: " +random.Next(100);
+            _routinKey = "routinKey: "+random.Next(100);
             _message = "J'envoie le message n° "+ random.Next(100) +" sur RabbitMq";
             _xcConfiguration = Substitute.For<IXCConfiguration>();
             _xcConfiguration.GetBusDetails().Returns(_busDetails);
             _xcConfiguration.GetComponentCode(null).ReturnsForAnyArgs(Convert.ToInt32(_exchangeName));
             _xcConfiguration.GetPublisherTopic(null, null, 0).ReturnsForAnyArgs(_routinKey);
+            _xcConfiguration.GetSubscriberTopic(null, null).ReturnsForAnyArgs(_routinKey);
         }
 
         [Test]
@@ -135,11 +139,60 @@ namespace ReactiveXComponentTest.IntegrationTests
             Check.That(contenu).IsEqualTo(_message);
         }
 
+        [TestCase(Visibility.Private)]
+        [TestCase(Visibility.Public)]
+        public void AddCallback_GivenAcomponentAStateMachineAndACallback_ShouldCreateSubscriptionAndReceiveMessageOnCallback_Test(Visibility visibility)
+        {
+            var subscirber = CreateSubscriber(visibility);
+            const string component = "Component";
+            const string stateMachine = "stateMachine";
+
+            subscirber.AddCallback(component, stateMachine, MessageReceivedUpdated);
+
+            PublishMessage(visibility);
+
+            string label = null;
+            const int timeoutReceive = 10000;
+            var lockEvent = new AutoResetEvent(false);
+
+            MessageReceived += instance =>
+            {
+                label = instance;
+                lockEvent.Set();
+            };
+            
+            if (!lockEvent.WaitOne(timeoutReceive))
+            {
+                throw new Exception("Message not received");
+            }
+
+            Check.That(label).IsNotEmpty();
+                
+        }
+
+        private void MessageReceivedUpdated(MessageEventArgs busEvent)
+        {
+            if (MessageReceived == null) return;
+            var publicMember = busEvent.MessageReceived as string;
+            if (publicMember != null) MessageReceived(publicMember);
+        }
+
+
+        private IXCSession CreateSession(Visibility visibility)
+        {
+            var privateCommunicationIdentifier = visibility == Visibility.Private ? "PrivateCommincationIdentifier" : string.Empty;
+            var rabbitMqConnection = new RabbitMqConnection(_xcConfiguration, privateCommunicationIdentifier);
+            return rabbitMqConnection.CreateSession();
+        }
+        private IXCSubscriber CreateSubscriber(Visibility visibility)
+        {
+            var session = CreateSession(visibility);
+            return session.CreateSubscriber();
+        }
+
         private void PublishMessage(Visibility visibility)
         {
-            string privateCommunicationIdentifier = visibility == Visibility.Private? "PrivateCommincationIdentifier" : string.Empty;
-            var rabbitMqConnection = new RabbitMqConnection(_xcConfiguration, privateCommunicationIdentifier);
-            var session = rabbitMqConnection.CreateSession();
+            var session = CreateSession(visibility);
             const string component = "Component";
             const string stateMachine = "stateMachine";
 
@@ -174,8 +227,8 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TearDown]
         public void TearDown()
         {
-            _channel.Dispose();
-            _connection.Dispose();
+            _channel?.Dispose();
+            _connection?.Dispose();
         }
     }
 }

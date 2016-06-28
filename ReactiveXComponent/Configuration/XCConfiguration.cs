@@ -98,15 +98,15 @@ namespace ReactiveXComponent.Configuration
             }   
         }
 
-        public string GetConsumerTopic(string component, string stateMachine, int eventCode)
+        public string GetSubscriberTopic(string component, string stateMachine)
         {
             try
             {
-                return _parser.GetConsumerTopic(component, stateMachine);
+                return _parser.GetSubscriberTopic(component, stateMachine);
             }
             catch (NullReferenceException ex)
             {
-                throw new NullReferenceException("Consumer topic not found", ex);
+                throw new NullReferenceException("Subscriber topic not found", ex);
             }
         }
     }

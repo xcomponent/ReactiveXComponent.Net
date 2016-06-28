@@ -114,7 +114,7 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
 
             const string stateMachine = "HelloResponse";
             const string expectedTopic = "output.1_0.HelloMicroservice.HelloWorld.HelloResponse";
-            var topic = _xcApiConfigParser.GetConsumerTopic(_component, stateMachine);
+            var topic = _xcApiConfigParser.GetSubscriberTopic(_component, stateMachine);
 
             Check.That(topic).IsEqualTo(expectedTopic);
         }

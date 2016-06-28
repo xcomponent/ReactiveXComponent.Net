@@ -21,5 +21,10 @@ namespace ReactiveXComponent.RabbitMq
         {
             return new RabbitMqPublisher(component, _xcConfiguration, _connection, _privateCommunicationIdentifier);
         }
+   
+        public IXCSubscriber CreateSubscriber()
+        {
+                return new RabbitMqSubscriber(_xcConfiguration, _connection, _privateCommunicationIdentifier);
+        }
     }
 }

@@ -59,12 +59,17 @@
     <Compile Include="Configuration\XCApiTags.cs" />
     <Compile Include="Configuration\XCConfiguration.cs" />
     <Compile Include="Connection\AbstractXCConnectionFactory.cs" />
+    <Compile Include="Connection\IXCSubscriber.cs" />
     <Compile Include="Connection\IXCConnection.cs" />
     <Compile Include="Parser\IXCApiConfigParser.cs" />
     <Compile Include="Parser\XCApiDescription.cs" />
     <Compile Include="Connection\IXCPublisher.cs" />
     <Compile Include="Connection\IXCSession.cs" />
+    <Compile Include="RabbitMq\RabbitMqSubscriberInfos.cs" />
+    <Compile Include="RabbitMq\StringEventArgs.cs" />
+    <Compile Include="RabbitMq\SubscriberKey.cs" />
     <Compile Include="RabbitMq\CreateRabbitMqConnectionException.cs" />
+    <Compile Include="RabbitMq\MessageEventArgs.cs" />
     <Compile Include="RabbitMq\RabbitMqConnection.cs" />
     <Compile Include="Connection\XCConnectionFactory.cs" />
     <Compile Include="RabbitMq\RabbitMqHeaderConverter.cs" />
@@ -75,6 +80,7 @@
     <Compile Include="Parser\TopicIdentifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMq\RabbitMqSession.cs" />
+    <Compile Include="RabbitMq\RabbitMqSubscriber.cs" />
     <Compile Include="XComponentApi.cs" />
   </ItemGroup>
   <ItemGroup>

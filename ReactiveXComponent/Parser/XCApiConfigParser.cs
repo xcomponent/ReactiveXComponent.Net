@@ -15,7 +15,7 @@ namespace ReactiveXComponent.Parser
         private Dictionary<string, Dictionary<string, long>> _stateMachineCodeByStateMachineAndComponent;
         private Dictionary<string, int> _eventCodeByEvent;
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
-        private Dictionary<TopicIdentifier, string> _consumerTopicByIdentifier;
+        private Dictionary<TopicIdentifier, string> _subscriberTopicByIdentifier;
 
         public void Parse(Stream xcApiStream)
         {
@@ -28,7 +28,7 @@ namespace ReactiveXComponent.Parser
             _stateMachineCodeByStateMachineAndComponent = CreateStateMachineCodeByNameAndComponentRepository(_xcApiDescription.GetComponentsNode());
             _eventCodeByEvent = CreateEventCodeByEventRepository(_xcApiDescription.GetPublishersNode());
             _publisherTopicByIdentifier = CreatePublisherTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetPublishersNode());
-            _consumerTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetConsumersNode());
+            _subscriberTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetConsumersNode());
         }
 
         private Dictionary<string, long> CreateComponentCodeByNameRepository(XmlNodeList components)
@@ -199,9 +199,9 @@ namespace ReactiveXComponent.Parser
             return publisherTopic;
         }
 
-        public string GetConsumerTopic(string component, string stateMachine)
+        public string GetSubscriberTopic(string component, string stateMachine)
         {
-            string consumerTopic;
+            string subscriberTopic;
             var componentCode = GetComponentCode(component);
             var stateMachineCode = GetStateMachineCode(component, stateMachine);
             var topicId = new TopicIdentifier
@@ -211,8 +211,8 @@ namespace ReactiveXComponent.Parser
                 EventCode = 0,
                 TopicType = XCApiTags.Input
             };
-            _consumerTopicByIdentifier.TryGetValue(topicId, out consumerTopic);
-            return consumerTopic;
+            _subscriberTopicByIdentifier.TryGetValue(topicId, out subscriberTopic);
+            return subscriberTopic;
         }
     }
 }

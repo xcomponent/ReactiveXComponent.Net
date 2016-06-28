@@ -240,6 +240,5 @@ namespace ReactiveXComponent.RabbitMq
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
     }
 }

@@ -8,6 +8,5 @@ namespace ReactiveXComponent.Connection
     {
         void AddCallback(string component, string stateMachine, Action<MessageEventArgs> callback);
         void RemoveCallback(string component, string stateMachine, Action<MessageEventArgs> callback);
-        IObservable<MessageEventArgs> MessageReceived { get; }
     }
 }

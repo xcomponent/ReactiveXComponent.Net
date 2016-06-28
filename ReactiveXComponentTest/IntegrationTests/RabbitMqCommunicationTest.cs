@@ -154,7 +154,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             string label = null;
             const int timeoutReceive = 10000;
             var lockEvent = new AutoResetEvent(false);
-
+            
             MessageReceived += instance =>
             {
                 label = instance;

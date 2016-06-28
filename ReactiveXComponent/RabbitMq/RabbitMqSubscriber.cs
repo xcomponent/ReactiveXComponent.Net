@@ -6,7 +6,6 @@ using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using ReactiveXComponent.RabbitMQ;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.Configuration;
@@ -24,6 +23,9 @@ namespace ReactiveXComponent.RabbitMq
         private readonly Dictionary<SubscriberKey, RabbitMqSubscriberInfos> _subscribers;
         private readonly Dictionary<SubscriberKey, List<Action<MessageEventArgs>>> _callbacksBySubscriberKey;
 
+        public event EventHandler<MessageEventArgs> MessageReceived;
+        private IObservable<MessageEventArgs> _xcObservable;
+
         public RabbitMqSubscriber(IXCConfiguration xcConfiguration, IConnection connection, string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = xcConfiguration;
@@ -31,29 +33,39 @@ namespace ReactiveXComponent.RabbitMq
             _subscribers = new Dictionary<SubscriberKey, RabbitMqSubscriberInfos>();
             _callbacksBySubscriberKey = new Dictionary<SubscriberKey, List<Action<MessageEventArgs>>>();
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
+            _xcObservable = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
+                handler => (sender, e) => handler(e),
+                h => MessageReceived += h,
+                h => MessageReceived -= h);
         }
 
         public void AddCallback(string component, string stateMachine, Action<MessageEventArgs> callback)
         {
             if (callback == null) return;
+            _xcObservable = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
+                handler => (sender, e) => handler(e),
+                h => MessageReceived += h,
+                h => MessageReceived -= h)
+                .Select(k => k)
+                .Where(k => k.Header.ComponentCode == _xcConfiguration.GetComponentCode(component) && k.Header.StateMachineCode == _xcConfiguration.GetStateMachineCode(component, stateMachine));
             var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(component), _xcConfiguration.GetStateMachineCode(component, stateMachine));
             AddToSubscribersRepository(subscriberKey);
             AddToCallBacksBySubscriberRepository(subscriberKey, callback);
-
+           
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
             {
                 InitPrivateSubscriber(component, stateMachine);
             }
             else
             {
-                _messageReceived.Subscribe(callback);
+                _xcObservable.Subscribe(callback);
                 Subscribe(component, stateMachine);
             }
         }
 
         private void InitPrivateSubscriber(string component, string stateMachine)
         {
-            _messageReceived.Subscribe(args =>
+            _xcObservable.Subscribe(args =>
             {
                 if (args.Header.StateMachineCode != _xcConfiguration.GetStateMachineCode(component, stateMachine) ||
                     args.Header.ComponentCode != _xcConfiguration.GetComponentCode(component)) return;
@@ -177,13 +189,9 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
-        private readonly Subject<MessageEventArgs> _messageReceived = new Subject<MessageEventArgs>();
-
-        public IObservable<MessageEventArgs> MessageReceived => _messageReceived.AsObservable();
-
         private void OnMessageReceived(MessageEventArgs e)
         {
-            _messageReceived.OnNext(e);
+            MessageReceived?.Invoke(this, e);
         }
 
         private void DispatchMessage(BasicDeliverEventArgs basicAckEventArgs)
@@ -223,7 +231,6 @@ namespace ReactiveXComponent.RabbitMq
             if (disposing)
             {
                 Close();
-                _messageReceived.Dispose();
             }
             _disposed = true;
         }
@@ -233,5 +240,6 @@ namespace ReactiveXComponent.RabbitMq
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
     }
 }

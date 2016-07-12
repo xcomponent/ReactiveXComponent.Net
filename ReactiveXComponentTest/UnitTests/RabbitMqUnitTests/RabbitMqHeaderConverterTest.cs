@@ -9,7 +9,7 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
     [TestFixture]
     public class RabbitMqHeaderConverterTest
     {
-        private Header _header;
+        private SatetMachineRef _satetMachineRef;
         private readonly UnicodeEncoding _encoding = new UnicodeEncoding();
 
         [SetUp]
@@ -21,7 +21,7 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
             const string Event = "GetSessionRequest";
             const string visibility = "Public";
 
-            _header = new Header()
+            _satetMachineRef = new SatetMachineRef()
             {
                 StateMachineCode = stateMachineCode,
                 ComponentCode = componentCode,
@@ -34,18 +34,18 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
         [Test]
         public void ConvertHeader_GivenHeader_ShouldConvertHeaderToADico_Test()
         {
-            var headerDico = RabbitMqHeaderConverter.ConvertHeader(_header);
+            var headerDico = RabbitMqHeaderConverter.ConvertHeader(_satetMachineRef);
 
-            Check.That(headerDico.Values).Contains(_header.ComponentCode).And.Contains(_header.StateMachineCode).And.Contains(_header.EventCode);
-            Assert.AreEqual(headerDico["PublishTopic"], _encoding.GetBytes(_header.PublishTopic));
-            Assert.AreEqual(headerDico["MessageType"], _encoding.GetBytes(_header.MessageType));
+            Check.That(headerDico.Values).Contains(_satetMachineRef.ComponentCode).And.Contains(_satetMachineRef.StateMachineCode).And.Contains(_satetMachineRef.EventCode);
+            Assert.AreEqual(headerDico["PublishTopic"], _encoding.GetBytes(_satetMachineRef.PublishTopic));
+            Assert.AreEqual(headerDico["MessageType"], _encoding.GetBytes(_satetMachineRef.MessageType));
         }
 
         [Test]
         public void ConvertHeader_GivenADico_ShouldConvertDicoToAHeader_Test()
         {
-            var headerDico = RabbitMqHeaderConverter.ConvertHeader(_header);
-            var headerExpected = _header;        
+            var headerDico = RabbitMqHeaderConverter.ConvertHeader(_satetMachineRef);
+            var headerExpected = _satetMachineRef;        
             var headerValue = RabbitMqHeaderConverter.ConvertHeader(headerDico);
             
             Assert.AreEqual(headerExpected, headerValue);
@@ -54,7 +54,7 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
         [TearDown]
         public void TearDown()
         {
-            _header = null;
+            _satetMachineRef = null;
         }
     }
 }

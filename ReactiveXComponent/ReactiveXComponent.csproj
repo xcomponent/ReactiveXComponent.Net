@@ -35,6 +35,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="RabbitMQ.Client, Version=3.6.2.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
       <HintPath>..\packages\RabbitMQ.Client.3.6.2\lib\net45\RabbitMQ.Client.dll</HintPath>
       <Private>True</Private>
@@ -69,8 +73,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\Header.cs" />
+    <Compile Include="Common\SatetMachineRef.cs" />
     <Compile Include="Common\HeaderElement.cs" />
+    <Compile Include="Common\StateMachineRef.cs" />
     <Compile Include="Common\Visibility.cs" />
     <Compile Include="Configuration\BusDetails.cs" />
     <Compile Include="Configuration\InitConfigurationException.cs" />
@@ -85,7 +90,6 @@
     <Compile Include="Connection\IXCPublisher.cs" />
     <Compile Include="Connection\IXCSession.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriberInfos.cs" />
-    <Compile Include="RabbitMq\StringEventArgs.cs" />
     <Compile Include="RabbitMq\SubscriberKey.cs" />
     <Compile Include="RabbitMq\CreateRabbitMqConnectionException.cs" />
     <Compile Include="RabbitMq\MessageEventArgs.cs" />
@@ -100,9 +104,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMq\RabbitMqSession.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriber.cs" />
+    <Compile Include="Serializer\BinarySerializer.cs" />
+    <Compile Include="Serializer\ISerializer.cs" />
+    <Compile Include="Serializer\JsonSerializer.cs" />
+    <Compile Include="Serializer\SerializationType.cs" />
+    <Compile Include="Serializer\SerializerFactory.cs" />
+    <Compile Include="Serializer\RXCSerializationException.cs" />
     <Compile Include="XComponentApi.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

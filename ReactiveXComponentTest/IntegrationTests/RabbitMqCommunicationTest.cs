@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using NFluent;
 using NSubstitute;
@@ -12,6 +11,7 @@ using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.RabbitMq;
 using ReactiveXComponent.RabbitMQ;
+using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponentTest.IntegrationTests
 {
@@ -27,6 +27,7 @@ namespace ReactiveXComponentTest.IntegrationTests
         private string _queueName;
         private IConnection _connection;
         private IModel _channel;
+        private string _serialization;
 
         private event Action<string> MessageReceived;
 
@@ -40,12 +41,14 @@ namespace ReactiveXComponentTest.IntegrationTests
                 Port = 5672,
                 Username = "guest"
             };
+            _serialization = "Json";
             var random = new Random();
             _exchangeName = random.Next(100).ToString();
             _routinKey = "routinKey: "+random.Next(100);
             _message = "J'envoie le message n° "+ random.Next(100) +" sur RabbitMq";
             _xcConfiguration = Substitute.For<IXCConfiguration>();
             _xcConfiguration.GetBusDetails().Returns(_busDetails);
+            _xcConfiguration.GetSerializationType().ReturnsForAnyArgs(_serialization);
             _xcConfiguration.GetComponentCode(null).ReturnsForAnyArgs(Convert.ToInt32(_exchangeName));
             _xcConfiguration.GetPublisherTopic(null, null, 0).ReturnsForAnyArgs(_routinKey);
             _xcConfiguration.GetSubscriberTopic(null, null).ReturnsForAnyArgs(_routinKey);
@@ -74,6 +77,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             {
                 throw new Exception("Message not received");
             }
+
             Check.That(routingKey).IsEqualTo(_routinKey);
             Check.That(exchangeName).IsEqualTo(_exchangeName);
         }
@@ -82,7 +86,7 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TestCase(Visibility.Public)]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectHeader_Test(Visibility visibility)
         {
-            var expectedHeader = new Header
+            var expectedHeader = new SatetMachineRef
             {
                 StateMachineCode = 0,
                 ComponentCode = Convert.ToInt32(_exchangeName),
@@ -110,23 +114,36 @@ namespace ReactiveXComponentTest.IntegrationTests
             }
             var headerRepository = basicProperties?.Headers;
             var header = RabbitMqHeaderConverter.ConvertHeader(headerRepository);
+
             Check.That(header).IsEqualTo(expectedHeader);
         }
 
         [Test]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMq_Test()
         {
+            SerializerFactory serializerFactory = null;
+            switch (_serialization)
+            {
+                case XCApiTags.Binary:
+                    serializerFactory = new SerializerFactory(SerializationType.Binary);
+                    break;
+                case XCApiTags.Json:
+                    serializerFactory = new SerializerFactory(SerializationType.Json);
+                    break;
+            }
+            var serializer = serializerFactory?.CreateSerializer();
+
             var consumer = CreateConsumer();
 
             PublishMessage(Visibility.Public);
 
-            byte[] msg = new byte[] {};
+            Stream msg = null;
             const int timeoutReceive = 10000;
             var lockEvent = new AutoResetEvent(false);
             consumer.Received += (model, ea) =>
             {
                 var body = ea.Body;
-                msg = body;
+                msg = new MemoryStream(body);
                 lockEvent.Set();
             };
             _channel?.BasicConsume(_queueName, true, consumer);
@@ -134,8 +151,8 @@ namespace ReactiveXComponentTest.IntegrationTests
             {
                 throw new Exception("Message not received");
             }
-            var binaryFormater = new BinaryFormatter();
-            var contenu = binaryFormater.Deserialize(new MemoryStream(msg)).ToString();
+            var contenu = serializer?.Deserialize(msg);
+
             Check.That(contenu).IsEqualTo(_message);
         }
 
@@ -147,7 +164,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             const string component = "Component";
             const string stateMachine = "stateMachine";
 
-            subscirber.AddCallback(component, stateMachine, MessageReceivedUpdated);
+            subscirber.Subscribe(component, stateMachine, MessageReceivedUpdated);
 
             PublishMessage(visibility);
 
@@ -166,7 +183,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                 throw new Exception("Message not received");
             }
 
-            Check.That(label).IsNotEmpty();
+            Check.That(label).IsNotEmpty().And.Contains("J'envoie le message n° ").And.Contains("sur RabbitMq");
                 
         }
 

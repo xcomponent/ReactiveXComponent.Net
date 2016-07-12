@@ -1,0 +1,943 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<deployment environment="Dev" xcProjectName="Perseus" deploymentTargetCode="-1996155195" deploymentTargetName="MonitoringApi" version="0.2.0.10001" frameworkType="Framework451" xmlns="http://xcomponent.com/DeploymentConfig.xsd" clientApiReference="XComponent.Perseus.ClientApi.dll">
+  <threading />
+  <serialization>Json</serialization>
+  <communication>
+    <bus name="rabbitmq" host="127.0.0.1" port="5672" user="guest" password="guest" type="RABBIT_MQ" />
+  </communication>
+  <clientAPICommunication>
+    <subscribe componentCode="1533612547" eventType="ERROR" topicType="input" communicationType="BUS" communication="rabbitmq">
+      <topic type="STATIC">error.0_2_0_10001.microservice1.RFQ</topic>
+    </subscribe>
+    <subscribe componentCode="1533612547" stateMachineCode="1533612547" eventType="UPDATE" topicType="input" communicationType="BUS" event="XComponent.Perseus.Common.Rfq" communication="rabbitmq" communicationThreadingType="INHERITFROMPARENT">
+      <topic type="STATIC">output.0_2_0_10001.microservice1.RFQ.RFQ</topic>
+    </subscribe>
+    <subscribe componentCode="1758013288" eventType="ERROR" topicType="input" communicationType="BUS" communication="rabbitmq">
+      <topic type="STATIC">error.0_2_0_10001.microservice1.PricerRESTAPI</topic>
+    </subscribe>
+    <subscribe componentCode="204142615" eventType="ERROR" topicType="input" communicationType="BUS" communication="rabbitmq">
+      <topic type="STATIC">error.0_2_0_10001.microserviceDocumentation.Research</topic>
+    </subscribe>
+    <subscribe componentCode="1842788740" eventType="ERROR" topicType="input" communicationType="BUS" communication="rabbitmq">
+      <topic type="STATIC">error.0_2_0_10001.microservice1.RFD</topic>
+    </subscribe>
+    <subscribe componentCode="276704799" eventType="ERROR" topicType="input" communicationType="BUS" communication="rabbitmq">
+      <topic type="STATIC">error.0_2_0_10001.microservice1.RFE</topic>
+    </subscribe>
+    <subscribe componentCode="149269333" eventType="ERROR" topicType="input" communicationType="BUS" communication="rabbitmq">
+      <topic type="STATIC">error.0_2_0_10001.microservice1.RuleSetService</topic>
+    </subscribe>
+    <subscribe componentCode="1183299321" eventType="ERROR" topicType="input" communicationType="BUS" communication="rabbitmq">
+      <topic type="STATIC">error.0_2_0_10001.microservice1.UserManagement</topic>
+    </subscribe>
+    <snapshot componentCode="1533612547">
+      <topic type="STATIC">snapshot.0_2_0_10001.microservice1.RFQ</topic>
+    </snapshot>
+    <snapshot componentCode="1758013288">
+      <topic type="STATIC">snapshot.0_2_0_10001.microservice1.PricerRESTAPI</topic>
+    </snapshot>
+    <snapshot componentCode="204142615">
+      <topic type="STATIC">snapshot.0_2_0_10001.microserviceDocumentation.Research</topic>
+    </snapshot>
+    <snapshot componentCode="1842788740">
+      <topic type="STATIC">snapshot.0_2_0_10001.microservice1.RFD</topic>
+    </snapshot>
+    <snapshot componentCode="276704799">
+      <topic type="STATIC">snapshot.0_2_0_10001.microservice1.RFE</topic>
+    </snapshot>
+    <snapshot componentCode="149269333">
+      <topic type="STATIC">snapshot.0_2_0_10001.microservice1.RuleSetService</topic>
+    </snapshot>
+    <snapshot componentCode="1183299321">
+      <topic type="STATIC">snapshot.0_2_0_10001.microservice1.UserManagement</topic>
+    </snapshot>
+  </clientAPICommunication>
+  <codesConverter>
+    <components>
+      <component name="PricerRESTAPI" id="1758013288">
+        <events>
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="1" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="2" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="3" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="4" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="5" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="6" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="7" />
+          <event name="XComponent.PricerRESTAPI.UserObject.ErrorResponse" id="8" />
+          <event name="XComponent.PricerRESTAPI.UserObject.Models.PricingResult" id="9" />
+          <event name="XComponent.PricerRESTAPI.UserObject.Price" id="10" />
+          <event name="XComponent.PricerRESTAPI.UserObject.PriceOperation" id="11" />
+          <event name="XComponent.PricerRESTAPI.UserObject.PricerRESTAPI_EntryPoint" id="12" />
+          <event name="XComponent.PricerRESTAPI.UserObject.SuccessResponse" id="13" />
+        </events>
+        <stateMachines>
+          <stateMachine name="PricerRESTAPI" id="1758013288">
+            <states>
+              <State name="EntryPoint" id="0" />
+              <State name="Up" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="PriceOperation" id="1649807363">
+            <states>
+              <State name="SendingRequest" id="2" />
+              <State name="RequestSent" id="1" />
+              <State name="SuccessResponseReceived" id="3" />
+              <State name="ErrorResponseReceived" id="0" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+      <component name="Research" id="204142615">
+        <events>
+          <event name="PerseusLib.Common.Constants.LoadOrdersProcessEnum" id="0" />
+          <event name="PerseusLib.Common.Constants.OpenUserSessionProcess" id="1" />
+          <event name="PerseusLib.Common.DataStructures.LimitedSizeDictionary`2" id="2" />
+          <event name="PerseusLib.Common.DateTimeProvider" id="3" />
+          <event name="PerseusLib.Common.DecimalParts" id="4" />
+          <event name="PerseusLib.Common.Dto.Referential.AutoCallInstrument" id="5" />
+          <event name="PerseusLib.Common.Dto.Referential.Instrument" id="6" />
+          <event name="PerseusLib.Common.Dto.Referential.InstrumentConverter" id="7" />
+          <event name="PerseusLib.Common.Dto.Referential.MaturityHelper" id="8" />
+          <event name="PerseusLib.Common.Dto.Referential.ProductType" id="9" />
+          <event name="PerseusLib.Common.Dto.Referential.RangeAccrualInstrument" id="10" />
+          <event name="PerseusLib.Common.Dto.ReportDefinition" id="11" />
+          <event name="PerseusLib.Common.Dto.UserManagement.ProfileRightInfo" id="12" />
+          <event name="PerseusLib.Common.Dto.UserManagement.RestoreSession" id="13" />
+          <event name="PerseusLib.Common.Dto.UserManagement.RightInfo" id="14" />
+          <event name="PerseusLib.Common.Dto.UserManagement.RightSource" id="15" />
+          <event name="PerseusLib.Common.Dto.UserManagement.Snapshot" id="16" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserInfo" id="17" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserProfileInfo" id="18" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserRightInfo" id="19" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserRightTimedInfo" id="20" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserSessionStatus" id="21" />
+          <event name="PerseusLib.Common.Helpers.IdHelper" id="22" />
+          <event name="PerseusLib.Common.IDateTimeProvider" id="23" />
+          <event name="PerseusLib.Common.MathHelper" id="24" />
+          <event name="PerseusLib.Common.PasswordHelper" id="25" />
+          <event name="PerseusLib.Common.SharedInstanceHolder`2" id="26" />
+          <event name="PerseusLib.Common.TimeZoneHelper" id="27" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="28" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="29" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="30" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="31" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="32" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="33" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="34" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="35" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchDocumentDto" id="36" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchEntityDto" id="37" />
+          <event name="XComponent.Perseus.Common.Factory.Research.IResearchServiceFactory" id="38" />
+          <event name="XComponent.Perseus.Common.IdentifiableExtensions" id="39" />
+          <event name="XComponent.Perseus.Common.IIdentifiable" id="40" />
+          <event name="XComponent.Perseus.Common.Margin" id="41" />
+          <event name="XComponent.Perseus.Common.MarginType" id="42" />
+          <event name="XComponent.Perseus.Common.MarginValidation" id="43" />
+          <event name="XComponent.Perseus.Common.Portfolio" id="44" />
+          <event name="XComponent.Perseus.Common.Rfq" id="45" />
+          <event name="XComponent.Perseus.Common.RfqBase" id="46" />
+          <event name="XComponent.Perseus.Common.RfqValidation" id="47" />
+          <event name="XComponent.Perseus.Common.RuleSetService.IRuleEvaluatorPlugin" id="48" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleDecision" id="49" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationResult" id="50" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStep" id="51" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStepKind" id="52" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.Rule" id="53" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleSet" id="54" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleType" id="55" />
+          <event name="XComponent.Perseus.Common.Service.Research.IResearchService" id="56" />
+          <event name="XComponent.Perseus.Common.Shield.ShieldRights" id="57" />
+          <event name="XComponent.Perseus.Common.Trade" id="58" />
+          <event name="XComponent.Perseus.Common.TradingSystem" id="59" />
+          <event name="XComponent.Perseus.Common.ValidationType" id="60" />
+          <event name="XComponent.Research.UserObject.CacheUpdater" id="61" />
+          <event name="XComponent.Research.UserObject.CreateResearchSettings" id="62" />
+          <event name="XComponent.Research.UserObject.DetailsResult" id="63" />
+          <event name="XComponent.Research.UserObject.FindResearch" id="64" />
+          <event name="XComponent.Research.UserObject.GetInstrumentDetails" id="65" />
+          <event name="XComponent.Research.UserObject.GetLatestResearch" id="66" />
+          <event name="XComponent.Research.UserObject.GetResearchDocument" id="67" />
+          <event name="XComponent.Research.UserObject.GetResearchEntity" id="68" />
+          <event name="XComponent.Research.UserObject.InitFailed" id="69" />
+          <event name="XComponent.Research.UserObject.InitOk" id="70" />
+          <event name="XComponent.Research.UserObject.InstrumentDetails" id="71" />
+          <event name="XComponent.Research.UserObject.IResearchServiceFactoryPlugin" id="72" />
+          <event name="XComponent.Research.UserObject.ManualDispose" id="73" />
+          <event name="XComponent.Research.UserObject.RebuildFailed" id="74" />
+          <event name="XComponent.Research.UserObject.RebuildIndex" id="75" />
+          <event name="XComponent.Research.UserObject.RebuildOk" id="76" />
+          <event name="XComponent.Research.UserObject.ResearchCache" id="77" />
+          <event name="XComponent.Research.UserObject.ResearchDocumentResponse" id="78" />
+          <event name="XComponent.Research.UserObject.ResearchEntity" id="79" />
+          <event name="XComponent.Research.UserObject.ResearchQueryResult" id="80" />
+          <event name="XComponent.Research.UserObject.ResearchSettings" id="81" />
+          <event name="XComponent.Research.UserObject.SuggestQuery" id="82" />
+          <event name="XComponent.Research.UserObject.Update" id="83" />
+          <event name="XComponent.Research.UserObject.UpdateFailed" id="84" />
+          <event name="XComponent.Research.UserObject.UpdateOk" id="85" />
+          <event name="XComponent.Research.UserObject.WordSuggested" id="86" />
+          <event name="XComponent.RFD.UserObject.GenerationError" id="87" />
+          <event name="XComponent.RFD.UserObject.GenerationOk" id="88" />
+          <event name="XComponent.RFD.UserObject.Retry" id="89" />
+          <event name="XComponent.RFD.UserObject.RFD" id="90" />
+        </events>
+        <stateMachines>
+          <stateMachine name="ResearchCache" id="-1466276473">
+            <states>
+              <State name="EntryPoint" id="0" />
+              <State name="Initializing" id="3" />
+              <State name="Initialized" id="2" />
+              <State name="Error" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ResearchEntity" id="785714487">
+            <states>
+              <State name="Processing" id="1" />
+              <State name="Processed" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ResearchDocument" id="-539495439">
+            <states>
+              <State name="Get" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="UpdateNotification" id="-281548045">
+            <states>
+              <State name="Updating" id="1" />
+              <State name="Updated" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ResearchQuery" id="2053852531">
+            <states>
+              <State name="Processing" id="1" />
+              <State name="Processed" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ResearchSuggestQuery" id="-947279046">
+            <states>
+              <State name="Suggest" id="0" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+      <component name="RFD" id="1842788740">
+        <events>
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="1" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="2" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="3" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="4" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="5" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="6" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="7" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchDocumentDto" id="8" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchEntityDto" id="9" />
+          <event name="XComponent.Perseus.Common.Factory.Research.IResearchServiceFactory" id="10" />
+          <event name="XComponent.Perseus.Common.IdentifiableExtensions" id="11" />
+          <event name="XComponent.Perseus.Common.IIdentifiable" id="12" />
+          <event name="XComponent.Perseus.Common.Margin" id="13" />
+          <event name="XComponent.Perseus.Common.MarginType" id="14" />
+          <event name="XComponent.Perseus.Common.MarginValidation" id="15" />
+          <event name="XComponent.Perseus.Common.Portfolio" id="16" />
+          <event name="XComponent.Perseus.Common.Rfq" id="17" />
+          <event name="XComponent.Perseus.Common.RfqBase" id="18" />
+          <event name="XComponent.Perseus.Common.RfqValidation" id="19" />
+          <event name="XComponent.Perseus.Common.RuleSetService.IRuleEvaluatorPlugin" id="20" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleDecision" id="21" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationResult" id="22" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStep" id="23" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStepKind" id="24" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.Rule" id="25" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleSet" id="26" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleType" id="27" />
+          <event name="XComponent.Perseus.Common.Service.Research.IResearchService" id="28" />
+          <event name="XComponent.Perseus.Common.Shield.ShieldRights" id="29" />
+          <event name="XComponent.Perseus.Common.Trade" id="30" />
+          <event name="XComponent.Perseus.Common.TradingSystem" id="31" />
+          <event name="XComponent.Perseus.Common.ValidationType" id="32" />
+          <event name="XComponent.RFD.UserObject.GenerationError" id="33" />
+          <event name="XComponent.RFD.UserObject.GenerationOk" id="34" />
+          <event name="XComponent.RFD.UserObject.Retry" id="35" />
+          <event name="XComponent.RFD.UserObject.RFD" id="36" />
+        </events>
+        <stateMachines>
+          <stateMachine name="RFDManager" id="1438119701">
+            <states>
+              <State name="EntryPoint" id="0" />
+              <State name="Initialized" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RFD" id="1842788740">
+            <states>
+              <State name="GeneratingDocument" id="2" />
+              <State name="DocumentGenerated" id="0" />
+              <State name="Error" id="1" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+      <component name="RFE" id="276704799">
+        <events>
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="1" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="2" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="3" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="4" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="5" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="6" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="7" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchDocumentDto" id="8" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchEntityDto" id="9" />
+          <event name="XComponent.Perseus.Common.Factory.Research.IResearchServiceFactory" id="10" />
+          <event name="XComponent.Perseus.Common.IdentifiableExtensions" id="11" />
+          <event name="XComponent.Perseus.Common.IIdentifiable" id="12" />
+          <event name="XComponent.Perseus.Common.Margin" id="13" />
+          <event name="XComponent.Perseus.Common.MarginType" id="14" />
+          <event name="XComponent.Perseus.Common.MarginValidation" id="15" />
+          <event name="XComponent.Perseus.Common.Portfolio" id="16" />
+          <event name="XComponent.Perseus.Common.Rfq" id="17" />
+          <event name="XComponent.Perseus.Common.RfqBase" id="18" />
+          <event name="XComponent.Perseus.Common.RfqValidation" id="19" />
+          <event name="XComponent.Perseus.Common.RuleSetService.IRuleEvaluatorPlugin" id="20" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleDecision" id="21" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationResult" id="22" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStep" id="23" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStepKind" id="24" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.Rule" id="25" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleSet" id="26" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleType" id="27" />
+          <event name="XComponent.Perseus.Common.Service.Research.IResearchService" id="28" />
+          <event name="XComponent.Perseus.Common.Shield.ShieldRights" id="29" />
+          <event name="XComponent.Perseus.Common.Trade" id="30" />
+          <event name="XComponent.Perseus.Common.TradingSystem" id="31" />
+          <event name="XComponent.Perseus.Common.ValidationType" id="32" />
+          <event name="XComponent.RFE.UserObject.Ack" id="33" />
+          <event name="XComponent.RFE.UserObject.ChoosePortfolio" id="34" />
+          <event name="XComponent.RFE.UserObject.RFE" id="35" />
+          <event name="XComponent.RFE.UserObject.SendToOrchestrade" id="36" />
+          <event name="XComponent.RFE.UserObject.SendToSophis" id="37" />
+          <event name="XComponent.RuleSetService.UserObject.Accepted" id="38" />
+          <event name="XComponent.RuleSetService.UserObject.AskForRuleSetUpdate" id="39" />
+          <event name="XComponent.RuleSetService.UserObject.AskForRuleUpdate" id="40" />
+          <event name="XComponent.RuleSetService.UserObject.CreateAggregator" id="41" />
+          <event name="XComponent.RuleSetService.UserObject.CreateRule" id="42" />
+          <event name="XComponent.RuleSetService.UserObject.CreateRuleSet" id="43" />
+          <event name="XComponent.RuleSetService.UserObject.EvaluateRule" id="44" />
+          <event name="XComponent.RuleSetService.UserObject.EvaluateRuleSet" id="45" />
+          <event name="XComponent.RuleSetService.UserObject.PublishResult" id="46" />
+          <event name="XComponent.RuleSetService.UserObject.Rejected" id="47" />
+          <event name="XComponent.RuleSetService.UserObject.RequiresValidations" id="48" />
+          <event name="XComponent.RuleSetService.UserObject.Rule" id="49" />
+          <event name="XComponent.RuleSetService.UserObject.RuleEvaluated" id="50" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSet" id="51" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetEvaluated" id="52" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetResult" id="53" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetUpdate" id="54" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetUpdateInternal" id="55" />
+          <event name="XComponent.RuleSetService.UserObject.RuleUpdate" id="56" />
+          <event name="XComponent.RuleSetService.UserObject.RuleUpdateInternal" id="57" />
+        </events>
+        <stateMachines>
+          <stateMachine name="RFEManager" id="1579282202">
+            <states>
+              <State name="EntryPoint" id="0" />
+              <State name="Initialized" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RFE" id="276704799">
+            <states>
+              <State name="RequestReceived" id="1" />
+              <State name="TradeSent" id="3" />
+              <State name="ChoosingPortfolio" id="0" />
+              <State name="TradeAcknowledged" id="2" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RuleSetQuery" id="-1140355645">
+            <states>
+              <State name="Sent" id="0" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+      <component name="RFQ" id="1533612547">
+        <events>
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="1" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="2" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="3" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="4" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="5" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="6" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="7" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchDocumentDto" id="8" />
+          <event name="XComponent.Perseus.Common.Dto.Research.ResearchEntityDto" id="9" />
+          <event name="XComponent.Perseus.Common.Factory.Research.IResearchServiceFactory" id="10" />
+          <event name="XComponent.Perseus.Common.IdentifiableExtensions" id="11" />
+          <event name="XComponent.Perseus.Common.IIdentifiable" id="12" />
+          <event name="XComponent.Perseus.Common.Margin" id="13" />
+          <event name="XComponent.Perseus.Common.MarginType" id="14" />
+          <event name="XComponent.Perseus.Common.MarginValidation" id="15" />
+          <event name="XComponent.Perseus.Common.Portfolio" id="16" />
+          <event name="XComponent.Perseus.Common.Rfq" id="17" />
+          <event name="XComponent.Perseus.Common.RfqBase" id="18" />
+          <event name="XComponent.Perseus.Common.RfqValidation" id="19" />
+          <event name="XComponent.Perseus.Common.RuleSetService.IRuleEvaluatorPlugin" id="20" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleDecision" id="21" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationResult" id="22" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStep" id="23" />
+          <event name="XComponent.Perseus.Common.RuleSetService.RuleEvaluationStepKind" id="24" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.Rule" id="25" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleSet" id="26" />
+          <event name="XComponent.Perseus.Common.RuleSetService.Rules.RuleType" id="27" />
+          <event name="XComponent.Perseus.Common.Service.Research.IResearchService" id="28" />
+          <event name="XComponent.Perseus.Common.Shield.ShieldRights" id="29" />
+          <event name="XComponent.Perseus.Common.Trade" id="30" />
+          <event name="XComponent.Perseus.Common.TradingSystem" id="31" />
+          <event name="XComponent.Perseus.Common.ValidationType" id="32" />
+          <event name="XComponent.PricerRESTAPI.UserObject.ErrorResponse" id="33" />
+          <event name="XComponent.PricerRESTAPI.UserObject.Models.PricingResult" id="34" />
+          <event name="XComponent.PricerRESTAPI.UserObject.Price" id="35" />
+          <event name="XComponent.PricerRESTAPI.UserObject.PriceOperation" id="36" />
+          <event name="XComponent.PricerRESTAPI.UserObject.PricerRESTAPI_EntryPoint" id="37" />
+          <event name="XComponent.PricerRESTAPI.UserObject.SuccessResponse" id="38" />
+          <event name="XComponent.RFD.UserObject.GenerationError" id="39" />
+          <event name="XComponent.RFD.UserObject.GenerationOk" id="40" />
+          <event name="XComponent.RFD.UserObject.Retry" id="41" />
+          <event name="XComponent.RFD.UserObject.RFD" id="42" />
+          <event name="XComponent.RFQ.UserObject.Accept" id="43" />
+          <event name="XComponent.RFQ.UserObject.AcceptRfq" id="44" />
+          <event name="XComponent.RFQ.UserObject.ApplyMargin" id="45" />
+          <event name="XComponent.RFQ.UserObject.ApplySalesMargin" id="46" />
+          <event name="XComponent.RFQ.UserObject.ApplyTraderMargin" id="47" />
+          <event name="XComponent.RFQ.UserObject.Approve" id="48" />
+          <event name="XComponent.RFQ.UserObject.ClientFacade" id="49" />
+          <event name="XComponent.RFQ.UserObject.ClientRequestAPrice" id="50" />
+          <event name="XComponent.RFQ.UserObject.ClientsClassified" id="51" />
+          <event name="XComponent.RFQ.UserObject.ComplianceFacade" id="52" />
+          <event name="XComponent.RFQ.UserObject.CreateClientFacade" id="53" />
+          <event name="XComponent.RFQ.UserObject.CreateComplianceFacade" id="54" />
+          <event name="XComponent.RFQ.UserObject.CreateLegalFacade" id="55" />
+          <event name="XComponent.RFQ.UserObject.CreatePricerAnswers" id="56" />
+          <event name="XComponent.RFQ.UserObject.CreatePricerRequest" id="57" />
+          <event name="XComponent.RFQ.UserObject.CreateRFDAnswer" id="58" />
+          <event name="XComponent.RFQ.UserObject.CreateRFQ" id="59" />
+          <event name="XComponent.RFQ.UserObject.CreateRuleSetQuery" id="60" />
+          <event name="XComponent.RFQ.UserObject.CreateSalesFacade" id="61" />
+          <event name="XComponent.RFQ.UserObject.CreateTraderFacade" id="62" />
+          <event name="XComponent.RFQ.UserObject.DocumentAndKidReceived" id="63" />
+          <event name="XComponent.RFQ.UserObject.InternalRFQ" id="64" />
+          <event name="XComponent.RFQ.UserObject.LegalFacade" id="65" />
+          <event name="XComponent.RFQ.UserObject.PriceReceived" id="66" />
+          <event name="XComponent.RFQ.UserObject.ProductsClassified" id="67" />
+          <event name="XComponent.RFQ.UserObject.Reject" id="68" />
+          <event name="XComponent.RFQ.UserObject.RequestingPricer" id="69" />
+          <event name="XComponent.RFQ.UserObject.RequestSuitabilityChecks" id="70" />
+          <event name="XComponent.RFQ.UserObject.RFC" id="71" />
+          <event name="XComponent.RFQ.UserObject.RFQManager" id="72" />
+          <event name="XComponent.RFQ.UserObject.SalesFacade" id="73" />
+          <event name="XComponent.RFQ.UserObject.TraderFacade" id="74" />
+          <event name="XComponent.RFQ.UserObject.UpdateMargin" id="75" />
+          <event name="XComponent.RFQ.UserObject.UpdatePrice" id="76" />
+          <event name="XComponent.RFQ.UserObject.ValidateDocument" id="77" />
+          <event name="XComponent.RFQ.UserObject.ValidateMargins" id="78" />
+          <event name="XComponent.RFQ.UserObject.ValidatePriceAndApplyMargin" id="79" />
+          <event name="XComponent.RFQ.UserObject.ValidateRfq" id="80" />
+          <event name="XComponent.RFQ.UserObject.WaitForRequiredApproval" id="81" />
+          <event name="XComponent.RuleSetService.UserObject.Accepted" id="82" />
+          <event name="XComponent.RuleSetService.UserObject.AskForRuleSetUpdate" id="83" />
+          <event name="XComponent.RuleSetService.UserObject.AskForRuleUpdate" id="84" />
+          <event name="XComponent.RuleSetService.UserObject.CreateAggregator" id="85" />
+          <event name="XComponent.RuleSetService.UserObject.CreateRule" id="86" />
+          <event name="XComponent.RuleSetService.UserObject.CreateRuleSet" id="87" />
+          <event name="XComponent.RuleSetService.UserObject.EvaluateRule" id="88" />
+          <event name="XComponent.RuleSetService.UserObject.EvaluateRuleSet" id="89" />
+          <event name="XComponent.RuleSetService.UserObject.PublishResult" id="90" />
+          <event name="XComponent.RuleSetService.UserObject.Rejected" id="91" />
+          <event name="XComponent.RuleSetService.UserObject.RequiresValidations" id="92" />
+          <event name="XComponent.RuleSetService.UserObject.Rule" id="93" />
+          <event name="XComponent.RuleSetService.UserObject.RuleEvaluated" id="94" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSet" id="95" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetEvaluated" id="96" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetResult" id="97" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetUpdate" id="98" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetUpdateInternal" id="99" />
+          <event name="XComponent.RuleSetService.UserObject.RuleUpdate" id="100" />
+          <event name="XComponent.RuleSetService.UserObject.RuleUpdateInternal" id="101" />
+        </events>
+        <stateMachines>
+          <stateMachine name="RFQManager" id="-1337559490">
+            <states>
+              <State name="EntryPoint" id="0" />
+              <State name="Initialized" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RFQ" id="1533612547">
+            <states>
+              <State name="PriceRequested" id="5" />
+              <State name="WaitingForRequiredApproval" id="15" />
+              <State name="Pricing" id="7" />
+              <State name="RFQRejected" id="9" />
+              <State name="ClientTradeValidation" id="0" />
+              <State name="WaitingForMarginValidation" id="14" />
+              <State name="LegalDocumentGeneration" id="3" />
+              <State name="TradingPricingValidation" id="11" />
+              <State name="WaitingForLegalDocumentApproval" id="13" />
+              <State name="SalesMarginAdjustment" id="10" />
+              <State name="WaitingForTraderValidation" id="17" />
+              <State name="RFQDone" id="8" />
+              <State name="MarginValidation" id="4" />
+              <State name="WaitingForSalesValidation" id="16" />
+              <State name="WaitingForClientValidation" id="12" />
+              <State name="LegalDocumentGenerated" id="2" />
+              <State name="PricerTimedOut" id="6" />
+              <State name="DocumentGenerationTimedOut" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RFC" id="-886094615">
+            <states>
+              <State name="ClassifyClients" id="3" />
+              <State name="CallDecisionTree" id="2" />
+              <State name="ApprovalRequired" id="1" />
+              <State name="Accepted" id="0" />
+              <State name="ClassifyProducts" id="4" />
+              <State name="Disposed" id="5" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RuleSetQuery" id="-1140355645">
+            <states>
+              <State name="Sent" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ClientFacade" id="-23591975">
+            <states>
+              <State name="ClientFacade" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ComplianceFacade" id="-2092731748">
+            <states>
+              <State name="ComplianceFacade" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="LegalFacade" id="-1625470144">
+            <states>
+              <State name="LegalFacade" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="TraderFacade" id="-806781592">
+            <states>
+              <State name="TraderFacade" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="SalesFacade" id="-280292881">
+            <states>
+              <State name="SalesFacade" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RequestingPricer" id="595094869">
+            <states>
+              <State name="RequestingPricer" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="PricerAnswers" id="2076561463">
+            <states>
+              <State name="ReceivingPricing" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="GenerateDocument" id="-515182675">
+            <states>
+              <State name="Publishing" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RFDAnswer" id="908035239">
+            <states>
+              <State name="ReceivingRFD" id="0" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+      <component name="RuleSetService" id="149269333">
+        <events>
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="1" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="2" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="3" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="4" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="5" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="6" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="7" />
+          <event name="XComponent.RuleSetService.UserObject.Accepted" id="8" />
+          <event name="XComponent.RuleSetService.UserObject.AskForRuleSetUpdate" id="9" />
+          <event name="XComponent.RuleSetService.UserObject.AskForRuleUpdate" id="10" />
+          <event name="XComponent.RuleSetService.UserObject.CreateAggregator" id="11" />
+          <event name="XComponent.RuleSetService.UserObject.CreateRule" id="12" />
+          <event name="XComponent.RuleSetService.UserObject.CreateRuleSet" id="13" />
+          <event name="XComponent.RuleSetService.UserObject.EvaluateRule" id="14" />
+          <event name="XComponent.RuleSetService.UserObject.EvaluateRuleSet" id="15" />
+          <event name="XComponent.RuleSetService.UserObject.PublishResult" id="16" />
+          <event name="XComponent.RuleSetService.UserObject.Rejected" id="17" />
+          <event name="XComponent.RuleSetService.UserObject.RequiresValidations" id="18" />
+          <event name="XComponent.RuleSetService.UserObject.Rule" id="19" />
+          <event name="XComponent.RuleSetService.UserObject.RuleEvaluated" id="20" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSet" id="21" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetEvaluated" id="22" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetResult" id="23" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetUpdate" id="24" />
+          <event name="XComponent.RuleSetService.UserObject.RuleSetUpdateInternal" id="25" />
+          <event name="XComponent.RuleSetService.UserObject.RuleUpdate" id="26" />
+          <event name="XComponent.RuleSetService.UserObject.RuleUpdateInternal" id="27" />
+          <event name="XComponent.UserManagement.UserObject.AcceptEula" id="28" />
+          <event name="XComponent.UserManagement.UserObject.AccessDenied" id="29" />
+          <event name="XComponent.UserManagement.UserObject.AccessGranted" id="30" />
+          <event name="XComponent.UserManagement.UserObject.BackendInfo" id="31" />
+          <event name="XComponent.UserManagement.UserObject.CachedPermissionChecker" id="32" />
+          <event name="XComponent.UserManagement.UserObject.CachedPermissionCheckerInternal" id="33" />
+          <event name="XComponent.UserManagement.UserObject.ChangePassword" id="34" />
+          <event name="XComponent.UserManagement.UserObject.ChangingPassword" id="35" />
+          <event name="XComponent.UserManagement.UserObject.CheckedRightRequest" id="36" />
+          <event name="XComponent.UserManagement.UserObject.ClientSessionHeartBeat" id="37" />
+          <event name="XComponent.UserManagement.UserObject.CloseSession" id="38" />
+          <event name="XComponent.UserManagement.UserObject.CustomRightRequest" id="39" />
+          <event name="XComponent.UserManagement.UserObject.CustomRightValue" id="40" />
+          <event name="XComponent.UserManagement.UserObject.Decline" id="41" />
+          <event name="XComponent.UserManagement.UserObject.DoManagingAction" id="42" />
+          <event name="XComponent.UserManagement.UserObject.Done" id="43" />
+          <event name="XComponent.UserManagement.UserObject.Error" id="44" />
+          <event name="XComponent.UserManagement.UserObject.Eula" id="45" />
+          <event name="XComponent.UserManagement.UserObject.EulaValidationRequired" id="46" />
+          <event name="XComponent.UserManagement.UserObject.GetBackendInfo" id="47" />
+          <event name="XComponent.UserManagement.UserObject.GetPermissionsSnapshot" id="48" />
+          <event name="XComponent.UserManagement.UserObject.GetRight" id="49" />
+          <event name="XComponent.UserManagement.UserObject.GetRightInternal" id="50" />
+          <event name="XComponent.UserManagement.UserObject.GetSession" id="51" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionDescriptor" id="52" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionInternal" id="53" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionRequest" id="54" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionRequestByDbId" id="55" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionsToRecoverSnapshot" id="56" />
+          <event name="XComponent.UserManagement.UserObject.GetUserRightHistory" id="57" />
+          <event name="XComponent.UserManagement.UserObject.InitDone" id="58" />
+          <event name="XComponent.UserManagement.UserObject.InitializeGetRight" id="59" />
+          <event name="XComponent.UserManagement.UserObject.InnerCloseSession" id="60" />
+          <event name="XComponent.UserManagement.UserObject.InternalSessionReply" id="61" />
+          <event name="XComponent.UserManagement.UserObject.InternalSessionRequest" id="62" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActionData" id="63" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActionMember" id="64" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ActionTarget" id="65" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ActionType" id="66" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.CreateProfileAction" id="67" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.CreateRightAction" id="68" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.CreateUserAction" id="69" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.DeleteRightAction" id="70" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.EditRightAction" id="71" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.EditUserAction" id="72" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.EditUserProfileAction" id="73" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ManagingAction" id="74" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ResetEulaAction" id="75" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.SetPasswordAction" id="76" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.SetRightAction" id="77" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.SystemRights" id="78" />
+          <event name="XComponent.UserManagement.UserObject.OpenSession" id="79" />
+          <event name="XComponent.UserManagement.UserObject.PermissionsSnapshot" id="80" />
+          <event name="XComponent.UserManagement.UserObject.PermissionsSnapshotData" id="81" />
+          <event name="XComponent.UserManagement.UserObject.Ping" id="82" />
+          <event name="XComponent.UserManagement.UserObject.PublishEula" id="83" />
+          <event name="XComponent.UserManagement.UserObject.RefreshPermissions" id="84" />
+          <event name="XComponent.UserManagement.UserObject.RightDenied" id="85" />
+          <event name="XComponent.UserManagement.UserObject.RightGranted" id="86" />
+          <event name="XComponent.UserManagement.UserObject.RightRequest" id="87" />
+          <event name="XComponent.UserManagement.UserObject.RightRequestDescriptor" id="88" />
+          <event name="XComponent.UserManagement.UserObject.SessionData" id="89" />
+          <event name="XComponent.UserManagement.UserObject.SessionExists" id="90" />
+          <event name="XComponent.UserManagement.UserObject.SessionId" id="91" />
+          <event name="XComponent.UserManagement.UserObject.SessionStatus" id="92" />
+          <event name="XComponent.UserManagement.UserObject.SessionsToRecoverSnapshot" id="93" />
+          <event name="XComponent.UserManagement.UserObject.SessionUpdated" id="94" />
+          <event name="XComponent.UserManagement.UserObject.UserManagement" id="95" />
+          <event name="XComponent.UserManagement.UserObject.UserRightHistory" id="96" />
+          <event name="XComponent.UserManagement.UserObject.UserRightHistoryData" id="97" />
+          <event name="XComponent.UserManagement.UserObject.UserSessionInfo" id="98" />
+          <event name="XComponent.UserManagement.UserObject.Validated" id="99" />
+          <event name="XComponent.UserManagement.UserObject.WrongPassword" id="100" />
+        </events>
+        <stateMachines>
+          <stateMachine name="RuleSetServiceManager" id="343451244">
+            <states>
+              <State name="EntryPoint" id="0" />
+              <State name="Initialized" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="Rule" id="1629595660">
+            <states>
+              <State name="Rule" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RuleSet" id="-704608159">
+            <states>
+              <State name="RuleSet" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="Accepted" id="-1807641753">
+            <states>
+              <State name="RuleSetResult" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RuleSetResultAggregator" id="-903710752">
+            <states>
+              <State name="Evaluating" id="1" />
+              <State name="Evaluated" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="Rejected" id="2034402374">
+            <states>
+              <State name="RuleSetResult" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RequiresValidations" id="-1565809184">
+            <states>
+              <State name="RuleSetResult" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RuleUpdate" id="-963416559">
+            <states>
+              <State name="AskingRuleUpdate" id="0" />
+              <State name="Granted" id="2" />
+              <State name="Denied" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RuleSetUpdate" id="1569090575">
+            <states>
+              <State name="AskingRuleSetUpdate" id="0" />
+              <State name="Granted" id="2" />
+              <State name="Denied" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RightRequest" id="-396123720">
+            <states>
+              <State name="RightRequest" id="0" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+      <component name="UserManagement" id="1183299321">
+        <events>
+          <event name="PerseusLib.Common.Constants.LoadOrdersProcessEnum" id="0" />
+          <event name="PerseusLib.Common.Constants.OpenUserSessionProcess" id="1" />
+          <event name="PerseusLib.Common.DataStructures.LimitedSizeDictionary`2" id="2" />
+          <event name="PerseusLib.Common.DateTimeProvider" id="3" />
+          <event name="PerseusLib.Common.DecimalParts" id="4" />
+          <event name="PerseusLib.Common.Dto.Referential.AutoCallInstrument" id="5" />
+          <event name="PerseusLib.Common.Dto.Referential.Instrument" id="6" />
+          <event name="PerseusLib.Common.Dto.Referential.InstrumentConverter" id="7" />
+          <event name="PerseusLib.Common.Dto.Referential.MaturityHelper" id="8" />
+          <event name="PerseusLib.Common.Dto.Referential.ProductType" id="9" />
+          <event name="PerseusLib.Common.Dto.Referential.RangeAccrualInstrument" id="10" />
+          <event name="PerseusLib.Common.Dto.ReportDefinition" id="11" />
+          <event name="PerseusLib.Common.Dto.UserManagement.ProfileRightInfo" id="12" />
+          <event name="PerseusLib.Common.Dto.UserManagement.RestoreSession" id="13" />
+          <event name="PerseusLib.Common.Dto.UserManagement.RightInfo" id="14" />
+          <event name="PerseusLib.Common.Dto.UserManagement.RightSource" id="15" />
+          <event name="PerseusLib.Common.Dto.UserManagement.Snapshot" id="16" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserInfo" id="17" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserProfileInfo" id="18" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserRightInfo" id="19" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserRightTimedInfo" id="20" />
+          <event name="PerseusLib.Common.Dto.UserManagement.UserSessionStatus" id="21" />
+          <event name="PerseusLib.Common.Helpers.IdHelper" id="22" />
+          <event name="PerseusLib.Common.IDateTimeProvider" id="23" />
+          <event name="PerseusLib.Common.MathHelper" id="24" />
+          <event name="PerseusLib.Common.PasswordHelper" id="25" />
+          <event name="PerseusLib.Common.SharedInstanceHolder`2" id="26" />
+          <event name="PerseusLib.Common.TimeZoneHelper" id="27" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="28" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="29" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="30" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="31" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="32" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="33" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="34" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="35" />
+          <event name="XComponent.UserManagement.UserObject.AcceptEula" id="36" />
+          <event name="XComponent.UserManagement.UserObject.AccessDenied" id="37" />
+          <event name="XComponent.UserManagement.UserObject.AccessGranted" id="38" />
+          <event name="XComponent.UserManagement.UserObject.BackendInfo" id="39" />
+          <event name="XComponent.UserManagement.UserObject.CachedPermissionChecker" id="40" />
+          <event name="XComponent.UserManagement.UserObject.CachedPermissionCheckerInternal" id="41" />
+          <event name="XComponent.UserManagement.UserObject.ChangePassword" id="42" />
+          <event name="XComponent.UserManagement.UserObject.ChangingPassword" id="43" />
+          <event name="XComponent.UserManagement.UserObject.CheckedRightRequest" id="44" />
+          <event name="XComponent.UserManagement.UserObject.ClientSessionHeartBeat" id="45" />
+          <event name="XComponent.UserManagement.UserObject.CloseSession" id="46" />
+          <event name="XComponent.UserManagement.UserObject.CustomRightRequest" id="47" />
+          <event name="XComponent.UserManagement.UserObject.CustomRightValue" id="48" />
+          <event name="XComponent.UserManagement.UserObject.Decline" id="49" />
+          <event name="XComponent.UserManagement.UserObject.DoManagingAction" id="50" />
+          <event name="XComponent.UserManagement.UserObject.Done" id="51" />
+          <event name="XComponent.UserManagement.UserObject.Error" id="52" />
+          <event name="XComponent.UserManagement.UserObject.Eula" id="53" />
+          <event name="XComponent.UserManagement.UserObject.EulaValidationRequired" id="54" />
+          <event name="XComponent.UserManagement.UserObject.GetBackendInfo" id="55" />
+          <event name="XComponent.UserManagement.UserObject.GetPermissionsSnapshot" id="56" />
+          <event name="XComponent.UserManagement.UserObject.GetRight" id="57" />
+          <event name="XComponent.UserManagement.UserObject.GetRightInternal" id="58" />
+          <event name="XComponent.UserManagement.UserObject.GetSession" id="59" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionDescriptor" id="60" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionInternal" id="61" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionRequest" id="62" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionRequestByDbId" id="63" />
+          <event name="XComponent.UserManagement.UserObject.GetSessionsToRecoverSnapshot" id="64" />
+          <event name="XComponent.UserManagement.UserObject.GetUserRightHistory" id="65" />
+          <event name="XComponent.UserManagement.UserObject.InitDone" id="66" />
+          <event name="XComponent.UserManagement.UserObject.InitializeGetRight" id="67" />
+          <event name="XComponent.UserManagement.UserObject.InnerCloseSession" id="68" />
+          <event name="XComponent.UserManagement.UserObject.InternalSessionReply" id="69" />
+          <event name="XComponent.UserManagement.UserObject.InternalSessionRequest" id="70" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActionData" id="71" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActionMember" id="72" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ActionTarget" id="73" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ActionType" id="74" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.CreateProfileAction" id="75" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.CreateRightAction" id="76" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.CreateUserAction" id="77" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.DeleteRightAction" id="78" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.EditRightAction" id="79" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.EditUserAction" id="80" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.EditUserProfileAction" id="81" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ManagingAction" id="82" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.ResetEulaAction" id="83" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.SetPasswordAction" id="84" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.SetRightAction" id="85" />
+          <event name="XComponent.UserManagement.UserObject.ManagingActions.SystemRights" id="86" />
+          <event name="XComponent.UserManagement.UserObject.OpenSession" id="87" />
+          <event name="XComponent.UserManagement.UserObject.PermissionsSnapshot" id="88" />
+          <event name="XComponent.UserManagement.UserObject.PermissionsSnapshotData" id="89" />
+          <event name="XComponent.UserManagement.UserObject.Ping" id="90" />
+          <event name="XComponent.UserManagement.UserObject.PublishEula" id="91" />
+          <event name="XComponent.UserManagement.UserObject.RefreshPermissions" id="92" />
+          <event name="XComponent.UserManagement.UserObject.RightDenied" id="93" />
+          <event name="XComponent.UserManagement.UserObject.RightGranted" id="94" />
+          <event name="XComponent.UserManagement.UserObject.RightRequest" id="95" />
+          <event name="XComponent.UserManagement.UserObject.RightRequestDescriptor" id="96" />
+          <event name="XComponent.UserManagement.UserObject.SessionData" id="97" />
+          <event name="XComponent.UserManagement.UserObject.SessionExists" id="98" />
+          <event name="XComponent.UserManagement.UserObject.SessionId" id="99" />
+          <event name="XComponent.UserManagement.UserObject.SessionStatus" id="100" />
+          <event name="XComponent.UserManagement.UserObject.SessionsToRecoverSnapshot" id="101" />
+          <event name="XComponent.UserManagement.UserObject.SessionUpdated" id="102" />
+          <event name="XComponent.UserManagement.UserObject.UserManagement" id="103" />
+          <event name="XComponent.UserManagement.UserObject.UserRightHistory" id="104" />
+          <event name="XComponent.UserManagement.UserObject.UserRightHistoryData" id="105" />
+          <event name="XComponent.UserManagement.UserObject.UserSessionInfo" id="106" />
+          <event name="XComponent.UserManagement.UserObject.Validated" id="107" />
+          <event name="XComponent.UserManagement.UserObject.WrongPassword" id="108" />
+        </events>
+        <stateMachines>
+          <stateMachine name="UserManagement" id="1183299321">
+            <states>
+              <State name="EntryPoint" id="0" />
+              <State name="UserManagementUp" id="3" />
+              <State name="UserManagementDown" id="2" />
+              <State name="Initializing" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="UserSession" id="-1111289325">
+            <states>
+              <State name="Checking" id="1" />
+              <State name="SessionUp" id="6" />
+              <State name="AccessDenied" id="0" />
+              <State name="SessionDown" id="5" />
+              <State name="SessionDisposed" id="4" />
+              <State name="SessionAlreadyOppenned" id="3" />
+              <State name="EulaValidation" id="2" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ManagingAction" id="1246482563">
+            <states>
+              <State name="Checking" id="3" />
+              <State name="ActionDenied" id="0" />
+              <State name="Executing" id="5" />
+              <State name="Done" id="4" />
+              <State name="ActionError" id="2" />
+              <State name="ActionDeniedFinal" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="GetRight" id="1076758116">
+            <states>
+              <State name="Analyzing" id="0" />
+              <State name="Denied" id="1" />
+              <State name="Granted" id="2" />
+            </states>
+          </stateMachine>
+          <stateMachine name="RightRequest" id="-396123720">
+            <states>
+              <State name="RigthRequest" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="CachedPermissionChecker" id="1564991941">
+            <states>
+              <State name="Checking" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="PermissionsSnapshot" id="-1835302415">
+            <states>
+              <State name="Checking" id="0" />
+              <State name="Denied" id="1" />
+              <State name="Snapshot" id="2" />
+            </states>
+          </stateMachine>
+          <stateMachine name="GetCustomRight" id="-1586577674">
+            <states>
+              <State name="CustomRightValue" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ChangePassword" id="-1857865987">
+            <states>
+              <State name="Checking" id="0" />
+              <State name="Done" id="1" />
+              <State name="Refused" id="2" />
+            </states>
+          </stateMachine>
+          <stateMachine name="SessionIdDown" id="628920614">
+            <states>
+              <State name="Publish" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="SessionUpdated" id="-1613226847">
+            <states>
+              <State name="Publish" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="SessionsToRecoverSnapshot" id="1438437248">
+            <states>
+              <State name="SessionsToRecoverSnapshot" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="UserRightHistory" id="139382177">
+            <states>
+              <State name="Checking" id="0" />
+              <State name="History" id="2" />
+              <State name="Denied" id="1" />
+            </states>
+          </stateMachine>
+          <stateMachine name="GetSession" id="-1658988079">
+            <states>
+              <State name="CheckingRights" id="1" />
+              <State name="Published" id="2" />
+              <State name="AccessDenied" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="BackendInfo" id="-1552310695">
+            <states>
+              <State name="Publish" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="Eula" id="-1900697607">
+            <states>
+              <State name="Eula" id="0" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+    </components>
+  </codesConverter>
+</deployment>

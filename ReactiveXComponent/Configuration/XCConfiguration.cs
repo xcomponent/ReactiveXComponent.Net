@@ -27,51 +27,27 @@ namespace ReactiveXComponent.Configuration
 
         public string GetConnectionType()
         {
-            try
-            {
-                return _parser.GetConnectionType();
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new NullReferenceException("Connection Type not found", ex);
-            }            
+            return _parser.GetConnectionType();   
+        }
+
+        public string GetSerializationType()
+        {
+            return _parser.GetSerializationType();
         }
 
         public long GetStateMachineCode(string component, string stateMachine)
         {
-            try
-            {
-                return _parser.GetStateMachineCode(component, stateMachine);
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new NullReferenceException("State Machine code not found", ex);
-            }
-            
+            return _parser.GetStateMachineCode(component, stateMachine);
         }
 
         public long GetComponentCode(string component)
         {
-            try
-            {
-                return _parser.GetComponentCode(component);
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new NullReferenceException("Component code not found", ex);
-            }
+            return _parser.GetComponentCode(component);
         }
 
         public int GetPublisherEventCode(string evnt)
         {
-            try
-            {
-                return _parser.GetPublisherEventCode(evnt);
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new NullReferenceException("Event code not found", ex);
-            }
+            return _parser.GetPublisherEventCode(evnt);
         }
 
         public BusDetails GetBusDetails()
@@ -88,26 +64,12 @@ namespace ReactiveXComponent.Configuration
 
         public string GetPublisherTopic(string component, string stateMachine, int eventCode)
         {
-            try
-            {
-                return _parser.GetPublisherTopic(component, stateMachine, eventCode);
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new NullReferenceException("Publisher topic not found", ex);
-            }   
+            return _parser.GetPublisherTopic(component, stateMachine, eventCode);
         }
 
         public string GetSubscriberTopic(string component, string stateMachine)
         {
-            try
-            {
-                return _parser.GetSubscriberTopic(component, stateMachine);
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new NullReferenceException("Subscriber topic not found", ex);
-            }
+            return _parser.GetSubscriberTopic(component, stateMachine);
         }
     }
 }

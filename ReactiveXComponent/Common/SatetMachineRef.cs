@@ -1,6 +1,6 @@
 namespace ReactiveXComponent.Common
 {
-    public class Header
+    public class SatetMachineRef
     {
         public long StateMachineCode { get; set; }
 
@@ -14,12 +14,12 @@ namespace ReactiveXComponent.Common
 
         public override bool Equals(object obj)
         {
-            var toCompareWith = obj as Header;
+            var toCompareWith = obj as SatetMachineRef;
         
             return toCompareWith != null && Equals(toCompareWith);
         }
 
-        private bool Equals(Header other)
+        private bool Equals(SatetMachineRef other)
         {
             return StateMachineCode == other.StateMachineCode && 
                    ComponentCode == other.ComponentCode &&

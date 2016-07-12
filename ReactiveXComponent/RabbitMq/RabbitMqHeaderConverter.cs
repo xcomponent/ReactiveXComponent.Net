@@ -8,7 +8,7 @@ namespace ReactiveXComponent.RabbitMq
 
     public static class RabbitMqHeaderConverter
     {
-        public static Dictionary<string, object> ConvertHeader(Header header)
+        public static Dictionary<string, object> ConvertHeader(SatetMachineRef satetMachineRef)
         {
             const int defaultValue = -1;
             long[] arrayDefaultValue = {-1};
@@ -18,21 +18,21 @@ namespace ReactiveXComponent.RabbitMq
                            {
                                {HeaderElement.StateCode, defaultValue},
                                {HeaderElement.StateMachineId, defaultValue},
-                               {HeaderElement.StateMachineCode, header?.StateMachineCode ?? defaultValue},
-                               {HeaderElement.ComponentCode, header?.ComponentCode ?? defaultValue},
-                               {HeaderElement.EventType, header?.EventCode ?? defaultValue},     
+                               {HeaderElement.StateMachineCode, satetMachineRef?.StateMachineCode ?? defaultValue},
+                               {HeaderElement.ComponentCode, satetMachineRef?.ComponentCode ?? defaultValue},
+                               {HeaderElement.EventType, satetMachineRef?.EventCode ?? defaultValue},     
                                {HeaderElement.Probes, arrayDefaultValue },
                                {HeaderElement.MessageHashCode, defaultValue},
                                {HeaderElement.IsContainsHashCode, false},
                                {HeaderElement.IncomingEventType, 0},
                                {HeaderElement.AgentId, defaultValue },
-                               {HeaderElement.PublishTopic, header?.PublishTopic != null ? encoding.GetBytes(header.PublishTopic) : encoding.GetBytes(string.Empty) },
-                               {HeaderElement.MessageType, header?.MessageType != null ? encoding.GetBytes(header.MessageType) : encoding.GetBytes(string.Empty)}
+                               {HeaderElement.PublishTopic, satetMachineRef?.PublishTopic != null ? encoding.GetBytes(satetMachineRef.PublishTopic) : encoding.GetBytes(string.Empty) },
+                               {HeaderElement.MessageType, satetMachineRef?.MessageType != null ? encoding.GetBytes(satetMachineRef.MessageType) : encoding.GetBytes(string.Empty)}
                            };
             return dico;
         }
 
-        public static Header ConvertHeader(IDictionary<string,object> header)
+        public static SatetMachineRef ConvertHeader(IDictionary<string,object> header)
         {
             var encoding = new UnicodeEncoding();
             var stateMachineCode = -1;
@@ -52,7 +52,7 @@ namespace ReactiveXComponent.RabbitMq
             if (header.ContainsKey(HeaderElement.MessageType))
                 messageType = encoding.GetString(header[HeaderElement.MessageType] as byte[]);
 
-            return new Header
+            return new SatetMachineRef
             {
                 StateMachineCode = stateMachineCode,
                 ComponentCode = componentCode,

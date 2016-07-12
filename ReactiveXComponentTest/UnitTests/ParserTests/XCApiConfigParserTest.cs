@@ -119,6 +119,18 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
             Check.That(topic).IsEqualTo(expectedTopic);
         }
 
+        [Test]
+        public void GetSerializationType_ShouldReturnSerializationType_Test()
+        {
+            _xcApiConfigParser = new XCApiConfigParser();
+            _xcApiConfigParser.Parse(_xcApiStream);
+
+            var expectedSerialization = "Binary";
+            var serialization = _xcApiConfigParser.GetSerializationType();
+
+            Check.That(serialization).IsEqualTo(expectedSerialization);
+        }
+
         private void Dispose(bool disposing)
         {
             if (_disposed)

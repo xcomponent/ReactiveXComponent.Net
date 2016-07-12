@@ -1,24 +1,16 @@
 ﻿namespace ReactiveXComponent.RabbitMq
 {
-    internal class SubscriberKey
+    public class SubscriberKey
     {
-        private readonly long _componentCode;
-        private readonly long _stateMachineCode;
+        private long ComponentCode { get; }
 
-        public long ComponentCode
-        {
-            get { return _componentCode; }
-        }
+        private long StateMachineCode { get; }
 
-        public long StateMachineCode
-        {
-            get { return _stateMachineCode; }
-        }
 
         public SubscriberKey(long componentCode, long stateMachineCode)
         {
-            _componentCode = componentCode;
-            _stateMachineCode = stateMachineCode;
+            ComponentCode = componentCode;
+            StateMachineCode = stateMachineCode;
         }
 
         protected bool Equals(SubscriberKey other)

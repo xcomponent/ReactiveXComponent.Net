@@ -143,6 +143,12 @@ namespace ReactiveXComponent.Parser
             return connection?.LocalName;
         }
 
+        public string GetSerializationType()
+        {
+            XmlNode serialisation = _xcApiDescription.GetSerializationNode()?.Item(0)?.FirstChild;
+            return serialisation?.InnerText;
+        }
+
         public BusDetails GetBusDetails()
         {
             BusDetails busDetails = null;

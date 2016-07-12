@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using RabbitMQ.Client;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;

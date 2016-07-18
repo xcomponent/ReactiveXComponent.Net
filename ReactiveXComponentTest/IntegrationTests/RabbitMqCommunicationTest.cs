@@ -40,7 +40,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                 Port = 5672,
                 Username = "guest"
             };
-            _serialization = "Json";
+            _serialization = "Binary";
             var random = new Random();
             _exchangeName = random.Next(100).ToString();
             _routinKey = "routinKey: "+random.Next(100);
@@ -163,31 +163,32 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TestCase(Visibility.Public)]
         public void Subscribe_GivenAcomponentAStateMachineAndACallback_ShouldCreateSubscriptionAndReceiveMessageOnCallback_Test(Visibility visibility)
         {
-            var subscirber = CreateSubscriber(visibility);
-            const string component = "Component";
-            const string stateMachine = "stateMachine";
-
-            subscirber.Subscribe(component, stateMachine, MessageReceivedUpdated);
-
-            PublishMessage(visibility);
-
-            string label = null;
-            const int timeoutReceive = 100000;
-            var lockEvent = new AutoResetEvent(false);
-            
-            MessageReceived += instance =>
+            using (var subscirber = CreateSubscriber(visibility))
             {
-                label = instance;
-                lockEvent.Set();
-            };
-            
-            if (!lockEvent.WaitOne(timeoutReceive))
-            {
-                throw new Exception("Message not received");
-            }
+                const string component = "Component";
+                const string stateMachine = "stateMachine";
 
-            Check.That(label).IsNotEmpty().And.Contains("J'envoie le message n° ").And.Contains("sur RabbitMq");
-                
+                subscirber.Subscribe(component, stateMachine, MessageReceivedUpdated);
+
+                PublishMessage(visibility);
+
+                string label = null;
+                const int timeoutReceive = 10000;
+                var lockEvent = new AutoResetEvent(false);
+
+                MessageReceived += instance =>
+                {
+                    label = instance;
+                    lockEvent.Set();
+                };
+
+                if (!lockEvent.WaitOne(timeoutReceive))
+                {
+                    throw new Exception("Message not received");
+                }
+
+                Check.That(label).IsNotEmpty().And.Contains("J'envoie le message n° ").And.Contains("sur RabbitMq");
+            }      
         }
 
         private void MessageReceivedUpdated(MessageEventArgs busEvent)

@@ -18,7 +18,7 @@ namespace ReactiveXComponent.Serializer
             }
             catch (Exception ex)
             {
-                throw new RXCSerializationException(ex.Message, ex);
+                throw new XCSerializationException(ex.Message, ex);
             }
         }
 

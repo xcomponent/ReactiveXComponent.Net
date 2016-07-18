@@ -1,18 +1,18 @@
 ﻿using ReactiveXComponent.Common;
 
-namespace ReactiveXComponent.RabbitMQ
+namespace ReactiveXComponent.RabbitMq
 {
     using System;
 
     public class MessageEventArgs : EventArgs
     {        
-        public MessageEventArgs(SatetMachineRef satetMachineRef, object messageReceived)
+        public MessageEventArgs(StateMachineRef stateMachineRef, object messageReceived)
         {
-            SatetMachineRef = satetMachineRef;
+            StateMachineRef = stateMachineRef;
             MessageReceived = messageReceived;            
         }
 
-        public SatetMachineRef SatetMachineRef { get; }
+        public StateMachineRef StateMachineRef { get; }
 
         public object MessageReceived { get; }
     }

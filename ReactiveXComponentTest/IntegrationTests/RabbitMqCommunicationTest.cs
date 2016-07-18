@@ -10,7 +10,6 @@ using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.RabbitMq;
-using ReactiveXComponent.RabbitMQ;
 using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponentTest.IntegrationTests
@@ -61,8 +60,8 @@ namespace ReactiveXComponentTest.IntegrationTests
 
             PublishMessage(Visibility.Public);
 
-            string routingKey = string.Empty;
-            string exchangeName = string.Empty;
+            var routingKey = string.Empty;
+            var exchangeName = string.Empty;
             const int timeoutReceive = 10000;
             var lockEvent = new AutoResetEvent(false);
             consumer.Received += (model, ea) =>
@@ -86,7 +85,7 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TestCase(Visibility.Public)]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectHeader_Test(Visibility visibility)
         {
-            var expectedHeader = new SatetMachineRef
+            var expectedHeader = new Header()
             {
                 StateMachineCode = 0,
                 ComponentCode = Convert.ToInt32(_exchangeName),
@@ -95,6 +94,10 @@ namespace ReactiveXComponentTest.IntegrationTests
                 PublishTopic = visibility == Visibility.Private? "PrivateCommincationIdentifier" : string.Empty
             };
 
+            if (visibility == Visibility.Private)
+            {
+                _routinKey = "PrivateCommincationIdentifier";
+            }
             var consumer = CreateConsumer();
 
             PublishMessage(visibility);
@@ -113,9 +116,9 @@ namespace ReactiveXComponentTest.IntegrationTests
                 throw new Exception("Message not received");
             }
             var headerRepository = basicProperties?.Headers;
-            var header = RabbitMqHeaderConverter.ConvertHeader(headerRepository);
+            var stateMachineRef = RabbitMqHeaderConverter.ConvertStateMachineRef(headerRepository);
 
-            Check.That(header).IsEqualTo(expectedHeader);
+            Check.That(ConatainsHeader(expectedHeader,stateMachineRef)).IsTrue();
         }
 
         [Test]
@@ -158,7 +161,7 @@ namespace ReactiveXComponentTest.IntegrationTests
 
         [TestCase(Visibility.Private)]
         [TestCase(Visibility.Public)]
-        public void AddCallback_GivenAcomponentAStateMachineAndACallback_ShouldCreateSubscriptionAndReceiveMessageOnCallback_Test(Visibility visibility)
+        public void Subscribe_GivenAcomponentAStateMachineAndACallback_ShouldCreateSubscriptionAndReceiveMessageOnCallback_Test(Visibility visibility)
         {
             var subscirber = CreateSubscriber(visibility);
             const string component = "Component";
@@ -197,7 +200,7 @@ namespace ReactiveXComponentTest.IntegrationTests
 
         private IXCSession CreateSession(Visibility visibility)
         {
-            var privateCommunicationIdentifier = visibility == Visibility.Private ? "PrivateCommincationIdentifier" : string.Empty;
+            var privateCommunicationIdentifier = visibility == Visibility.Private ? "PrivateCommincationIdentifier" : null;
             var rabbitMqConnection = new RabbitMqConnection(_xcConfiguration, privateCommunicationIdentifier);
             return rabbitMqConnection.CreateSession();
         }
@@ -239,6 +242,15 @@ namespace ReactiveXComponentTest.IntegrationTests
             var consumer = new EventingBasicConsumer(_channel);
 
             return consumer;
+        }
+
+        private bool ConatainsHeader(Header header, StateMachineRef stateMachineRef)
+        {
+            return stateMachineRef.StateMachineCode == header.StateMachineCode && 
+                    stateMachineRef.ComponentCode == header.ComponentCode && 
+                    stateMachineRef.EventCode == header.EventCode && 
+                    stateMachineRef.MessageType == header.MessageType && 
+                    stateMachineRef.PublishTopic == header.PublishTopic;
         }
 
         [TearDown]

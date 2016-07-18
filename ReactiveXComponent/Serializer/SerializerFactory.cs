@@ -1,5 +1,3 @@
-using System.Runtime.Serialization;
-
 namespace ReactiveXComponent.Serializer
 {
     public class SerializerFactory

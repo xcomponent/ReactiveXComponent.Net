@@ -29,7 +29,7 @@ namespace ReactiveXComponent.RabbitMq
                 case XCApiTags.Json:
                     return new SerializerFactory(SerializationType.Json);
                 default:
-                    throw new RXCSerializationException("SerializerFactory init failed");
+                    throw new XCSerializationException("SerializerFactory init failed");
             }
         }
 

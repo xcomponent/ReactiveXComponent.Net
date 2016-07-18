@@ -12,13 +12,12 @@ namespace ReactiveXComponent.RabbitMq
     {
         private bool _disposed;
         private readonly IXCConfiguration _configuration;
-        private SatetMachineRef _satetMachineRef;
         private IModel _publisherChannel;
         private readonly string _exchangeName;
         private readonly string _component;
         private readonly string _privateCommunicationIdentifier;
 
-        private readonly SerializerFactory _serializerFactory;
+        private readonly ISerializer _serializer;
 
         public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, SerializerFactory serializerFactory, string privateCommunicationIdentifier = null)
         {
@@ -27,7 +26,7 @@ namespace ReactiveXComponent.RabbitMq
             _exchangeName = configuration?.GetComponentCode(component).ToString();
             _configuration = configuration;
             CreatePublisherChannel(connection);
-            _serializerFactory = serializerFactory;
+            _serializer = serializerFactory?.CreateSerializer();
         }
 
         private void CreatePublisherChannel(IConnection connection)
@@ -39,43 +38,39 @@ namespace ReactiveXComponent.RabbitMq
 
         public void SendEvent(string stateMachine, object message, Visibility visibility)
         {
-            InitHeader(_component, stateMachine, message, visibility);
-
-            var routingKey = _configuration.GetPublisherTopic(_component, stateMachine, (int)_satetMachineRef?.EventCode);
+            var header = CreateHeader(_component, stateMachine, message, visibility);
+            if (header == null) return;
+            var routingKey = !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier:
+                            _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode);
             var prop = _publisherChannel.CreateBasicProperties();
-            prop.Headers = RabbitMqHeaderConverter.ConvertHeader(_satetMachineRef);
+            prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
             message = message ?? 0;
 
             Send(message, routingKey, prop);
         }
 
-        private void InitHeader(string component, string stateMachine, object message, Visibility visibility)
+        private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)
         {
             var messageType = message?.GetType().ToString() ?? string.Empty;
-            try
+            if (_configuration == null) return null;
+            var header = new Header
             {
-                _satetMachineRef = new SatetMachineRef
-                {
-                    StateMachineCode = _configuration.GetStateMachineCode(component, stateMachine),
-                    ComponentCode = _configuration.GetComponentCode(component),
-                    MessageType = messageType,
-                    EventCode = _configuration.GetPublisherEventCode(messageType),
-                    PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty
-                };
-            }
-            catch (NullReferenceException e)
-            {
-                throw new NullReferenceException("Failed to init SatetMachineRef", e);  
-            }
+                StateMachineCode = _configuration.GetStateMachineCode(component, stateMachine),
+                ComponentCode = _configuration.GetComponentCode(component),
+                MessageType = messageType,
+                EventCode = _configuration.GetPublisherEventCode(messageType),
+                PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty
+            };
+            return header;
         }
 
         private void Send(object message, string routingKey, IBasicProperties properties)
         {
-            var serializer = _serializerFactory.CreateSerializer();
+            
             byte[] messageBytes;
             using (var stream = new MemoryStream())
             {
-                serializer.Serialize(stream, message);
+                _serializer.Serialize(stream, message);
                 messageBytes = stream.ToArray();
             }
 

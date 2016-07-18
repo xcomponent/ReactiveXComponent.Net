@@ -1,5 +1,4 @@
 using System;
-using RabbitMQ.Client;
 using ReactiveXComponent.Common;
 
 namespace ReactiveXComponent.Connection

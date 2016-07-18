@@ -85,9 +85,6 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="MonitoringApi.xcApi">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="TestApi.xcApi">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

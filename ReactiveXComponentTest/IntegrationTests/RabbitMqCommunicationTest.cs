@@ -172,7 +172,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             PublishMessage(visibility);
 
             string label = null;
-            const int timeoutReceive = 10000;
+            const int timeoutReceive = 100000;
             var lockEvent = new AutoResetEvent(false);
             
             MessageReceived += instance =>

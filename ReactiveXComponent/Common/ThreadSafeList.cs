@@ -43,7 +43,7 @@ namespace ReactiveXComponent.Common
         {
             lock (_lock)
             {
-                return _list != null && _list.Contains(item);
+                return _list.Contains(item);
             }
         }
 
@@ -65,7 +65,7 @@ namespace ReactiveXComponent.Common
 
         public int Count => _list.Count;
 
-        public bool IsReadOnly { get; }
+        public bool IsReadOnly => false;
 
         public int IndexOf(T item)
         {
@@ -88,6 +88,14 @@ namespace ReactiveXComponent.Common
             lock (_lock)
             {
                 _list.RemoveAt(index);
+            }
+        }
+
+        public bool TryRemove(T item)
+        {
+            lock (_lock)
+            {
+                return _list.Contains(item) && _list.Remove(item);
             }
         }
 

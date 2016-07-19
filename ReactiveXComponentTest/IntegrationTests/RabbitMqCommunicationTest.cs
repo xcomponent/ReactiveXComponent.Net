@@ -64,6 +64,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             var exchangeName = string.Empty;
             const int timeoutReceive = 10000;
             var lockEvent = new AutoResetEvent(false);
+            
             consumer.Received += (model, ea) =>
             {
                 routingKey = ea.RoutingKey;
@@ -71,18 +72,17 @@ namespace ReactiveXComponentTest.IntegrationTests
                 lockEvent.Set();
             };
             _channel?.BasicConsume(_queueName, true, consumer);
-            
-            if (!lockEvent.WaitOne(timeoutReceive))
-            {
-                throw new Exception("Message not received");
-            }
 
+            var messageReceived = lockEvent.WaitOne(timeoutReceive);
+            
+            Check.That(messageReceived).IsTrue();
             Check.That(routingKey).IsEqualTo(_routinKey);
             Check.That(exchangeName).IsEqualTo(_exchangeName);
         }
 
         [TestCase(Visibility.Private)]
         [TestCase(Visibility.Public)]
+         
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectHeader_Test(Visibility visibility)
         {
             var expectedHeader = new Header()
@@ -111,30 +111,28 @@ namespace ReactiveXComponentTest.IntegrationTests
                 lockEvent.Set();
             };
             _channel?.BasicConsume(_queueName, true, consumer);
-            if (!lockEvent.WaitOne(timeoutReceive))
-            {
-                throw new Exception("Message not received");
-            }
+
+            var messageReceived = lockEvent.WaitOne(timeoutReceive);
             var headerRepository = basicProperties?.Headers;
             var stateMachineRef = RabbitMqHeaderConverter.ConvertStateMachineRef(headerRepository);
 
+            Check.That(messageReceived).IsTrue();
             Check.That(ConatainsHeader(expectedHeader,stateMachineRef)).IsTrue();
         }
 
         [Test]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMq_Test()
         {
-            SerializerFactory serializerFactory = null;
+            ISerializer serializer = null;
             switch (_serialization)
             {
                 case XCApiTags.Binary:
-                    serializerFactory = new SerializerFactory(SerializationType.Binary);
+                    serializer = SerializerFactory.CreateSerializer(SerializationType.Binary);
                     break;
                 case XCApiTags.Json:
-                    serializerFactory = new SerializerFactory(SerializationType.Json);
+                    serializer= SerializerFactory.CreateSerializer(SerializationType.Json);
                     break;
             }
-            var serializer = serializerFactory?.CreateSerializer();
 
             var consumer = CreateConsumer();
 
@@ -150,13 +148,12 @@ namespace ReactiveXComponentTest.IntegrationTests
                 lockEvent.Set();
             };
             _channel?.BasicConsume(_queueName, true, consumer);
-            if (!lockEvent.WaitOne(timeoutReceive))
-            {
-                throw new Exception("Message not received");
-            }
-            var contenu = serializer?.Deserialize(msg);
 
-            Check.That(contenu).IsEqualTo(_message);
+            var messageReceived = lockEvent.WaitOne(timeoutReceive);
+            var receivedMessage = serializer?.Deserialize(msg);
+
+            Check.That(messageReceived).IsTrue();
+            Check.That(receivedMessage).IsEqualTo(_message);
         }
 
         [TestCase(Visibility.Private)]
@@ -175,18 +172,15 @@ namespace ReactiveXComponentTest.IntegrationTests
                 string label = null;
                 const int timeoutReceive = 10000;
                 var lockEvent = new AutoResetEvent(false);
-
                 MessageReceived += instance =>
                 {
                     label = instance;
                     lockEvent.Set();
                 };
 
-                if (!lockEvent.WaitOne(timeoutReceive))
-                {
-                    throw new Exception("Message not received");
-                }
+                var messageReceived = lockEvent.WaitOne(timeoutReceive);
 
+                Check.That(messageReceived).IsTrue();
                 Check.That(label).IsNotEmpty().And.Contains("J'envoie le message n° ").And.Contains("sur RabbitMq");
             }      
         }
@@ -245,7 +239,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             return consumer;
         }
 
-        private bool ConatainsHeader(Header header, StateMachineRef stateMachineRef)
+        private bool ConatainsHeader(Header header, StateMachineRefHeader stateMachineRef)
         {
             return stateMachineRef.StateMachineCode == header.StateMachineCode && 
                     stateMachineRef.ComponentCode == header.ComponentCode && 

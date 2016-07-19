@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.IO;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Exceptions;
 using System.Reactive.Linq;
+using RabbitMQ.Client.Exceptions;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.Configuration;
@@ -20,21 +20,21 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _privateCommunicationIdentifier;
 
         private readonly ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos> _subscribers;
-        private readonly ConcurrentDictionary<SubscriberKey, ThreadSafeList<Action<MessageEventArgs>>> _listenerToUpdateBySubscriberKeyRepo;
+        private readonly ConcurrentDictionary<SubscriberKey, ThreadSafeList<Action<MessageEventArgs>>> _listenerBySubscriberKeyRepo;
 
         public event EventHandler<MessageEventArgs> MessageReceived;
         private IObservable<MessageEventArgs> _xcObservable;
 
         private readonly ISerializer _serializer;
 
-        public RabbitMqSubscriber(IXCConfiguration xcConfiguration, IConnection connection, SerializerFactory serializerFactory, string privateCommunicationIdentifier = null)
+        public RabbitMqSubscriber(IXCConfiguration xcConfiguration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = xcConfiguration;
             _connection = connection;
             _subscribers = new ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos>();
-            _listenerToUpdateBySubscriberKeyRepo = new ConcurrentDictionary<SubscriberKey, ThreadSafeList<Action<MessageEventArgs>>>();
+            _listenerBySubscriberKeyRepo = new ConcurrentDictionary<SubscriberKey, ThreadSafeList<Action<MessageEventArgs>>>();
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
-            _serializer = serializerFactory?.CreateSerializer();
+            _serializer = serializer;
             InitObservableCollection();
         }
 
@@ -51,11 +51,11 @@ namespace ReactiveXComponent.RabbitMq
             if (stateMachineListener == null) return;
             
             var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(component), _xcConfiguration.GetStateMachineCode(component, stateMachine));
-            AddToListenerToUpdateBySubscriberKeyRepository(subscriberKey, stateMachineListener);
+            AddListenerToRepository(subscriberKey, stateMachineListener);
 
             _xcObservable = _xcObservable
-                .Where(k => k.StateMachineRef.ComponentCode == _xcConfiguration.GetComponentCode(component) &&
-                            k.StateMachineRef.StateMachineCode == _xcConfiguration.GetStateMachineCode(component, stateMachine));
+                .Where(k => k.StateMachineRefHeader.ComponentCode == _xcConfiguration.GetComponentCode(component) &&
+                            k.StateMachineRefHeader.StateMachineCode == _xcConfiguration.GetStateMachineCode(component, stateMachine));
 
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
             {
@@ -72,10 +72,10 @@ namespace ReactiveXComponent.RabbitMq
         {
             _xcObservable.Subscribe(args =>
             {
-                var subscribreKey = new SubscriberKey(args.StateMachineRef.ComponentCode,
-                    args.StateMachineRef.StateMachineCode);
+                var subscribreKey = new SubscriberKey(args.StateMachineRefHeader.ComponentCode,
+                    args.StateMachineRefHeader.StateMachineCode);
                 ThreadSafeList<Action<MessageEventArgs>> listenerToUpdateList;
-                if (!_listenerToUpdateBySubscriberKeyRepo.TryGetValue(subscribreKey, out listenerToUpdateList))
+                if (!_listenerBySubscriberKeyRepo.TryGetValue(subscribreKey, out listenerToUpdateList))
                     return;
                 foreach (var listener in listenerToUpdateList)
                 {
@@ -113,7 +113,7 @@ namespace ReactiveXComponent.RabbitMq
             }
             catch (OperationInterruptedException e)
             {
-                throw new Exception("Init Subscriber failed", e);
+                throw new XComponentException("Failed to init Subscriber:" + e.Message, e);
             }
         }
 
@@ -155,9 +155,9 @@ namespace ReactiveXComponent.RabbitMq
             }    
         }
 
-        private void AddToListenerToUpdateBySubscriberKeyRepository(SubscriberKey subscriberKey, Action<MessageEventArgs> stateMachineListener)
+        private void AddListenerToRepository(SubscriberKey subscriberKey, Action<MessageEventArgs> stateMachineListener)
         {
-            _listenerToUpdateBySubscriberKeyRepo.AddOrUpdate(subscriberKey, 
+            _listenerBySubscriberKeyRepo.AddOrUpdate(subscriberKey, 
             key => new ThreadSafeList<Action<MessageEventArgs>> { stateMachineListener },
             (key, oldValue) =>
             {
@@ -202,18 +202,17 @@ namespace ReactiveXComponent.RabbitMq
             var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(component), _xcConfiguration.GetStateMachineCode(component, stateMachine));
             DeleteSubscription(subscriberKey);
             ThreadSafeList<Action<MessageEventArgs>> listStateMachineListener;
-            _listenerToUpdateBySubscriberKeyRepo.TryGetValue(subscriberKey, out listStateMachineListener);
-            if (listStateMachineListener == null || !listStateMachineListener.Contains(stateMachineListener)) return;
-                listStateMachineListener.Remove(stateMachineListener);
+            _listenerBySubscriberKeyRepo.TryGetValue(subscriberKey, out listStateMachineListener);
+            listStateMachineListener?.TryRemove(stateMachineListener);
         }
 
         private void Close()
         {
-            foreach (var subscriberkey in _listenerToUpdateBySubscriberKeyRepo.Keys)
+            foreach (var subscriberkey in _listenerBySubscriberKeyRepo.Keys)
             {
                 DeleteSubscription(subscriberkey);
             }
-            _listenerToUpdateBySubscriberKeyRepo.Clear();
+            _listenerBySubscriberKeyRepo.Clear();
             _connection.Close();
         }
 

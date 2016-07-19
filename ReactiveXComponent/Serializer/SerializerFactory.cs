@@ -1,24 +1,17 @@
 namespace ReactiveXComponent.Serializer
 {
-    public class SerializerFactory
+    public static class SerializerFactory
     {
-        private readonly SerializationType _serializationType;
-
-        public SerializerFactory(SerializationType serializationType)
+        public static ISerializer CreateSerializer(SerializationType serializationType)
         {
-            _serializationType = serializationType;
-        }
-
-        public ISerializer CreateSerializer()
-        {
-            switch (_serializationType)
+            switch (serializationType)
             {
                 case SerializationType.Binary:
                     return new BinarySerializer();
                 case SerializationType.Json:
                     return new JsonSerializer();
                 default:
-                    throw new System.Runtime.Serialization.SerializationException("Unhandled serialization type " + _serializationType);
+                    throw new System.Runtime.Serialization.SerializationException("Unhandled serialization type " + serializationType);
             }
         }
     }

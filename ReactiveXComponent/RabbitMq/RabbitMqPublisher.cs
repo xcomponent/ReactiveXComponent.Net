@@ -19,14 +19,14 @@ namespace ReactiveXComponent.RabbitMq
 
         private readonly ISerializer _serializer;
 
-        public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, SerializerFactory serializerFactory, string privateCommunicationIdentifier = null)
+        public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
             _component = component;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _exchangeName = configuration?.GetComponentCode(component).ToString();
             _configuration = configuration;
             CreatePublisherChannel(connection);
-            _serializer = serializerFactory?.CreateSerializer();
+            _serializer = serializer;
         }
 
         private void CreatePublisherChannel(IConnection connection)
@@ -75,15 +75,15 @@ namespace ReactiveXComponent.RabbitMq
             }
 
             if (messageBytes == null)
-                throw new Exception("Message serialisation failed");
+                throw new XComponentException("Message serialisation failed");
 
             try
             {
                 _publisherChannel.BasicPublish(_exchangeName, routingKey, properties, messageBytes);
             }
-            catch (Exception exception)
+            catch (XComponentException exception)
             {
-                throw new Exception("The publication failed: " + exception.Message, exception);
+                throw new XComponentException("The publication failed: " + exception.Message, exception);
             }
         }
 

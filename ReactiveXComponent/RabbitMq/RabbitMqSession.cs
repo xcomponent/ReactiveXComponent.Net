@@ -10,37 +10,37 @@ namespace ReactiveXComponent.RabbitMq
         private readonly IXCConfiguration _xcConfiguration;
         private readonly IConnection _connection;
         private readonly string _privateCommunicationIdentifier;
-        private readonly SerializerFactory _serializerFactory;
+        private readonly ISerializer _serializer;
 
         public RabbitMqSession(IXCConfiguration xcConfiguration, IConnection connection , string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = xcConfiguration;
             _connection = connection;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
-            _serializerFactory = InitSerializerFactory();
+            _serializer = SelectSerializer();
         }
 
-        private SerializerFactory InitSerializerFactory()
+        private ISerializer SelectSerializer()
         {
             switch (_xcConfiguration.GetSerializationType())
             {
                 case XCApiTags.Binary:
-                    return new SerializerFactory(SerializationType.Binary);
+                    return SerializerFactory.CreateSerializer(SerializationType.Binary);
                 case XCApiTags.Json:
-                    return new SerializerFactory(SerializationType.Json);
+                    return SerializerFactory.CreateSerializer(SerializationType.Json);
                 default:
-                    throw new XCSerializationException("SerializerFactory init failed");
+                    throw new XCSerializationException("Serialization type not supported");
             }
         }
 
         public IXCPublisher CreatePublisher(string component)
         {
-            return new RabbitMqPublisher(component, _xcConfiguration, _connection, _serializerFactory, _privateCommunicationIdentifier);
+            return new RabbitMqPublisher(component, _xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
         }
    
         public IXCSubscriber CreateSubscriber()
         {
-                return new RabbitMqSubscriber(_xcConfiguration, _connection, _serializerFactory, _privateCommunicationIdentifier);
+                return new RabbitMqSubscriber(_xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
         }
     }
 }

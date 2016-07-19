@@ -35,9 +35,9 @@ namespace ReactiveXComponent.RabbitMq
                     Protocol = Protocols.DefaultProtocol
                 };
             }
-            catch (Exception e)
+            catch (XComponentException e)
             {
-                throw new Exception("RabbitMQ Connection init failed", e);
+                throw new XComponentException("RabbitMQ Connection init failed" + e.Message, e);
             }
         }
 
@@ -49,7 +49,7 @@ namespace ReactiveXComponent.RabbitMq
             }
             catch (CreateRabbitMqConnectionException ex)
             {
-                throw new CreateRabbitMqConnectionException("Cannot connect to broker ", ex);
+                throw new CreateRabbitMqConnectionException("Cannot connect to broker" + ex.Message, ex);
             }
             return _connection;
         }

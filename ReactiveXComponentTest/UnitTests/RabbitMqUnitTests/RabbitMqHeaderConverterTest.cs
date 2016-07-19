@@ -51,7 +51,7 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
             Assert.IsTrue(ConatainsHeader(headerExpected, stateMachineRef));
         }
 
-        private bool ConatainsHeader(Header header, StateMachineRef stateMachineRef)
+        private bool ConatainsHeader(Header header, StateMachineRefHeader stateMachineRef)
         {
             return stateMachineRef.StateMachineCode == header.StateMachineCode &&
                     stateMachineRef.ComponentCode == header.ComponentCode &&

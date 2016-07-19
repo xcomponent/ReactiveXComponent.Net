@@ -177,7 +177,6 @@ namespace ReactiveXComponentTest.IntegrationTests
                     label = instance;
                     lockEvent.Set();
                 };
-
                 var messageReceived = lockEvent.WaitOne(timeoutReceive);
 
                 Check.That(messageReceived).IsTrue();

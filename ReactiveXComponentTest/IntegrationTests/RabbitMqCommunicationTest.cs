@@ -166,7 +166,6 @@ namespace ReactiveXComponentTest.IntegrationTests
                 const string stateMachine = "stateMachine";
 
                 subscirber.Subscribe(component, stateMachine, MessageReceivedUpdated);
-
                 PublishMessage(visibility);
 
                 string label = null;

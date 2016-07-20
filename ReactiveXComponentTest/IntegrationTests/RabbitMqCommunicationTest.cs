@@ -52,8 +52,6 @@ namespace ReactiveXComponentTest.IntegrationTests
         {
             var consumer = CreateConsumer();
 
-            PublishMessage(Visibility.Public);
-
             var routingKey = string.Empty;
             var exchangeName = string.Empty;
             const int timeoutReceive = 10000;
@@ -66,6 +64,8 @@ namespace ReactiveXComponentTest.IntegrationTests
                 lockEvent.Set();
             };
             _channel?.BasicConsume(_queueName, true, consumer);
+
+            PublishMessage(Visibility.Public);
 
             var messageReceived = lockEvent.WaitOne(timeoutReceive);
             
@@ -94,8 +94,6 @@ namespace ReactiveXComponentTest.IntegrationTests
             }
             var consumer = CreateConsumer();
 
-            PublishMessage(visibility);
-
             IBasicProperties basicProperties = null;
             const int timeoutReceive = 10000;
             var lockEvent = new AutoResetEvent(false);
@@ -105,6 +103,8 @@ namespace ReactiveXComponentTest.IntegrationTests
                 lockEvent.Set();
             };
             _channel?.BasicConsume(_queueName, true, consumer);
+
+            PublishMessage(visibility);
 
             var messageReceived = lockEvent.WaitOne(timeoutReceive);
             var headerRepository = basicProperties?.Headers;
@@ -130,8 +130,6 @@ namespace ReactiveXComponentTest.IntegrationTests
 
             var consumer = CreateConsumer();
 
-            PublishMessage(Visibility.Public);
-
             Stream msg = null;
             const int timeoutReceive = 10000;
             var lockEvent = new AutoResetEvent(false);
@@ -142,6 +140,8 @@ namespace ReactiveXComponentTest.IntegrationTests
                 lockEvent.Set();
             };
             _channel?.BasicConsume(_queueName, true, consumer);
+
+            PublishMessage(Visibility.Public);
 
             var messageReceived = lockEvent.WaitOne(timeoutReceive);
             var receivedMessage = serializer?.Deserialize(msg);

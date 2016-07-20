@@ -40,7 +40,7 @@ namespace ReactiveXComponent.RabbitMq
    
         public IXCSubscriber CreateSubscriber()
         {
-                return new RabbitMqSubscriber(_xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
+            return new RabbitMqSubscriber(_xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
         }
     }
 }

@@ -2,13 +2,21 @@ namespace ReactiveXComponent.Configuration
 {
     public class BusDetails
     {
-        public string Username { get; set; }
+        public BusDetails(string username, string password, string host, int port)
+        {
+            Username = username;
+            Password = password;
+            Host = host;
+            Port = port;
+        }
 
-        public string Password { get; set; }
+        public string Username { get; }
 
-        public string Host { get; set; }
+        public string Password { get; }
 
-        public int Port { get; set; }
+        public string Host { get; }
+
+        public int Port { get; }
 
         public override bool Equals(object obj)
         {

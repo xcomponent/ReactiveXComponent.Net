@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.Parser;
@@ -27,5 +28,39 @@ namespace ReactiveXComponent
         {
             return _xcConnection.CreateSession();
         }
+
+        #region IDisposable implementation
+
+        private bool _disposed;
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // clear managed resources
+                    _xcConnection.Dispose();
+                }
+
+                // clear unmanaged resources
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~XComponentApi()
+        {
+            Dispose(false);
+        }
+
+        #endregion
+
     }
 }

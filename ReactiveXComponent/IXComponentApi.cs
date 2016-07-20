@@ -1,8 +1,9 @@
-﻿using ReactiveXComponent.Connection;
+﻿using System;
+using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent
 {
-    public interface IXComponentApi
+    public interface IXComponentApi : IDisposable
     {
         IXCSession CreateSession();
     }

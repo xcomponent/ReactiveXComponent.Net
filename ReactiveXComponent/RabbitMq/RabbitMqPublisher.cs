@@ -10,13 +10,11 @@ namespace ReactiveXComponent.RabbitMq
 {
     public class RabbitMqPublisher : IXCPublisher
     {
-        private bool _disposed;
         private readonly IXCConfiguration _configuration;
         private IModel _publisherChannel;
         private readonly string _exchangeName;
         private readonly string _component;
         private readonly string _privateCommunicationIdentifier;
-         
         private readonly ISerializer _serializer;
 
         public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
@@ -31,7 +29,11 @@ namespace ReactiveXComponent.RabbitMq
 
         private void CreatePublisherChannel(IConnection connection)
         {
-            if (connection == null || !connection.IsOpen) return;
+            if (connection == null || !connection.IsOpen)
+            {
+                return;
+            }
+
             _publisherChannel = connection.CreateModel();
             _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
         }
@@ -39,9 +41,15 @@ namespace ReactiveXComponent.RabbitMq
         public void SendEvent(string stateMachine, object message, Visibility visibility)
         {
             var header = CreateHeader(_component, stateMachine, message, visibility);
-            if (header == null) return;
+
+            if (header == null)
+            {
+                return;
+            }
+
             var routingKey = !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier:
                             _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode);
+
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
             message = message ?? 0;
@@ -52,7 +60,12 @@ namespace ReactiveXComponent.RabbitMq
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)
         {
             var messageType = message?.GetType().ToString() ?? string.Empty;
-            if (_configuration == null) return null;
+
+            if (_configuration == null)
+            {
+                return null;
+            }
+
             var header = new Header
             {
                 StateMachineCode = _configuration.GetStateMachineCode(component, stateMachine),
@@ -61,12 +74,17 @@ namespace ReactiveXComponent.RabbitMq
                 EventCode = _configuration.GetPublisherEventCode(messageType),
                 PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty
             };
+
             return header;
         }
 
         private void Send(object message, string routingKey, IBasicProperties properties)
         {
-            
+            if (message == null)
+            {
+                throw new ReactiveXComponentException("Given message is null");
+            }
+
             byte[] messageBytes;
             using (var stream = new MemoryStream())
             {
@@ -74,35 +92,49 @@ namespace ReactiveXComponent.RabbitMq
                 messageBytes = stream.ToArray();
             }
 
-            if (messageBytes == null)
-                throw new ReactiveXComponentException("Message serialisation failed");
-
             try
             {
                 _publisherChannel.BasicPublish(_exchangeName, routingKey, properties, messageBytes);
             }
-            catch (ReactiveXComponentException exception)
+            catch (Exception exception)
             {
                 throw new ReactiveXComponentException("The publication failed: " + exception.Message, exception);
             }
         }
 
+        #region IDisposable implementation
+
+        private bool _disposed;
+
         private void Dispose(bool disposing)
         {
-            if (_disposed)
-                return;
-
-            if (disposing)
+            if (!_disposed)
             {
-                _publisherChannel?.Close();
-            }
-            _disposed = true;
+                if (disposing)
+                {
+                    // clear managed resources
+                    _publisherChannel?.Close();
+                    _publisherChannel?.Dispose();
+                }
 
+                // clear unmanaged resources
+
+                _disposed = true;
+            }
         }
 
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        ~RabbitMqPublisher()
+        {
+            Dispose(false);
+        }
+
+        #endregion
+
     }
 }

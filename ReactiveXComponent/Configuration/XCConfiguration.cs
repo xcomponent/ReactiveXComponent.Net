@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ReactiveXComponent.Common;
 using ReactiveXComponent.Parser;
 
 namespace ReactiveXComponent.Configuration
@@ -19,9 +20,9 @@ namespace ReactiveXComponent.Configuration
             {
                 _parser.Parse(xcApiStream);
             }
-            catch (InitConfigurationException ex)
+            catch (Exception ex)
             {
-                throw new InitConfigurationException("Failed to init configuration", ex);
+                throw new ReactiveXComponentException("Failed to init configuration", ex);
             }
         }
 
@@ -52,14 +53,7 @@ namespace ReactiveXComponent.Configuration
 
         public BusDetails GetBusDetails()
         {
-            try
-            {
-                return _parser.GetBusDetails();
-            }
-            catch (NullReferenceException ex)
-            {
-                throw new NullReferenceException("Bus details not found", ex);
-            }  
+            return _parser.GetBusDetails();
         }
 
         public string GetPublisherTopic(string component, string stateMachine, int eventCode)

@@ -41,13 +41,7 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
             _xcApiConfigParser = new XCApiConfigParser();
             _xcApiConfigParser.Parse(_xcApiStream);
 
-            var expectedBusDetails = new BusDetails
-            {
-                Username = "guest",
-                Password = "guest",
-                Host = "127.0.0.1",
-                Port = 5672
-            };
+            var expectedBusDetails = new BusDetails("guest", "guest", "127.0.0.1", 5672);
             var busDetails = _xcApiConfigParser.GetBusDetails();
 
             Check.That(busDetails).IsEqualTo(expectedBusDetails);

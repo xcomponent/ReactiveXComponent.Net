@@ -1,5 +1,7 @@
 ﻿using System;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
+using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 
@@ -7,7 +9,6 @@ namespace ReactiveXComponent.RabbitMq
 {
     public class RabbitMqConnection : IXCConnection
     {
-        private bool _disposed;
         private IConnection _connection;
         private ConnectionFactory _factory;
         private readonly IXCConfiguration _xcConfiguration;
@@ -17,15 +18,15 @@ namespace ReactiveXComponent.RabbitMq
         {
             _xcConfiguration = configuration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
+
             Init(configuration.GetBusDetails());
-            _connection = CreateRabbitMqConnection();
         }
 
         private void Init(BusDetails busDetails)
         {
             try
             {
-                _factory = new ConnectionFactory()
+                _factory = new ConnectionFactory() 
                 {
                     UserName = busDetails.Username ?? XCApiTags.DefaultUserName,
                     Password = busDetails.Password ?? XCApiTags.DefaultPassword,
@@ -34,46 +35,54 @@ namespace ReactiveXComponent.RabbitMq
                     Port = busDetails.Port,
                     Protocol = Protocols.DefaultProtocol
                 };
-            }
-            catch (ReactiveXComponentException e)
-            {
-                throw new ReactiveXComponentException("RabbitMQ Connection init failed" + e.Message, e);
-            }
-        }
 
-        private IConnection CreateRabbitMqConnection()
-        {
-            try
-            {
-                _connection = _factory?.CreateConnection();   
+                _connection = _factory?.CreateConnection();
             }
-            catch (CreateRabbitMqConnectionException ex)
+            catch (BrokerUnreachableException e)
             {
-                throw new CreateRabbitMqConnectionException("Cannot connect to broker" + ex.Message, ex);
+                throw new ReactiveXComponentException("Error while creating Rabbit Mq connection: " + e.Message, e);
             }
-            return _connection;
+            
         }
 
         public IXCSession CreateSession()
         {
             return new RabbitMqSession(_xcConfiguration, _connection, _privateCommunicationIdentifier);
         }
+        
+        #region IDisposable implementation
+
+        private bool _disposed;
 
         private void Dispose(bool disposing)
         {
-            if (_disposed)
-                return;
-
-            if (disposing)
+            if (!_disposed)
             {
-                _connection?.Close();
+                if (disposing)
+                {
+                    // clear managed resources
+                    _connection?.Close();
+                    _connection?.Dispose();
+                }
+
+                // clear unmanaged resources
+
+                _disposed = true;
             }
-            _disposed = true;
         }
 
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        ~RabbitMqConnection()
+        {
+            Dispose(false);
+        }
+
+        #endregion
+
     }
 }

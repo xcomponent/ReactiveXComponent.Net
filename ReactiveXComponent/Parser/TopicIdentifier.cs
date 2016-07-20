@@ -2,10 +2,18 @@
 {
     public class TopicIdentifier
     {
-        public long Component { get; set; }
-        public long StateMachine { get; set; }
-        public int EventCode { get; set; }
-        public string TopicType { get; set; }
+        public TopicIdentifier(long component, long stateMachine, int eventCode, string topicType)
+        {
+            Component = component;
+            StateMachine = stateMachine;
+            EventCode = eventCode;
+            TopicType = topicType;
+        }
+
+        public long Component { get; }
+        public long StateMachine { get; }
+        public int EventCode { get; }
+        public  string TopicType { get; }
 
         public override bool Equals(object obj)
         {

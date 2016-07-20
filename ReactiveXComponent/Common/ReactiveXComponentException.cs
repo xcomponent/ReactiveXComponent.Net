@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace ReactiveXComponent.RabbitMq
+namespace ReactiveXComponent.Common
 {
     [Serializable]
     public class ReactiveXComponentException : Exception

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 
 namespace ReactiveXComponent.Serializer
@@ -13,8 +14,15 @@ namespace ReactiveXComponent.Serializer
             var streamWriter = new StreamWriter(stream);
             var jsonTextWriter = new JsonTextWriter(streamWriter);
 
-            serializer.Serialize(jsonTextWriter, message);
-            jsonTextWriter.Flush();
+            try
+            {
+                serializer.Serialize(jsonTextWriter, message);
+                jsonTextWriter.Flush();
+            }
+            catch (Exception e)
+            {
+                throw new XCSerializationException(e.Message, e);
+            }
         }
 
         public object Deserialize(Stream stream)
@@ -23,7 +31,14 @@ namespace ReactiveXComponent.Serializer
             var streamReader = new StreamReader(stream);
             var jsonTextReader = new JsonTextReader(streamReader);
 
-            return serializer.Deserialize(jsonTextReader);
+            try
+            {
+                return serializer.Deserialize(jsonTextReader);
+            }
+            catch (Exception e)
+            {
+                throw new XCSerializationException(e.Message, e);
+            }
         }
     }
 }

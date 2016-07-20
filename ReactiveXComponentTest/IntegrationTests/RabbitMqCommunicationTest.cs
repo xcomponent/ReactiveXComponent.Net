@@ -33,13 +33,7 @@ namespace ReactiveXComponentTest.IntegrationTests
         [SetUp]
         public void Setup()
         {
-            _busDetails = new BusDetails
-            {
-                Host = "127.0.0.1",
-                Password = "guest",
-                Port = 5672,
-                Username = "guest"
-            };
+            _busDetails = new BusDetails("guest", "guest", "127.0.0.1", 5672);
             _serialization = "Binary";
             var random = new Random();
             _exchangeName = random.Next(100).ToString();

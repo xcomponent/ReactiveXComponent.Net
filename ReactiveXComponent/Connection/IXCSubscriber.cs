@@ -7,5 +7,6 @@ namespace ReactiveXComponent.Connection
     {
         void Subscribe(string component, string stateMachine, Action<MessageEventArgs> stateMachineListener);
         void Unsubscribe(string component, string stateMachine, Action<MessageEventArgs> stateMachineListener);
+        IObservable<MessageEventArgs> StateMachineUpdatesStream { get; }
     }
 }

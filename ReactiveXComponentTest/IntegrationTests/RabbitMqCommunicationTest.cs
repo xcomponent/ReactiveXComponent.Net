@@ -166,8 +166,6 @@ namespace ReactiveXComponentTest.IntegrationTests
                 const string stateMachine = "stateMachine";
 
                 subscirber.Subscribe(component, stateMachine, MessageReceivedUpdated);
-                PublishMessage(visibility);
-
                 string label = null;
                 const int timeoutReceive = 10000;
                 var lockEvent = new AutoResetEvent(false);
@@ -176,6 +174,10 @@ namespace ReactiveXComponentTest.IntegrationTests
                     label = instance;
                     lockEvent.Set();
                 };
+
+                PublishMessage(visibility);
+
+               
                 var messageReceived = lockEvent.WaitOne(timeoutReceive);
 
                 Check.That(messageReceived).IsTrue();

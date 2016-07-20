@@ -105,7 +105,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RabbitMq\RabbitMqSession.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriber.cs" />
-    <Compile Include="RabbitMq\XComponentException.cs" />
+    <Compile Include="RabbitMq\ReactiveXComponentException.cs" />
     <Compile Include="Serializer\BinarySerializer.cs" />
     <Compile Include="Serializer\ISerializer.cs" />
     <Compile Include="Serializer\JsonSerializer.cs" />

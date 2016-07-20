@@ -11,7 +11,7 @@ namespace ReactiveXComponent.Serializer
                 case SerializationType.Json:
                     return new JsonSerializer();
                 default:
-                    throw new System.Runtime.Serialization.SerializationException("Unhandled serialization type " + serializationType);
+                    throw new XCSerializationException("Unhandled serialization type " + serializationType);
             }
         }
     }

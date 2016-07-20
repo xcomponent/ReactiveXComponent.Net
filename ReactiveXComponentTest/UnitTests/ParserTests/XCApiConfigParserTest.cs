@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using NFluent;
 using NUnit.Framework;
 using ReactiveXComponent.Configuration;
@@ -8,9 +7,8 @@ using ReactiveXComponent.Parser;
 namespace ReactiveXComponentTest.UnitTests.ParserTests
 {
     [TestFixture]
-    public class XCApiConfigParserTest : IDisposable
+    public class XCApiConfigParserTest
     {
-        private bool _disposed;
         private string _component;
         private string _stateMachine;
         private XCApiConfigParser _xcApiConfigParser;
@@ -131,24 +129,11 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
             Check.That(serialization).IsEqualTo(expectedSerialization);
         }
 
-        private void Dispose(bool disposing)
-        {
-            if (_disposed)
-                return;
-
-            if (disposing)
-            {
-                _xcApiConfigParser = null;
-                _xcApiStream.Dispose();
-            }
-            _disposed = true;
-        }
-
         [TearDown]
-        public void Dispose()
+        public void TearDown()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _xcApiConfigParser = null;
+            _xcApiStream.Dispose();
         }
     }
 }

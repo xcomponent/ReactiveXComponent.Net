@@ -35,9 +35,9 @@ namespace ReactiveXComponent.RabbitMq
                     Protocol = Protocols.DefaultProtocol
                 };
             }
-            catch (XComponentException e)
+            catch (ReactiveXComponentException e)
             {
-                throw new XComponentException("RabbitMQ Connection init failed" + e.Message, e);
+                throw new ReactiveXComponentException("RabbitMQ Connection init failed" + e.Message, e);
             }
         }
 
@@ -74,7 +74,6 @@ namespace ReactiveXComponent.RabbitMq
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _exchangeName;
         private readonly string _component;
         private readonly string _privateCommunicationIdentifier;
-
+         
         private readonly ISerializer _serializer;
 
         public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
@@ -75,15 +75,15 @@ namespace ReactiveXComponent.RabbitMq
             }
 
             if (messageBytes == null)
-                throw new XComponentException("Message serialisation failed");
+                throw new ReactiveXComponentException("Message serialisation failed");
 
             try
             {
                 _publisherChannel.BasicPublish(_exchangeName, routingKey, properties, messageBytes);
             }
-            catch (XComponentException exception)
+            catch (ReactiveXComponentException exception)
             {
-                throw new XComponentException("The publication failed: " + exception.Message, exception);
+                throw new ReactiveXComponentException("The publication failed: " + exception.Message, exception);
             }
         }
 
@@ -103,7 +103,6 @@ namespace ReactiveXComponent.RabbitMq
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

@@ -1,7 +1,12 @@
+﻿
 namespace ReactiveXComponent.Common
 {
-    public class Header
+    public class StateMachineRefHeader
     {
+        public long StateMachineId { get; set; }
+
+        public long AgentId { get; set; }
+
         public long StateMachineCode { get; set; }
 
         public long ComponentCode { get; set; }
@@ -11,5 +16,7 @@ namespace ReactiveXComponent.Common
         public string MessageType { get; set; }
 
         public string PublishTopic { get; set; }
+
+        public string RoutingKey { get; set; }
     }
 }

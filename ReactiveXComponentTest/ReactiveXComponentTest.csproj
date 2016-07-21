@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NFluent, Version=1.2.0.0, Culture=neutral, PublicKeyToken=18828b37b84b1437, processorArchitecture=MSIL">
       <HintPath>..\packages\NFluent.1.2.0.0\lib\net40\NFluent.dll</HintPath>
       <Private>True</Private>
@@ -71,8 +75,6 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqHeaderConverterTest.cs" />
-    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqPublisherTest.cs" />
-    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqTestBase.cs" />
     <Compile Include="IntegrationTests\RabbitMqCommunicationTest.cs" />
   </ItemGroup>
   <ItemGroup>

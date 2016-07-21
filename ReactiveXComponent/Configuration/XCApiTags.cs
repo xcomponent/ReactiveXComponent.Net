@@ -24,5 +24,7 @@
         public const string Output = "output";
         public const string DefaultUserName = "guest";
         public const string DefaultPassword = "guest";
+        public const string Binary = "Binary";
+        public const string Json = "Json";
     }
 }

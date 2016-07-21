@@ -15,7 +15,7 @@ namespace ReactiveXComponent.Parser
         private Dictionary<string, Dictionary<string, long>> _stateMachineCodeByStateMachineAndComponent;
         private Dictionary<string, int> _eventCodeByEvent;
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
-        private Dictionary<TopicIdentifier, string> _consumerTopicByIdentifier;
+        private Dictionary<TopicIdentifier, string> _subscriberTopicByIdentifier;
 
         public void Parse(Stream xcApiStream)
         {
@@ -28,7 +28,7 @@ namespace ReactiveXComponent.Parser
             _stateMachineCodeByStateMachineAndComponent = CreateStateMachineCodeByNameAndComponentRepository(_xcApiDescription.GetComponentsNode());
             _eventCodeByEvent = CreateEventCodeByEventRepository(_xcApiDescription.GetPublishersNode());
             _publisherTopicByIdentifier = CreatePublisherTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetPublishersNode());
-            _consumerTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetConsumersNode());
+            _subscriberTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetConsumersNode());
         }
 
         private Dictionary<string, long> CreateComponentCodeByNameRepository(XmlNodeList components)
@@ -127,13 +127,7 @@ namespace ReactiveXComponent.Parser
 
         private TopicIdentifier CreateTopicIdentifier(long componentCode, long stateMachineCode, int eventCode, string topicType)
         {
-            var topicIdentifier = new TopicIdentifier
-            {
-                Component = componentCode,
-                StateMachine = stateMachineCode,
-                EventCode = eventCode,
-                TopicType = topicType
-            };
+            var topicIdentifier = new TopicIdentifier(componentCode, stateMachineCode, eventCode, topicType);
             return topicIdentifier;
         }
 
@@ -143,20 +137,25 @@ namespace ReactiveXComponent.Parser
             return connection?.LocalName;
         }
 
+        public string GetSerializationType()
+        {
+            XmlNode serialisation = _xcApiDescription.GetSerializationNode()?.Item(0)?.FirstChild;
+            return serialisation?.InnerText;
+        }
+
         public BusDetails GetBusDetails()
         {
             BusDetails busDetails = null;
             XmlNode connection = _xcApiDescription.GetCommunicationNode().Item(0)?.FirstChild;
             if (connection?.Attributes != null)
             {
-                busDetails = new BusDetails
-                {
-                    Host = connection.Attributes["host"]?.Value,
-                    Username = connection.Attributes["user"]?.Value,
-                    Password = connection.Attributes["password"]?.Value,
-                    Port = Convert.ToInt32(connection.Attributes["port"]?.Value)
-                };
+                busDetails = new BusDetails(
+                    connection.Attributes["user"]?.Value,
+                    connection.Attributes["password"]?.Value,
+                    connection.Attributes["host"]?.Value,
+                    Convert.ToInt32(connection.Attributes["port"]?.Value));
             }
+
             return busDetails;
         }
 
@@ -188,31 +187,19 @@ namespace ReactiveXComponent.Parser
             string publisherTopic;
             var componentCode = GetComponentCode(component);
             var stateMachineCode = GetStateMachineCode(component, stateMachine);
-            var topicId = new TopicIdentifier
-            {
-                Component = componentCode,
-                StateMachine = stateMachineCode,
-                EventCode = eventCode,
-                TopicType = XCApiTags.Output
-            };
+            var topicId = new TopicIdentifier(componentCode, stateMachineCode, eventCode, XCApiTags.Output);
             _publisherTopicByIdentifier.TryGetValue(topicId, out publisherTopic);
             return publisherTopic;
         }
 
-        public string GetConsumerTopic(string component, string stateMachine)
+        public string GetSubscriberTopic(string component, string stateMachine)
         {
-            string consumerTopic;
+            string subscriberTopic;
             var componentCode = GetComponentCode(component);
             var stateMachineCode = GetStateMachineCode(component, stateMachine);
-            var topicId = new TopicIdentifier
-            {
-                Component = componentCode,
-                StateMachine = stateMachineCode,
-                EventCode = 0,
-                TopicType = XCApiTags.Input
-            };
-            _consumerTopicByIdentifier.TryGetValue(topicId, out consumerTopic);
-            return consumerTopic;
+            var topicId = new TopicIdentifier(componentCode, stateMachineCode, 0, XCApiTags.Input);
+            _subscriberTopicByIdentifier.TryGetValue(topicId, out subscriberTopic);
+            return subscriberTopic;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using NFluent;
 using NUnit.Framework;
 using ReactiveXComponent.Configuration;
@@ -8,9 +7,8 @@ using ReactiveXComponent.Parser;
 namespace ReactiveXComponentTest.UnitTests.ParserTests
 {
     [TestFixture]
-    public class XCApiConfigParserTest : IDisposable
+    public class XCApiConfigParserTest
     {
-        private bool _disposed;
         private string _component;
         private string _stateMachine;
         private XCApiConfigParser _xcApiConfigParser;
@@ -43,13 +41,7 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
             _xcApiConfigParser = new XCApiConfigParser();
             _xcApiConfigParser.Parse(_xcApiStream);
 
-            var expectedBusDetails = new BusDetails
-            {
-                Username = "guest",
-                Password = "guest",
-                Host = "127.0.0.1",
-                Port = 5672
-            };
+            var expectedBusDetails = new BusDetails("guest", "guest", "127.0.0.1", 5672);
             var busDetails = _xcApiConfigParser.GetBusDetails();
 
             Check.That(busDetails).IsEqualTo(expectedBusDetails);
@@ -114,29 +106,28 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
 
             const string stateMachine = "HelloResponse";
             const string expectedTopic = "output.1_0.HelloMicroservice.HelloWorld.HelloResponse";
-            var topic = _xcApiConfigParser.GetConsumerTopic(_component, stateMachine);
+            var topic = _xcApiConfigParser.GetSubscriberTopic(_component, stateMachine);
 
             Check.That(topic).IsEqualTo(expectedTopic);
         }
 
-        private void Dispose(bool disposing)
+        [Test]
+        public void GetSerializationType_ShouldReturnSerializationType_Test()
         {
-            if (_disposed)
-                return;
+            _xcApiConfigParser = new XCApiConfigParser();
+            _xcApiConfigParser.Parse(_xcApiStream);
 
-            if (disposing)
-            {
-                _xcApiConfigParser = null;
-                _xcApiStream.Dispose();
-            }
-            _disposed = true;
+            var expectedSerialization = XCApiTags.Binary;
+            var serialization = _xcApiConfigParser.GetSerializationType();
+
+            Check.That(serialization).IsEqualTo(expectedSerialization);
         }
 
         [TearDown]
-        public void Dispose()
+        public void TearDown()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _xcApiConfigParser = null;
+            _xcApiStream.Dispose();
         }
     }
 }

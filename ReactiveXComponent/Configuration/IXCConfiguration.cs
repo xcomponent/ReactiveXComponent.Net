@@ -11,6 +11,7 @@ namespace ReactiveXComponent.Configuration
         long GetComponentCode(string component);
         int GetPublisherEventCode(string evnt);
         string GetPublisherTopic(string component, string stateMachine, int eventCode);
-        string GetConsumerTopic(string component, string stateMachine, int eventCode);
+        string GetSubscriberTopic(string component, string stateMachine);
+        string GetSerializationType();
     }
 }

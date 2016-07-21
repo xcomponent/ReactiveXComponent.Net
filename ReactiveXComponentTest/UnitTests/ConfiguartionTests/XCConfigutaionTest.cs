@@ -19,20 +19,6 @@ namespace ReactiveXComponentTest.UnitTests.ConfiguartionTests
         }
 
         [Test]
-        public void GetBusDetails_GivenXCConfigurationInitilizedWithNull_ShouldThrowANullReferenceException_Test()
-        {
-            var xcConfig = new XCConfiguration(null);
-            Check.ThatCode(() => xcConfig.GetBusDetails()).Throws<NullReferenceException>();
-        }
-
-        [Test]
-        public void Init_GivenAStreamAndXCConfigurationInitilizedWithNull_ShouldThrowFailedToInitException_Test()
-        {
-            var xcConfig = new XCConfiguration(null);
-            Check.ThatCode(() => xcConfig.Init(null)).Throws<NullReferenceException>();
-        }
-
-        [Test]
         public void GetPublisherTopic_GivenAStreamAndXCConfigurationInitilizedWithAParser_ShouldReturnANullPublisher_Test()
         {
             var xcConfig = new XCConfiguration(_parser);

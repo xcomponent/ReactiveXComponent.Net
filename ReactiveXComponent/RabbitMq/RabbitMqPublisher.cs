@@ -1,84 +1,96 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using RabbitMQ.Client;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
+using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponent.RabbitMq
 {
     public class RabbitMqPublisher : IXCPublisher
     {
-        private bool _disposed;
         private readonly IXCConfiguration _configuration;
-        private Header _header;
         private IModel _publisherChannel;
         private readonly string _exchangeName;
         private readonly string _component;
         private readonly string _privateCommunicationIdentifier;
+        private readonly ISerializer _serializer;
 
-        public IModel PublisherChanne => _publisherChannel;
-
-        public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, string privateCommunicationIdentifier = null)
+        public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
             _component = component;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _exchangeName = configuration?.GetComponentCode(component).ToString();
             _configuration = configuration;
             CreatePublisherChannel(connection);
+            _serializer = serializer;
         }
 
         private void CreatePublisherChannel(IConnection connection)
         {
-            if (connection == null || !connection.IsOpen) return;
+            if (connection == null || !connection.IsOpen)
+            {
+                return;
+            }
+
             _publisherChannel = connection.CreateModel();
             _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
         }
 
         public void SendEvent(string stateMachine, object message, Visibility visibility)
         {
-            InitHeader(_component, stateMachine, message, visibility);
+            var header = CreateHeader(_component, stateMachine, message, visibility);
 
-            var routingKey = _configuration.GetPublisherTopic(_component, stateMachine, (int)_header?.EventCode);
+            if (header == null)
+            {
+                return;
+            }
+
+            var routingKey = !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier:
+                            _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode);
+
             var prop = _publisherChannel.CreateBasicProperties();
-            prop.Headers = RabbitMqHeaderConverter.ConvertHeader(_header);
+            prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
             message = message ?? 0;
 
             Send(message, routingKey, prop);
         }
 
-        private void InitHeader(string component, string stateMachine, object message, Visibility visibility)
+        private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)
         {
             var messageType = message?.GetType().ToString() ?? string.Empty;
-            try
+
+            if (_configuration == null)
             {
-                _header = new Header
-                {
-                    StateMachineCode = _configuration.GetStateMachineCode(component, stateMachine),
-                    ComponentCode = _configuration.GetComponentCode(component),
-                    MessageType = messageType,
-                    EventCode = _configuration.GetPublisherEventCode(messageType),
-                    PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty
-                };
+                return null;
             }
-            catch (NullReferenceException e)
+
+            var header = new Header
             {
-                throw new NullReferenceException("Failed to init Header", e);  
-            }
+                StateMachineCode = _configuration.GetStateMachineCode(component, stateMachine),
+                ComponentCode = _configuration.GetComponentCode(component),
+                MessageType = messageType,
+                EventCode = _configuration.GetPublisherEventCode(messageType),
+                PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty
+            };
+
+            return header;
         }
 
         private void Send(object message, string routingKey, IBasicProperties properties)
         {
+            if (message == null)
+            {
+                throw new ReactiveXComponentException("Given message is null");
+            }
+
             byte[] messageBytes;
             using (var stream = new MemoryStream())
             {
-                Serialize(stream, message);
+                _serializer.Serialize(stream, message);
                 messageBytes = stream.ToArray();
             }
-
-            if (messageBytes == null)
-                throw new Exception("Message serialisation failed");
 
             try
             {
@@ -86,30 +98,29 @@ namespace ReactiveXComponent.RabbitMq
             }
             catch (Exception exception)
             {
-                throw new Exception("The publication failed: " + exception.Message, exception);
+                throw new ReactiveXComponentException("The publication failed: " + exception.Message, exception);
             }
         }
 
-        private void Serialize(Stream stream, object message)
-        {
-            if (message != null)
-            {
-                var binaryFormater = new BinaryFormatter();
-                binaryFormater.Serialize(stream, message);
-            }
-        }
+        #region IDisposable implementation
+
+        private bool _disposed;
 
         private void Dispose(bool disposing)
         {
-            if (_disposed)
-                return;
-
-            if (disposing)
+            if (!_disposed)
             {
-                _publisherChannel?.Close();
-            }
-            _disposed = true;
+                if (disposing)
+                {
+                    // clear managed resources
+                    _publisherChannel?.Close();
+                    _publisherChannel?.Dispose();
+                }
 
+                // clear unmanaged resources
+
+                _disposed = true;
+            }
         }
 
         public void Dispose()
@@ -117,5 +128,13 @@ namespace ReactiveXComponent.RabbitMq
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        ~RabbitMqPublisher()
+        {
+            Dispose(false);
+        }
+
+        #endregion
+
     }
 }

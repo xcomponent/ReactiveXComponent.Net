@@ -46,9 +46,18 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
         {
             var headerDico = RabbitMqHeaderConverter.ConvertHeader(_header);
             var headerExpected = _header;        
-            var headerValue = RabbitMqHeaderConverter.ConvertHeader(headerDico);
+            var stateMachineRef = RabbitMqHeaderConverter.ConvertStateMachineRef(headerDico);
             
-            Assert.AreEqual(headerExpected, headerValue);
+            Assert.IsTrue(ConatainsHeader(headerExpected, stateMachineRef));
+        }
+
+        private bool ConatainsHeader(Header header, StateMachineRefHeader stateMachineRef)
+        {
+            return stateMachineRef.StateMachineCode == header.StateMachineCode &&
+                    stateMachineRef.ComponentCode == header.ComponentCode &&
+                    stateMachineRef.EventCode == header.EventCode &&
+                    stateMachineRef.MessageType == header.MessageType &&
+                    stateMachineRef.PublishTopic == header.PublishTopic;
         }
 
         [TearDown]

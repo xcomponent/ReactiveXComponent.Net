@@ -18,39 +18,63 @@ namespace ReactiveXComponentTest.IntegrationTests
     [Category("Integration Tests")]
     public class RabbitMqCommunicationTest
     {
+        private const string User = "guest";
+        private const string Password = "guest";
+        private const string Host = "127.0.0.1";
+        private const int Port = 5672;
+        private const string TestMessage = "Test message";
+        private const string PrivateCommincationIdentifier = "PrivateCommincationIdentifier";
+
+        private const string ComponentNameA = "ComponentA";
+        private const string StateMachineA = "StateMachineA";
+
         private IXCConfiguration _xcConfiguration;
         private BusDetails _busDetails;
         private string _exchangeName;
-        private string _routinKey;
-        private string _message;
+        private string _routingKey;
         private string _queueName;
         private IConnection _connection;
         private IModel _channel;
         private string _serialization;
-
-        private event Action<string> MessageReceived;
+        private ConnectionFactory _connectionFactory;
 
         [SetUp]
         public void Setup()
         {
-            _busDetails = new BusDetails("guest", "guest", "127.0.0.1", 5672);
-            _serialization = "Binary";
+            _busDetails = new BusDetails(User, Password, Host, Port);
+            _serialization = XCApiTags.Binary;
             var random = new Random();
             _exchangeName = random.Next(100).ToString();
-            _routinKey = "routinKey: "+random.Next(100);
-            _message = "J'envoie le message n° "+ random.Next(100) +" sur RabbitMq";
+            _routingKey = random.Next(100).ToString();
+
+            _connectionFactory = new ConnectionFactory {
+                UserName = _busDetails.Username,
+                Password = _busDetails.Password,
+                VirtualHost = ConnectionFactory.DefaultVHost,
+                HostName = _busDetails.Host,
+                Port = _busDetails.Port,
+                Protocol = Protocols.DefaultProtocol
+            };
+
+            _connection = _connectionFactory.CreateConnection();
+            _channel = _connection.CreateModel();
+            _channel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
+            _queueName = _channel.QueueDeclare().QueueName;
+            _channel.QueueBind(_queueName, _exchangeName, _routingKey);
+
             _xcConfiguration = Substitute.For<IXCConfiguration>();
             _xcConfiguration.GetBusDetails().Returns(_busDetails);
             _xcConfiguration.GetSerializationType().ReturnsForAnyArgs(_serialization);
+            _xcConfiguration.GetStateMachineCode(null, null).ReturnsForAnyArgs(0);
             _xcConfiguration.GetComponentCode(null).ReturnsForAnyArgs(Convert.ToInt32(_exchangeName));
-            _xcConfiguration.GetPublisherTopic(null, null, 0).ReturnsForAnyArgs(_routinKey);
-            _xcConfiguration.GetSubscriberTopic(null, null).ReturnsForAnyArgs(_routinKey);
+            _xcConfiguration.GetPublisherTopic(null, null, 0).ReturnsForAnyArgs(_routingKey);
+            _xcConfiguration.GetSubscriberTopic(null, null).ReturnsForAnyArgs(_routingKey);
         }
 
         [Test]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectRoutingKeyAndExchangeName_Test()
         {
-            var consumer = CreateConsumer();
+            var consumer = new EventingBasicConsumer(_channel);
 
             var routingKey = string.Empty;
             var exchangeName = string.Empty;
@@ -65,53 +89,53 @@ namespace ReactiveXComponentTest.IntegrationTests
             };
             _channel?.BasicConsume(_queueName, true, consumer);
 
-            PublishMessage(Visibility.Public);
+            PublishMessage(ComponentNameA, StateMachineA, Visibility.Public);
 
             var messageReceived = lockEvent.WaitOne(timeoutReceive);
             
             Check.That(messageReceived).IsTrue();
-            Check.That(routingKey).IsEqualTo(_routinKey);
+            Check.That(routingKey).IsEqualTo(_routingKey);
             Check.That(exchangeName).IsEqualTo(_exchangeName);
         }
 
         [TestCase(Visibility.Private)]
         [TestCase(Visibility.Public)]
-         
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectHeader_Test(Visibility visibility)
         {
-            var expectedHeader = new Header()
+            using (var subscriber = CreateSubscriber(visibility))
             {
-                StateMachineCode = 0,
-                ComponentCode = Convert.ToInt32(_exchangeName),
-                MessageType = "System.String",
-                EventCode = 0,
-                PublishTopic = visibility == Visibility.Private? "PrivateCommincationIdentifier" : string.Empty
-            };
+                var expectedHeader = new Header() {
+                    StateMachineCode = 0,
+                    ComponentCode = Convert.ToInt32(_exchangeName),
+                    MessageType = "System.String",
+                    EventCode = 0,
+                    PublishTopic = visibility == Visibility.Private ? PrivateCommincationIdentifier : string.Empty
+                };
 
-            if (visibility == Visibility.Private)
-            {
-                _routinKey = "PrivateCommincationIdentifier";
+                var routingKey = visibility == Visibility.Private ? PrivateCommincationIdentifier : string.Empty;
+
+                IModel channel;
+                var consumer = CreateConsumer(routingKey, out channel);
+                
+                const int timeoutReceive = 10000;
+                var lockEvent = new AutoResetEvent(false);
+                StateMachineRefHeader stateMachineRefHeader = null;
+                Action<MessageEventArgs> messagedReceivedHandler = args =>
+                {
+                    stateMachineRefHeader = args.StateMachineRefHeader;
+                    lockEvent.Set();
+                };
+
+                subscriber.Subscribe(ComponentNameA, StateMachineA, messagedReceivedHandler);
+
+                PublishMessage(ComponentNameA, StateMachineA, visibility);
+
+                var messageReceived = lockEvent.WaitOne(timeoutReceive);
+
+                Check.That(messageReceived).IsTrue();
+                Check.That(MatchesHeader(expectedHeader, stateMachineRefHeader)).IsTrue();
             }
-            var consumer = CreateConsumer();
 
-            IBasicProperties basicProperties = null;
-            const int timeoutReceive = 10000;
-            var lockEvent = new AutoResetEvent(false);
-            consumer.Received += (model, ea) =>
-            {
-                basicProperties = ea.BasicProperties;
-                lockEvent.Set();
-            };
-            _channel?.BasicConsume(_queueName, true, consumer);
-
-            PublishMessage(visibility);
-
-            var messageReceived = lockEvent.WaitOne(timeoutReceive);
-            var headerRepository = basicProperties?.Headers;
-            var stateMachineRef = RabbitMqHeaderConverter.ConvertStateMachineRef(headerRepository);
-
-            Check.That(messageReceived).IsTrue();
-            Check.That(ConatainsHeader(expectedHeader,stateMachineRef)).IsTrue();
         }
 
         [Test]
@@ -128,7 +152,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                     break;
             }
 
-            var consumer = CreateConsumer();
+            var consumer = new EventingBasicConsumer(_channel);
 
             Stream msg = null;
             const int timeoutReceive = 10000;
@@ -141,105 +165,85 @@ namespace ReactiveXComponentTest.IntegrationTests
             };
             _channel?.BasicConsume(_queueName, true, consumer);
 
-            PublishMessage(Visibility.Public);
+            PublishMessage(ComponentNameA, StateMachineA, Visibility.Public);
 
             var messageReceived = lockEvent.WaitOne(timeoutReceive);
             var receivedMessage = serializer?.Deserialize(msg);
 
             Check.That(messageReceived).IsTrue();
-            Check.That(receivedMessage).IsEqualTo(_message);
+            Check.That(receivedMessage).IsEqualTo(TestMessage);
         }
 
         [TestCase(Visibility.Private)]
         [TestCase(Visibility.Public)]
         public void Subscribe_GivenAcomponentAStateMachineAndACallback_ShouldCreateSubscriptionAndReceiveMessageOnCallback_Test(Visibility visibility)
         {
-            using (var subscirber = CreateSubscriber(visibility))
+            using (var subscriber = CreateSubscriber(visibility))
             {
-                const string component = "Component";
-                const string stateMachine = "stateMachine";
-
-                subscirber.Subscribe(component, stateMachine, MessageReceivedUpdated);
+                const string component = ComponentNameA;
+                const string stateMachine = StateMachineA;
                 string label = null;
                 const int timeoutReceive = 10000;
                 var lockEvent = new AutoResetEvent(false);
-                MessageReceived += instance =>
+
+                Action<MessageEventArgs> messagedReceivedHandler = args => 
                 {
-                    label = instance;
+                    label = args.MessageReceived as string;
                     lockEvent.Set();
                 };
 
-                PublishMessage(visibility);
-
+                subscriber.Subscribe(component, stateMachine, messagedReceivedHandler);
+                PublishMessage(component, stateMachine, visibility);
                
                 var messageReceived = lockEvent.WaitOne(timeoutReceive);
 
+                subscriber.Unsubscribe(component, stateMachine, messagedReceivedHandler);
+
                 Check.That(messageReceived).IsTrue();
-                Check.That(label).IsNotEmpty().And.Contains("J'envoie le message n° ").And.Contains("sur RabbitMq");
+                Check.That(label).IsNotNull().And.IsNotEmpty().And.Equals(TestMessage);
             }      
         }
 
-        private void MessageReceivedUpdated(MessageEventArgs busEvent)
-        {
-            if (MessageReceived == null) return;
-            var publicMember = busEvent.MessageReceived as string;
-            if (publicMember != null) MessageReceived(publicMember);
-        }
-
-
         private IXCSession CreateSession(Visibility visibility)
         {
-            var privateCommunicationIdentifier = visibility == Visibility.Private ? "PrivateCommincationIdentifier" : null;
+            var privateCommunicationIdentifier = visibility == Visibility.Private ? PrivateCommincationIdentifier : null;
             var rabbitMqConnection = new RabbitMqConnection(_xcConfiguration, privateCommunicationIdentifier);
             return rabbitMqConnection.CreateSession();
         }
+
         private IXCSubscriber CreateSubscriber(Visibility visibility)
         {
             var session = CreateSession(visibility);
             return session.CreateSubscriber();
         }
 
-        private void PublishMessage(Visibility visibility)
+        private void PublishMessage(string component, string stateMachine, Visibility visibility)
         {
             var session = CreateSession(visibility);
-            const string component = "Component";
-            const string stateMachine = "stateMachine";
 
             using (var publisher = session?.CreatePublisher(component))
             {
-                publisher?.SendEvent(stateMachine, _message, visibility);  
+                publisher?.SendEvent(stateMachine, TestMessage, visibility);  
             }
         }
 
-        private EventingBasicConsumer CreateConsumer()
+        private EventingBasicConsumer CreateConsumer(string routingKey, out IModel channel)
         {
-            var factory = new ConnectionFactory
-            {
-                UserName = _busDetails.Username,
-                Password = _busDetails.Password,
-                VirtualHost = ConnectionFactory.DefaultVHost,
-                HostName = _busDetails.Host,
-                Port = _busDetails.Port,
-                Protocol = Protocols.DefaultProtocol
-            };
+            channel = _connection.CreateModel();
+            channel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
+            _queueName = channel.QueueDeclare().QueueName;
+            channel.QueueBind(_queueName, _exchangeName, routingKey);
 
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
-            _queueName = _channel.QueueDeclare().QueueName;
-            _channel.QueueBind(_queueName, _exchangeName, _routinKey);
-            var consumer = new EventingBasicConsumer(_channel);
-
-            return consumer;
+            return new EventingBasicConsumer(channel);
         }
 
-        private bool ConatainsHeader(Header header, StateMachineRefHeader stateMachineRef)
+        private bool MatchesHeader(Header header, StateMachineRefHeader stateMachineRefHeader)
         {
-            return stateMachineRef.StateMachineCode == header.StateMachineCode && 
-                    stateMachineRef.ComponentCode == header.ComponentCode && 
-                    stateMachineRef.EventCode == header.EventCode && 
-                    stateMachineRef.MessageType == header.MessageType && 
-                    stateMachineRef.PublishTopic == header.PublishTopic;
+            return stateMachineRefHeader.StateMachineCode == header.StateMachineCode &&
+                    stateMachineRefHeader.ComponentCode == header.ComponentCode &&
+                    stateMachineRefHeader.EventCode == header.EventCode &&
+                    stateMachineRefHeader.MessageType == header.MessageType &&
+                    stateMachineRefHeader.PublishTopic == header.PublishTopic;
         }
 
         [TearDown]

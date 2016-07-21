@@ -117,7 +117,7 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
             _xcApiConfigParser = new XCApiConfigParser();
             _xcApiConfigParser.Parse(_xcApiStream);
 
-            var expectedSerialization = "Binary";
+            var expectedSerialization = XCApiTags.Binary;
             var serialization = _xcApiConfigParser.GetSerializationType();
 
             Check.That(serialization).IsEqualTo(expectedSerialization);

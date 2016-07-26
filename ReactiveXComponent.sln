@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveXComponent", "React
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveXComponentTest", "ReactiveXComponentTest\ReactiveXComponentTest.csproj", "{C06144BE-083F-49D3-B938-8A1B926FAC1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XComponentClientApiTest", "XComponentClientApiTest\XComponentClientApiTest.csproj", "{AE7E449C-B065-45F6-9E6D-C4EF235C803F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XComponentClientApi", "XComponentClientApi\XComponentClientApi.csproj", "{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}"
 EndProject
 Global
@@ -25,10 +23,6 @@ Global
 		{C06144BE-083F-49D3-B938-8A1B926FAC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C06144BE-083F-49D3-B938-8A1B926FAC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C06144BE-083F-49D3-B938-8A1B926FAC1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AE7E449C-B065-45F6-9E6D-C4EF235C803F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AE7E449C-B065-45F6-9E6D-C4EF235C803F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AE7E449C-B065-45F6-9E6D-C4EF235C803F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AE7E449C-B065-45F6-9E6D-C4EF235C803F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}.Release|Any CPU.ActiveCfg = Release|Any CPU

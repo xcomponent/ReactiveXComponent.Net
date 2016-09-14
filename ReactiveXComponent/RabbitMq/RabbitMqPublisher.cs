@@ -72,7 +72,8 @@ namespace ReactiveXComponent.RabbitMq
                 ComponentCode = _configuration.GetComponentCode(component),
                 MessageType = messageType,
                 EventCode = _configuration.GetPublisherEventCode(messageType),
-                PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty
+                IncomingEventType = (int)IncomingEventType.Transition,
+                PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty                
             };
 
             return header;

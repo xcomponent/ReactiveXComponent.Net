@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="Common\Header.cs" />
     <Compile Include="Common\HeaderElement.cs" />
+    <Compile Include="Common\IncomingEventType.cs" />
     <Compile Include="Common\StateMachineRefHeader.cs" />
     <Compile Include="Common\ThreadSafeList.cs" />
     <Compile Include="Common\Visibility.cs" />

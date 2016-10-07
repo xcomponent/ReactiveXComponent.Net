@@ -12,7 +12,7 @@ namespace ReactiveXComponent.RabbitMq
             MessageReceived = messageReceived;            
         }
 
-        public StateMachineRefHeader StateMachineRefHeader { get; }
+        public  StateMachineRefHeader StateMachineRefHeader { get; }
 
         public object MessageReceived { get; }
     }

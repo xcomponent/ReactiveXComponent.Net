@@ -46,7 +46,7 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
         {
             var headerDico = RabbitMqHeaderConverter.ConvertHeader(_header);
             var headerExpected = _header;        
-            var stateMachineRef = RabbitMqHeaderConverter.ConvertStateMachineRef(headerDico);
+            var stateMachineRef = RabbitMqHeaderConverter.ConvertStateMachineRefHeader(headerDico);
             
             Assert.IsTrue(ConatainsHeader(headerExpected, stateMachineRef));
         }

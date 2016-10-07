@@ -185,8 +185,9 @@ namespace ReactiveXComponent.Parser
         public string GetPublisherTopic(string component, string stateMachine, int eventCode)
         {
             string publisherTopic;
+            long code;
             var componentCode = GetComponentCode(component);
-            var stateMachineCode = GetStateMachineCode(component, stateMachine);
+            var stateMachineCode = Int64.TryParse(stateMachine, out code) ? code : GetStateMachineCode(component, stateMachine);
             var topicId = new TopicIdentifier(componentCode, stateMachineCode, eventCode, XCApiTags.Output);
             _publisherTopicByIdentifier.TryGetValue(topicId, out publisherTopic);
             return publisherTopic;
@@ -195,8 +196,9 @@ namespace ReactiveXComponent.Parser
         public string GetSubscriberTopic(string component, string stateMachine)
         {
             string subscriberTopic;
+            long code;
             var componentCode = GetComponentCode(component);
-            var stateMachineCode = GetStateMachineCode(component, stateMachine);
+            var stateMachineCode = Int64.TryParse(stateMachine, out code)? code : GetStateMachineCode(component, stateMachine);
             var topicId = new TopicIdentifier(componentCode, stateMachineCode, 0, XCApiTags.Input);
             _subscriberTopicByIdentifier.TryGetValue(topicId, out subscriberTopic);
             return subscriberTopic;

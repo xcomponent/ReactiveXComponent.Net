@@ -138,6 +138,70 @@ namespace ReactiveXComponentTest.IntegrationTests
 
         }
 
+        [TestCase(Visibility.Private)]
+        [TestCase(Visibility.Public)]
+        public void SendEventWithStateMachineRef_GivenAStateMachineRefAndAMessage_ShouldSendMessageToCorrectStateMachineRef_Test(Visibility visibility)
+        {
+            var session = CreateSession(visibility);
+            var subscriber = session?.CreateSubscriber(ComponentNameA);
+            var publisher = session?.CreatePublisher(ComponentNameA);
+
+            var routingKey = visibility == Visibility.Private ? PrivateCommincationIdentifier : string.Empty;
+
+            IModel channel;
+            CreateConsumer(routingKey, out channel);
+
+            const int timeoutReceive = 10000;
+            var lockEvent = new AutoResetEvent(false);
+            StateMachineRefHeader stateMachineRefHeader = null;
+            Action<MessageEventArgs> messagedReceivedHandler = args =>
+            {
+                stateMachineRefHeader = args.StateMachineRefHeader;
+                lockEvent.Set();
+            };
+
+            subscriber?.Subscribe(StateMachineA, messagedReceivedHandler);
+            publisher?.SendEvent(StateMachineA, TestMessage, visibility);
+
+            var messageReceived = lockEvent.WaitOne(timeoutReceive);
+
+            Check.That(messageReceived).IsTrue();
+
+            var firstStateRefHeader = new StateMachineRefHeader()
+            {
+                StateMachineId = stateMachineRefHeader.StateMachineId,
+                AgentId = stateMachineRefHeader.AgentId,
+                StateMachineCode = stateMachineRefHeader.StateMachineCode,
+                ComponentCode = stateMachineRefHeader.ComponentCode,
+                EventCode = stateMachineRefHeader.EventCode,
+                IncomingEventType = stateMachineRefHeader.IncomingEventType,
+                MessageType = stateMachineRefHeader.MessageType,
+                PublishTopic = stateMachineRefHeader.PublishTopic
+            };
+
+            subscriber?.Subscribe(StateMachineA, messagedReceivedHandler);
+            publisher?.SendEventWithStateMachineRef(firstStateRefHeader, 1);
+
+            var newMessageReceived = lockEvent.WaitOne(timeoutReceive);
+
+            Check.That(newMessageReceived).IsTrue();
+
+            var secondStateRefHeader = new StateMachineRefHeader()
+            {
+                StateMachineId = stateMachineRefHeader.StateMachineId,
+                AgentId = stateMachineRefHeader.AgentId,
+                StateMachineCode = stateMachineRefHeader.StateMachineCode,
+                ComponentCode = stateMachineRefHeader.ComponentCode,
+                EventCode = stateMachineRefHeader.EventCode,
+                IncomingEventType = stateMachineRefHeader.IncomingEventType,
+                MessageType = stateMachineRefHeader.MessageType,
+                PublishTopic = stateMachineRefHeader.PublishTopic
+            };
+
+            //Equily Test false due to MessageType
+            Check.That(secondStateRefHeader.Equals(firstStateRefHeader)).IsFalse();
+        }
+
         [Test]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMq_Test()
         {

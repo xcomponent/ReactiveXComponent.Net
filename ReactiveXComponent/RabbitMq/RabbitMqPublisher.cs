@@ -42,10 +42,7 @@ namespace ReactiveXComponent.RabbitMq
         {
             var header = CreateHeader(_component, stateMachine, message, visibility);
 
-            if (header == null)
-            {
-                return;
-            }
+            if (header == null) return;
 
             var routingKey = !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier:
                             _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode);
@@ -53,6 +50,22 @@ namespace ReactiveXComponent.RabbitMq
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
             message = message ?? 0;
+
+            Send(message, routingKey, prop);
+        }
+
+        public void SendEventWithStateMachineRef(StateMachineRefHeader stateMachineRefHeader, object message)
+        {
+            if (stateMachineRefHeader == null) return;
+
+            var stateMachineRefNewHeader = CreateStateMachineRefHeader(stateMachineRefHeader, message);
+            var routingKey = !string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _privateCommunicationIdentifier :
+                            _configuration.GetPublisherTopic(_component, stateMachineRefHeader.StateMachineId.ToString(),
+                            stateMachineRefHeader.EventCode);
+            
+            var prop = _publisherChannel.CreateBasicProperties();
+            prop.Headers = RabbitMqHeaderConverter.ConvertStateMachineRefHeader(stateMachineRefNewHeader);
+            message = message?? 0;
 
             Send(message, routingKey, prop);
         }
@@ -77,6 +90,30 @@ namespace ReactiveXComponent.RabbitMq
             };
 
             return header;
+        }
+
+        private StateMachineRefHeader CreateStateMachineRefHeader(StateMachineRefHeader stateMachineRefHeader, object message)
+        {
+            var messageType = message?.GetType().ToString() ?? string.Empty;
+
+            if (_configuration == null)
+            {
+                return null;
+            }
+
+            var stateMachineRefheader = new StateMachineRefHeader()
+            {
+                StateMachineId = stateMachineRefHeader.StateMachineId,
+                AgentId = stateMachineRefHeader.AgentId,
+                StateMachineCode = stateMachineRefHeader.StateMachineCode,
+                ComponentCode = stateMachineRefHeader.ComponentCode,
+                MessageType = messageType,
+                EventCode = _configuration.GetPublisherEventCode(messageType),
+                IncomingEventType = stateMachineRefHeader.IncomingEventType,
+                PublishTopic = stateMachineRefHeader.PublishTopic
+            };
+
+            return stateMachineRefheader;
         }
 
         private void Send(object message, string routingKey, IBasicProperties properties)

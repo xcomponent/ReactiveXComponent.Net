@@ -202,7 +202,7 @@ namespace ReactiveXComponent.RabbitMq
             var obj = _serializer.Deserialize(new MemoryStream(basicAckEventArgs.Body));
 
             var msgEventArgs = new MessageEventArgs(
-                                    RabbitMqHeaderConverter.ConvertStateMachineRef(basicAckEventArgs.BasicProperties.Headers),
+                                    RabbitMqHeaderConverter.ConvertStateMachineRefHeader(basicAckEventArgs.BasicProperties.Headers),
                                     obj);
 
             OnMessageReceived(msgEventArgs);

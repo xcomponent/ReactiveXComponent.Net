@@ -105,6 +105,7 @@ namespace ReactiveXComponent.RabbitMq
             {
                 StateMachineId = stateMachineRefHeader.StateMachineId,
                 AgentId = stateMachineRefHeader.AgentId,
+                StateCode = stateMachineRefHeader.StateCode,
                 StateMachineCode = stateMachineRefHeader.StateMachineCode,
                 ComponentCode = stateMachineRefHeader.ComponentCode,
                 MessageType = messageType,

@@ -198,7 +198,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                 PublishTopic = stateMachineRefHeader.PublishTopic
             };
 
-            //Equily Test false due to MessageType
+            //Equality Test false due to MessageType
             Check.That(secondStateRefHeader.Equals(firstStateRefHeader)).IsFalse();
         }
 

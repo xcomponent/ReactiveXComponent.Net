@@ -174,15 +174,15 @@ namespace ReactiveXComponentTest.IntegrationTests
                 StateMachineCode = stateMachineRefHeader.StateMachineCode,
                 ComponentCode = stateMachineRefHeader.ComponentCode,
                 EventCode = stateMachineRefHeader.EventCode,
-                IncomingEventType = stateMachineRefHeader.IncomingEventType,
                 MessageType = stateMachineRefHeader.MessageType,
                 PublishTopic = stateMachineRefHeader.PublishTopic
             };
-
-            subscriber?.Subscribe(StateMachineA, messagedReceivedHandler);
-            publisher?.SendEventWithStateMachineRef(firstStateRefHeader, 1);
+            
+            publisher?.SendEvent(firstStateRefHeader, 1, visibility);
 
             var newMessageReceived = lockEvent.WaitOne(timeoutReceive);
+
+            subscriber?.Unsubscribe(StateMachineA, messagedReceivedHandler);
 
             Check.That(newMessageReceived).IsTrue();
 
@@ -193,13 +193,14 @@ namespace ReactiveXComponentTest.IntegrationTests
                 StateMachineCode = stateMachineRefHeader.StateMachineCode,
                 ComponentCode = stateMachineRefHeader.ComponentCode,
                 EventCode = stateMachineRefHeader.EventCode,
-                IncomingEventType = stateMachineRefHeader.IncomingEventType,
                 MessageType = stateMachineRefHeader.MessageType,
                 PublishTopic = stateMachineRefHeader.PublishTopic
             };
-
-            //Equality Test false due to MessageType
-            Check.That(secondStateRefHeader.Equals(firstStateRefHeader)).IsFalse();
+            
+            Check.That(firstStateRefHeader.AgentId == secondStateRefHeader.AgentId).IsTrue();
+            Check.That(firstStateRefHeader.StateMachineId == secondStateRefHeader.StateMachineId).IsTrue();
+            Check.That(firstStateRefHeader.ComponentCode == secondStateRefHeader.ComponentCode).IsTrue();
+            Check.That(firstStateRefHeader.StateMachineCode == secondStateRefHeader.StateMachineCode).IsTrue();
         }
 
         [Test]

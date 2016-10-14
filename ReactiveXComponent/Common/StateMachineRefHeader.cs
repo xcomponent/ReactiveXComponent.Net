@@ -15,8 +15,6 @@ namespace ReactiveXComponent.Common
 
         public int EventCode { get; set; }
 
-        public int IncomingEventType { get; set; }
-
         public string MessageType { get; set; }
 
         public string PublishTopic { get; set; }
@@ -37,7 +35,6 @@ namespace ReactiveXComponent.Common
                 && StateMachineCode == other.StateMachineCode 
                 && ComponentCode == other.ComponentCode
                 && EventCode == other.EventCode
-                && IncomingEventType == other.IncomingEventType
                 && string.Equals(MessageType, other.MessageType)
                 && string.Equals(PublishTopic, other.PublishTopic);
         }
@@ -52,7 +49,6 @@ namespace ReactiveXComponent.Common
                 hashCode = (int) ((hashCode * 397) ^ StateMachineCode);
                 hashCode = (int) ((hashCode * 397) ^ ComponentCode);
                 hashCode = (hashCode * 397) ^ EventCode;
-                hashCode = (hashCode * 397) ^ IncomingEventType;
                 hashCode = (hashCode * 397) ^ (MessageType?.GetHashCode() ?? 0);
                 hashCode = (hashCode * 397) ^ (PublishTopic?.GetHashCode() ?? 0);
                 return hashCode;

@@ -213,9 +213,9 @@ namespace ReactiveXComponent.RabbitMq
             MessageReceived?.Invoke(this, e);
         }
 
-        public void Unsubscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
+        public void Unsubscribe(string stateMachineCode, Action<MessageEventArgs> stateMachineListener)
         {
-            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine));
+            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachineCode));
 
             DeleteSubscription(subscriberKey);
 

@@ -25,8 +25,7 @@ namespace ReactiveXComponent.RabbitMq
             return dico;
         }
 
-
-        public static Dictionary<string, object> ConvertStateMachineRefHeader(StateMachineRefHeader stateMachineRefHeader)
+        public static Dictionary<string, object> CreateHeaderFromStateMachineRefHeader(StateMachineRefHeader stateMachineRefHeader, IncomingEventType incomingEventType)
         {
             const int defaultValue = -1;
             var encoding = new UnicodeEncoding();
@@ -39,9 +38,9 @@ namespace ReactiveXComponent.RabbitMq
                                 {HeaderElement.StateMachineCode, stateMachineRefHeader?.StateMachineCode ?? defaultValue},
                                 {HeaderElement.ComponentCode, stateMachineRefHeader?.ComponentCode ?? defaultValue},
                                 {HeaderElement.EventType, stateMachineRefHeader?.EventCode ?? defaultValue},
-                                {HeaderElement.IncomingEventType, stateMachineRefHeader?.IncomingEventType ?? defaultValue},
                                 {HeaderElement.PublishTopic, stateMachineRefHeader?.PublishTopic != null ? encoding.GetBytes(stateMachineRefHeader.PublishTopic) : encoding.GetBytes(string.Empty) },
-                                {HeaderElement.MessageType, stateMachineRefHeader?.MessageType != null ? encoding.GetBytes(stateMachineRefHeader.MessageType) : encoding.GetBytes(string.Empty)}
+                                {HeaderElement.MessageType, stateMachineRefHeader?.MessageType != null ? encoding.GetBytes(stateMachineRefHeader.MessageType) : encoding.GetBytes(string.Empty)},
+                                {HeaderElement.IncomingEventType, (int)incomingEventType}
                            };
             return dico;
         }

@@ -10,7 +10,7 @@ namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
     public class RabbitMqHeaderConverterTest
     {
         private Header _header;
-        private readonly UnicodeEncoding _encoding = new UnicodeEncoding();
+        private readonly UTF8Encoding _encoding = new UTF8Encoding();
 
         [SetUp]
         public void Setup()

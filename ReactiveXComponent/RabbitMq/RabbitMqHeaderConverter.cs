@@ -11,7 +11,7 @@ namespace ReactiveXComponent.RabbitMq
         public static Dictionary<string, object> ConvertHeader(Header header)
         {
             const int defaultValue = -1;
-            var encoding = new UnicodeEncoding();
+            var encoding = new UTF8Encoding();
 
             var dico = new Dictionary<string, object>
                            {
@@ -28,7 +28,7 @@ namespace ReactiveXComponent.RabbitMq
         public static Dictionary<string, object> CreateHeaderFromStateMachineRefHeader(StateMachineRefHeader stateMachineRefHeader, IncomingEventType incomingEventType)
         {
             const int defaultValue = -1;
-            var encoding = new UnicodeEncoding();
+            var encoding = new UTF8Encoding();
 
             var dico = new Dictionary<string, object>
                            {
@@ -47,7 +47,7 @@ namespace ReactiveXComponent.RabbitMq
 
         public static StateMachineRefHeader ConvertStateMachineRefHeader(IDictionary<string,object> stateMachineRefHeader)
         {
-            var encoding = new UnicodeEncoding();
+            var encoding = new UTF8Encoding();
             var stateMachineId = -1;
             var agentId = -1;
             var stateCode = -1;

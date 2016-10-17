@@ -63,11 +63,9 @@ namespace ReactiveXComponent.RabbitMq
             {
                 InitPrivateSubscriber(stateMachine);
             }
-            else
-            {
-                StateMachineUpdatesStream.Subscribe(stateMachineListener);
-                InitSubscriber(stateMachine);
-            }
+
+            StateMachineUpdatesStream.Subscribe(stateMachineListener);
+            InitSubscriber(stateMachine);
         }
 
         private void InitPrivateSubscriber(string stateMachine)

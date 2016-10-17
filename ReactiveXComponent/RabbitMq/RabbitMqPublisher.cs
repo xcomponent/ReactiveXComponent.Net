@@ -44,20 +44,7 @@ namespace ReactiveXComponent.RabbitMq
 
             if (header == null) return;
 
-            string communicationIdentifier = string.IsNullOrEmpty(_privateCommunicationIdentifier)
-                ? _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode)
-                : _privateCommunicationIdentifier;
-
-            string routingKey;
-
-            if (visibility == Visibility.Private)
-            {
-                routingKey = communicationIdentifier;
-            }
-            else
-            {
-                routingKey = _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode);
-            }
+            string routingKey = _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode);
 
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
@@ -72,21 +59,8 @@ namespace ReactiveXComponent.RabbitMq
 
             var stateMachineRefNewHeader = CreateStateMachineRefHeader(stateMachineRefHeader, message);
 
-            string communicationIdentifier = string.IsNullOrEmpty(_privateCommunicationIdentifier)
-                ? _configuration.GetPublisherTopic(_component, stateMachineRefHeader.StateMachineId.ToString(), stateMachineRefHeader.EventCode)
-                : _privateCommunicationIdentifier;
-
-            string routingKey;
-
-            if (visibility == Visibility.Private)
-            {
-                routingKey = communicationIdentifier;
-            }
-            else
-            {
-                routingKey = _configuration.GetPublisherTopic(_component,
-                    stateMachineRefHeader.StateMachineId.ToString(), stateMachineRefHeader.EventCode);
-            }
+            string routingKey = _configuration.GetPublisherTopic(_component,
+                    stateMachineRefHeader.StateMachineCode.ToString(), stateMachineRefHeader.EventCode);
 
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRefNewHeader, IncomingEventType.Transition);

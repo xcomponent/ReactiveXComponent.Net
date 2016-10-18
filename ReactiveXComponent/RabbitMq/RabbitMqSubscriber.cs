@@ -61,32 +61,11 @@ namespace ReactiveXComponent.RabbitMq
 
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
             {
-                InitPrivateSubscriber(stateMachine);
+                InitSubscriber(stateMachine, _privateCommunicationIdentifier);
             }
 
             StateMachineUpdatesStream.Subscribe(stateMachineListener);
             InitSubscriber(stateMachine);
-        }
-
-        private void InitPrivateSubscriber(string stateMachine)
-        {
-            StateMachineUpdatesStream.Subscribe(args =>
-            {
-                var subscribreKey = new SubscriberKey(args.StateMachineRefHeader.ComponentCode, args.StateMachineRefHeader.StateMachineCode);
-
-                ThreadSafeList<Action<MessageEventArgs>> listenerToUpdateList;
-                if (!_listenerBySubscriberKeyRepo.TryGetValue(subscribreKey, out listenerToUpdateList))
-                {
-                    return;
-                }
-
-                foreach (var listener in listenerToUpdateList)
-                {
-                    listener(args);
-                }
-            });
-
-            InitSubscriber(stateMachine, _privateCommunicationIdentifier);
         }
 
         private void InitSubscriber(string stateMachine, string privateCommunicationIdentifier = null)

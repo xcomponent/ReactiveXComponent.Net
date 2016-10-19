@@ -13,5 +13,6 @@ namespace ReactiveXComponent.Configuration
         string GetPublisherTopic(string component, string stateMachine, int eventCode);
         string GetSubscriberTopic(string component, string stateMachine);
         string GetSerializationType();
+        string GetSnapshotTopic(string component);
     }
 }

@@ -65,5 +65,10 @@ namespace ReactiveXComponent.Configuration
         {
             return _parser.GetSubscriberTopic(component, stateMachine);
         }
+
+        public string GetSnapshotTopic(string component)
+        {
+            return _parser.GetSnapshotTopic(component);
+        }
     }
 }

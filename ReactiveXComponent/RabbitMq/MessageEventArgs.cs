@@ -6,14 +6,17 @@ namespace ReactiveXComponent.RabbitMq
 
     public class MessageEventArgs : EventArgs
     {        
-        public MessageEventArgs(StateMachineRefHeader stateMachineRefHeader, object messageReceived)
+        public MessageEventArgs(StateMachineRefHeader stateMachineRefHeader, object messageReceived, string replyTopic = null)
         {
             StateMachineRefHeader = stateMachineRefHeader;
-            MessageReceived = messageReceived;            
+            MessageReceived = messageReceived;
+            ReplyTopic = replyTopic;
         }
 
         public  StateMachineRefHeader StateMachineRefHeader { get; }
 
         public object MessageReceived { get; }
+
+        public string ReplyTopic { get; }
     }
 }

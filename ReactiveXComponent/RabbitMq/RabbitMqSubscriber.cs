@@ -19,6 +19,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
         private readonly string _component;
+        private readonly RabbitMqSnapshot _rabbitMqSnapshot;
 
         private readonly ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos> _subscribers;
         private readonly ConcurrentDictionary<SubscriberKey, ThreadSafeList<Action<MessageEventArgs>>> _listenerBySubscriberKeyRepo;
@@ -38,6 +39,7 @@ namespace ReactiveXComponent.RabbitMq
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _serializer = serializer;
             InitObservableCollection();
+            _rabbitMqSnapshot = new RabbitMqSnapshot(connection, component, xcConfiguration, _serializer, privateCommunicationIdentifier);
         }
 
         private void InitObservableCollection()
@@ -68,6 +70,11 @@ namespace ReactiveXComponent.RabbitMq
             InitSubscriber(stateMachine);
         }
 
+        public void GetSnapshot(string stateMachine, Action<MessageEventArgs> OnGetSnapshot)
+        {
+            _rabbitMqSnapshot.GetSnapshot(stateMachine, OnGetSnapshot);
+        }
+        
         private void InitSubscriber(string stateMachine, string privateCommunicationIdentifier = null)
         {
             if (_xcConfiguration == null)

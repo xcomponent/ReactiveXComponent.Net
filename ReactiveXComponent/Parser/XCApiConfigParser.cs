@@ -16,6 +16,7 @@ namespace ReactiveXComponent.Parser
         private Dictionary<string, int> _eventCodeByEvent;
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
         private Dictionary<TopicIdentifier, string> _subscriberTopicByIdentifier;
+        private Dictionary<long, string> _snapshotTopicByComponent;
 
         public void Parse(Stream xcApiStream)
         {
@@ -29,6 +30,7 @@ namespace ReactiveXComponent.Parser
             _eventCodeByEvent = CreateEventCodeByEventRepository(_xcApiDescription.GetPublishersNode());
             _publisherTopicByIdentifier = CreatePublisherTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetPublishersNode());
             _subscriberTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetConsumersNode());
+            _snapshotTopicByComponent = CreateSnapshotTopicByComponentRepository(_xcApiDescription.GetSnapshotsNode()); ;
         }
 
         private Dictionary<string, long> CreateComponentCodeByNameRepository(XmlNodeList components)
@@ -108,6 +110,16 @@ namespace ReactiveXComponent.Parser
             return topicByIdentifierRepo;
         }
 
+        private Dictionary<long, string> CreateSnapshotTopicByComponentRepository(XmlNodeList snapshotNodes)
+        {
+            Dictionary<long, string> SnapshotTopicByComponentRepo = new Dictionary<long, string>();
+            foreach (XmlNode node in snapshotNodes)
+            {
+                AddSnapshotTopicToRepository(SnapshotTopicByComponentRepo, node);
+            }
+            return SnapshotTopicByComponentRepo;
+        }
+
         private void AddTopicToRepository(Dictionary<TopicIdentifier, string> repository, XmlNode node)
         {
             var componentCode = Convert.ToInt64(node?.Attributes[XCApiTags.ComponentCode]?.Value);
@@ -122,6 +134,17 @@ namespace ReactiveXComponent.Parser
             {
                 XmlNode topicNode = node?.FirstChild;
                 repository.Add(topicIdentifier, topicNode?.InnerText);
+            }
+        }
+
+        private void AddSnapshotTopicToRepository(Dictionary<long, string> repository, XmlNode node)
+        {
+            var componentCode = Convert.ToInt64(node?.Attributes[XCApiTags.ComponentCode]?.Value);
+
+            if (!repository.ContainsKey(componentCode))
+            {
+                XmlNode topicNode = node?.FirstChild;
+                repository.Add(componentCode, topicNode?.InnerText);
             }
         }
 
@@ -202,6 +225,14 @@ namespace ReactiveXComponent.Parser
             var topicId = new TopicIdentifier(componentCode, stateMachineCode, 0, XCApiTags.Input);
             _subscriberTopicByIdentifier.TryGetValue(topicId, out subscriberTopic);
             return subscriberTopic;
+        }
+
+        public string GetSnapshotTopic(string component)
+        {
+            string snapshotTopic;
+            var componentCode = GetComponentCode(component);
+            _snapshotTopicByComponent.TryGetValue(componentCode, out snapshotTopic);
+            return snapshotTopic;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace ReactiveXComponent.Configuration
         long GetStateMachineCode(string component, string stateMachine);
         long GetComponentCode(string component);
         int GetPublisherEventCode(string evnt);
-        string GetPublisherTopic(string component, string stateMachine, int eventCode);
+        string GetPublisherTopic(string component, string stateMachine);
         string GetSubscriberTopic(string component, string stateMachine);
         string GetSerializationType();
     }

@@ -56,9 +56,9 @@ namespace ReactiveXComponent.Configuration
             return _parser.GetBusDetails();
         }
 
-        public string GetPublisherTopic(string component, string stateMachine, int eventCode)
+        public string GetPublisherTopic(string component, string stateMachine)
         {
-            return _parser.GetPublisherTopic(component, stateMachine, eventCode);
+            return _parser.GetPublisherTopic(component, stateMachine);
         }
 
         public string GetSubscriberTopic(string component, string stateMachine)

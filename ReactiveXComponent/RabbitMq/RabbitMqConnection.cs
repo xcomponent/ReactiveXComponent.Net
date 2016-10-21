@@ -61,7 +61,11 @@ namespace ReactiveXComponent.RabbitMq
                 if (disposing)
                 {
                     // clear managed resources
-                    _connection?.Close();
+                    if (_connection.IsOpen)
+                    {
+                        _connection?.Close();
+                    }
+
                     _connection?.Dispose();
                 }
 

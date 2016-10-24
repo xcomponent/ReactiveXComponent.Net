@@ -70,6 +70,11 @@ namespace ReactiveXComponent.RabbitMq
             InitSubscriber(stateMachine);
         }
 
+        public void GetSnapshot(string stateMachine, Action<MessageEventArgs> OnGetSnapshot)
+        {
+            _rabbitMqSnapshot.GetSnapshot(stateMachine, OnGetSnapshot);
+        }
+
         private void InitSubscriber(string stateMachine, string privateCommunicationIdentifier = null)
         {
             if (_xcConfiguration == null)

@@ -44,7 +44,8 @@ namespace ReactiveXComponent.RabbitMq
 
             if (header == null) return;
 
-            string routingKey = _configuration.GetPublisherTopic(_component, stateMachine, header.EventCode);
+            var routingKey = !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier:
+                            _configuration.GetPublisherTopic(_component, stateMachine);
 
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.ConvertHeader(header);
@@ -59,8 +60,7 @@ namespace ReactiveXComponent.RabbitMq
 
             var stateMachineRefNewHeader = CreateStateMachineRefHeader(stateMachineRefHeader, message);
 
-            string routingKey = _configuration.GetPublisherTopic(_component,
-                    stateMachineRefHeader.StateMachineCode.ToString(), stateMachineRefHeader.EventCode);
+            string routingKey = _configuration.GetPublisherTopic(_component, stateMachineRefHeader.StateMachineCode.ToString());
 
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRefNewHeader, IncomingEventType.Transition);
@@ -150,7 +150,6 @@ namespace ReactiveXComponent.RabbitMq
                 if (disposing)
                 {
                     // clear managed resources
-                    _publisherChannel?.Close();
                     _publisherChannel?.Dispose();
                 }
 

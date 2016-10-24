@@ -67,7 +67,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             _xcConfiguration.GetSerializationType().ReturnsForAnyArgs(_serialization);
             _xcConfiguration.GetStateMachineCode(null, null).ReturnsForAnyArgs(0);
             _xcConfiguration.GetComponentCode(null).ReturnsForAnyArgs(Convert.ToInt32(_exchangeName));
-            _xcConfiguration.GetPublisherTopic(null, null, 0).ReturnsForAnyArgs(_routingKey);
+            _xcConfiguration.GetPublisherTopic(null, null).ReturnsForAnyArgs(_routingKey);
             _xcConfiguration.GetSubscriberTopic(null, null).ReturnsForAnyArgs(_routingKey);
         }
 

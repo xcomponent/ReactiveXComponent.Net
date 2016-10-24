@@ -89,11 +89,9 @@ namespace ReactiveXComponentTest.UnitTests.ParserTests
         {
             _xcApiConfigParser = new XCApiConfigParser();
             _xcApiConfigParser.Parse(_xcApiStream);
-
-            const string messageType = "XComponent.HelloWorld.UserObject.SayHello";
-            var eventCode = _xcApiConfigParser.GetPublisherEventCode(messageType);
+            
             const string expectedTopic = "input.1_0.HelloMicroservice.HelloWorld.HelloWorldManager";
-            var topic = _xcApiConfigParser.GetPublisherTopic(_component, _stateMachine, eventCode);
+            var topic = _xcApiConfigParser.GetPublisherTopic(_component, _stateMachine);
 
             Check.That(topic).IsEqualTo(expectedTopic);
         }

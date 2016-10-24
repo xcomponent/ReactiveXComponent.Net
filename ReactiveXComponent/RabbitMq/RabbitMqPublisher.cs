@@ -149,11 +149,6 @@ namespace ReactiveXComponent.RabbitMq
                 if (disposing)
                 {
                     // clear managed resources
-                    if (_publisherChannel != null && _publisherChannel.IsOpen)
-                    {
-                        _publisherChannel?.Close();
-                    }
-                    
                     _publisherChannel?.Dispose();
                 }
 

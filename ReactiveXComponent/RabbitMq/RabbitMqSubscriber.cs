@@ -212,10 +212,7 @@ namespace ReactiveXComponent.RabbitMq
             }
 
             _listenerBySubscriberKeyRepo.Clear();
-            if (_connection.IsOpen)
-            {
-                _connection.Close();
-            }
+            _connection.Dispose();
         }
 
         #region IDisposable implementation

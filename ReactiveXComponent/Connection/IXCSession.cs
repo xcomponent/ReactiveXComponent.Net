@@ -3,6 +3,6 @@
     public interface IXCSession
     {
         IXCPublisher CreatePublisher(string component);
-        IXCSubscriber CreateSubscriber();
+        IXCSubscriber CreateSubscriber(string component);
     }
 }

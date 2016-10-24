@@ -18,6 +18,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
+        private readonly string _component;
 
         private readonly ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos> _subscribers;
         private readonly ConcurrentDictionary<SubscriberKey, ThreadSafeList<Action<MessageEventArgs>>> _listenerBySubscriberKeyRepo;
@@ -27,8 +28,9 @@ namespace ReactiveXComponent.RabbitMq
 
         public IObservable<MessageEventArgs> StateMachineUpdatesStream { get; private set; }
 
-        public RabbitMqSubscriber(IXCConfiguration xcConfiguration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
+        public RabbitMqSubscriber(string component, IXCConfiguration xcConfiguration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
+            _component = component;
             _xcConfiguration = xcConfiguration;
             _connection = connection;
             _subscribers = new ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos>();
@@ -46,58 +48,35 @@ namespace ReactiveXComponent.RabbitMq
                 h => MessageReceived -= h);
         }
 
-        public void Subscribe(string component, string stateMachine, Action<MessageEventArgs> stateMachineListener)
+        public void Subscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
         {
             if (stateMachineListener == null) return;
             
-            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(component), _xcConfiguration.GetStateMachineCode(component, stateMachine));
+            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine));
             AddListenerToRepository(subscriberKey, stateMachineListener);
 
             StateMachineUpdatesStream = StateMachineUpdatesStream
-                .Where(k => k.StateMachineRefHeader.ComponentCode == _xcConfiguration.GetComponentCode(component) &&
-                            k.StateMachineRefHeader.StateMachineCode == _xcConfiguration.GetStateMachineCode(component, stateMachine));
+                .Where(k => k.StateMachineRefHeader.ComponentCode == _xcConfiguration.GetComponentCode(_component) &&
+                            k.StateMachineRefHeader.StateMachineCode == _xcConfiguration.GetStateMachineCode(_component, stateMachine));
 
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
             {
-                InitPrivateSubscriber(component, stateMachine);
+                InitSubscriber(stateMachine, _privateCommunicationIdentifier);
             }
-            else
-            {
-                StateMachineUpdatesStream.Subscribe(stateMachineListener);
-                InitSubscriber(component, stateMachine);
-            }
+
+            StateMachineUpdatesStream.Subscribe(stateMachineListener);
+            InitSubscriber(stateMachine);
         }
 
-        private void InitPrivateSubscriber(string component, string stateMachine)
-        {
-            StateMachineUpdatesStream.Subscribe(args =>
-            {
-                var subscribreKey = new SubscriberKey(args.StateMachineRefHeader.ComponentCode, args.StateMachineRefHeader.StateMachineCode);
-
-                ThreadSafeList<Action<MessageEventArgs>> listenerToUpdateList;
-                if (!_listenerBySubscriberKeyRepo.TryGetValue(subscribreKey, out listenerToUpdateList))
-                {
-                    return;
-                }
-
-                foreach (var listener in listenerToUpdateList)
-                {
-                    listener(args);
-                }
-            });
-
-            InitSubscriber(component, stateMachine, _privateCommunicationIdentifier);
-        }
-
-        private void InitSubscriber(string component, string stateMachine, string privateCommunicationIdentifier = null)
+        private void InitSubscriber(string stateMachine, string privateCommunicationIdentifier = null)
         {
             if (_xcConfiguration == null)
             {
                 return;
             }
 
-            var exchangeName = _xcConfiguration.GetComponentCode(component).ToString();
-            var routingKey = string.IsNullOrEmpty(privateCommunicationIdentifier) ? _xcConfiguration.GetSubscriberTopic(component, stateMachine) : privateCommunicationIdentifier;
+            var exchangeName = _xcConfiguration.GetComponentCode(_component).ToString();
+            var routingKey = string.IsNullOrEmpty(privateCommunicationIdentifier) ? _xcConfiguration.GetSubscriberTopic(_component, stateMachine) : privateCommunicationIdentifier;
 
             try
             {
@@ -111,7 +90,7 @@ namespace ReactiveXComponent.RabbitMq
                     Subscriber = subscriber
                 };
 
-                var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(component), _xcConfiguration.GetStateMachineCode(component, stateMachine));
+                var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine));
                 _subscribers.AddOrUpdate(subscriberKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
 
                 ReceiveMessage(subscriberKey);
@@ -200,7 +179,7 @@ namespace ReactiveXComponent.RabbitMq
             var obj = _serializer.Deserialize(new MemoryStream(basicAckEventArgs.Body));
 
             var msgEventArgs = new MessageEventArgs(
-                                    RabbitMqHeaderConverter.ConvertStateMachineRef(basicAckEventArgs.BasicProperties.Headers),
+                                    RabbitMqHeaderConverter.ConvertStateMachineRefHeader(basicAckEventArgs.BasicProperties.Headers),
                                     obj);
 
             OnMessageReceived(msgEventArgs);
@@ -211,9 +190,9 @@ namespace ReactiveXComponent.RabbitMq
             MessageReceived?.Invoke(this, e);
         }
 
-        public void Unsubscribe(string component, string stateMachine, Action<MessageEventArgs> stateMachineListener)
+        public void Unsubscribe(string stateMachineCode, Action<MessageEventArgs> stateMachineListener)
         {
-            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(component), _xcConfiguration.GetStateMachineCode(component, stateMachine));
+            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachineCode));
 
             DeleteSubscription(subscriberKey);
 
@@ -233,7 +212,7 @@ namespace ReactiveXComponent.RabbitMq
             }
 
             _listenerBySubscriberKeyRepo.Clear();
-            _connection.Close();
+            _connection.Dispose();
         }
 
         #region IDisposable implementation

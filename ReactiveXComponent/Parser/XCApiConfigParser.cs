@@ -14,6 +14,7 @@ namespace ReactiveXComponent.Parser
         private Dictionary<string, long> _componentCodeByComponent;
         private Dictionary<string, Dictionary<string, long>> _stateMachineCodeByStateMachineAndComponent;
         private Dictionary<string, int> _eventCodeByEvent;
+        private HashSet<string> _eventNames;
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
         private Dictionary<TopicIdentifier, string> _subscriberTopicByIdentifier;
 
@@ -27,8 +28,9 @@ namespace ReactiveXComponent.Parser
             _componentCodeByComponent = CreateComponentCodeByNameRepository(_xcApiDescription.GetComponentsNode());
             _stateMachineCodeByStateMachineAndComponent = CreateStateMachineCodeByNameAndComponentRepository(_xcApiDescription.GetComponentsNode());
             _eventCodeByEvent = CreateEventCodeByEventRepository(_xcApiDescription.GetPublishersNode());
-            _publisherTopicByIdentifier = CreatePublisherTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetPublishersNode());
-            _subscriberTopicByIdentifier = CreateConsumerTopicByComponentStateMachineAndEvenCodeRepository(_xcApiDescription.GetConsumersNode());
+            _eventNames = CreateEventNamesRepository(_xcApiDescription.GetPublishersNode());
+            _publisherTopicByIdentifier = CreatePublisherTopicByComponentAndStateMachineRepository(_xcApiDescription.GetPublishersNode());
+            _subscriberTopicByIdentifier = CreateConsumerTopicByComponentAndStateMachineAndRepository(_xcApiDescription.GetConsumersNode());
         }
 
         private Dictionary<string, long> CreateComponentCodeByNameRepository(XmlNodeList components)
@@ -77,6 +79,17 @@ namespace ReactiveXComponent.Parser
             return eventCodeByEventRepo;
         }
 
+        private HashSet<string> CreateEventNamesRepository(XmlNodeList publishNodes)
+        {
+            HashSet<string> eventNamesRepo = new HashSet<string>();
+
+            foreach (XmlNode node in publishNodes)
+            {
+                AddEventNameToRepository(eventNamesRepo, node);
+            }
+            return eventNamesRepo;
+        }
+
         private void AddEventCodeToRepository(Dictionary<string, int> repository, XmlNode node)
         {
             if (node?.Attributes?[XCApiTags.EventName]?.Value != null && !repository.ContainsKey(node.Attributes[XCApiTags.EventName]?.Value))
@@ -86,7 +99,15 @@ namespace ReactiveXComponent.Parser
             }
         }
 
-        private Dictionary<TopicIdentifier, string> CreatePublisherTopicByComponentStateMachineAndEvenCodeRepository(XmlNodeList publishNodes)
+        private void AddEventNameToRepository(HashSet<string> repository, XmlNode node)
+        {
+            if (node?.Attributes?[XCApiTags.EventName]?.Value != null && !repository.Contains(node.Attributes[XCApiTags.EventName]?.Value))
+            {
+                repository.Add(node.Attributes[XCApiTags.EventName].Value);
+            }
+        }
+
+        private Dictionary<TopicIdentifier, string> CreatePublisherTopicByComponentAndStateMachineRepository(XmlNodeList publishNodes)
         {
             Dictionary<TopicIdentifier, string> topicByIdentifierRepo = new Dictionary<TopicIdentifier, string>();
 
@@ -97,7 +118,7 @@ namespace ReactiveXComponent.Parser
             return topicByIdentifierRepo;
         }
 
-        private Dictionary<TopicIdentifier, string> CreateConsumerTopicByComponentStateMachineAndEvenCodeRepository(XmlNodeList subscribeNodes)
+        private Dictionary<TopicIdentifier, string> CreateConsumerTopicByComponentAndStateMachineAndRepository(XmlNodeList subscribeNodes)
         {
             Dictionary<TopicIdentifier, string> topicByIdentifierRepo = new Dictionary<TopicIdentifier, string>();
 
@@ -112,11 +133,10 @@ namespace ReactiveXComponent.Parser
         {
             var componentCode = Convert.ToInt64(node?.Attributes[XCApiTags.ComponentCode]?.Value);
             var stateMachineCode = Convert.ToInt64(node?.Attributes[XCApiTags.StateMachineCode]?.Value);
-            var eventCode = node?.Attributes[XCApiTags.EventCode] == null
-                ? 0 : Convert.ToInt32(node.Attributes[XCApiTags.EventCode].Value);
+            var eventName = node?.Attributes[XCApiTags.EventName].Value;
             var topicType = node?.Attributes[XCApiTags.TopicType]?.Value;
 
-            var topicIdentifier = CreateTopicIdentifier(componentCode, stateMachineCode, eventCode, topicType);
+            var topicIdentifier = CreateTopicIdentifier(componentCode, stateMachineCode, topicType);
 
             if (!repository.ContainsKey(topicIdentifier))
             {
@@ -125,9 +145,9 @@ namespace ReactiveXComponent.Parser
             }
         }
 
-        private TopicIdentifier CreateTopicIdentifier(long componentCode, long stateMachineCode, int eventCode, string topicType)
+        private TopicIdentifier CreateTopicIdentifier(long componentCode, long stateMachineCode, string topicType)
         {
-            var topicIdentifier = new TopicIdentifier(componentCode, stateMachineCode, eventCode, topicType);
+            var topicIdentifier = new TopicIdentifier(componentCode, stateMachineCode, topicType);
             return topicIdentifier;
         }
 
@@ -182,12 +202,13 @@ namespace ReactiveXComponent.Parser
             return eventCode ;
         }
 
-        public string GetPublisherTopic(string component, string stateMachine, int eventCode)
+        public string GetPublisherTopic(string component, string stateMachine)
         {
             string publisherTopic;
+            long code;
             var componentCode = GetComponentCode(component);
-            var stateMachineCode = GetStateMachineCode(component, stateMachine);
-            var topicId = new TopicIdentifier(componentCode, stateMachineCode, eventCode, XCApiTags.Output);
+            var stateMachineCode = Int64.TryParse(stateMachine, out code) ? code : GetStateMachineCode(component, stateMachine);
+            var topicId = new TopicIdentifier(componentCode, stateMachineCode, XCApiTags.Output);
             _publisherTopicByIdentifier.TryGetValue(topicId, out publisherTopic);
             return publisherTopic;
         }
@@ -195,9 +216,10 @@ namespace ReactiveXComponent.Parser
         public string GetSubscriberTopic(string component, string stateMachine)
         {
             string subscriberTopic;
+            long code;
             var componentCode = GetComponentCode(component);
-            var stateMachineCode = GetStateMachineCode(component, stateMachine);
-            var topicId = new TopicIdentifier(componentCode, stateMachineCode, 0, XCApiTags.Input);
+            var stateMachineCode = Int64.TryParse(stateMachine, out code)? code : GetStateMachineCode(component, stateMachine);
+            var topicId = new TopicIdentifier(componentCode, stateMachineCode, XCApiTags.Input);
             _subscriberTopicByIdentifier.TryGetValue(topicId, out subscriberTopic);
             return subscriberTopic;
         }

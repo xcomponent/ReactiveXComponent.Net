@@ -67,7 +67,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             _xcConfiguration.GetSerializationType().ReturnsForAnyArgs(_serialization);
             _xcConfiguration.GetStateMachineCode(null, null).ReturnsForAnyArgs(0);
             _xcConfiguration.GetComponentCode(null).ReturnsForAnyArgs(Convert.ToInt32(_exchangeName));
-            _xcConfiguration.GetPublisherTopic(null, null, 0).ReturnsForAnyArgs(_routingKey);
+            _xcConfiguration.GetPublisherTopic(null, null).ReturnsForAnyArgs(_routingKey);
             _xcConfiguration.GetSubscriberTopic(null, null).ReturnsForAnyArgs(_routingKey);
         }
 
@@ -102,7 +102,7 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TestCase(Visibility.Public)]
         public void SendEvent_GivenAStateMachineAMessageAndAVisibility_ShouldSendMessageToRabbitMqWithCorrectHeader_Test(Visibility visibility)
         {
-            using (var subscriber = CreateSubscriber(visibility))
+            using (var subscriber = CreateSubscriber(ComponentNameA, visibility))
             {
                 var expectedHeader = new Header() {
                     StateMachineCode = 0,
@@ -115,7 +115,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                 var routingKey = visibility == Visibility.Private ? PrivateCommincationIdentifier : string.Empty;
 
                 IModel channel;
-                var consumer = CreateConsumer(routingKey, out channel);
+                CreateConsumer(routingKey, out channel);
                 
                 const int timeoutReceive = 10000;
                 var lockEvent = new AutoResetEvent(false);
@@ -126,7 +126,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                     lockEvent.Set();
                 };
 
-                subscriber.Subscribe(ComponentNameA, StateMachineA, messagedReceivedHandler);
+                subscriber.Subscribe(StateMachineA, messagedReceivedHandler);
 
                 PublishMessage(ComponentNameA, StateMachineA, visibility);
 
@@ -136,6 +136,71 @@ namespace ReactiveXComponentTest.IntegrationTests
                 Check.That(MatchesHeader(expectedHeader, stateMachineRefHeader)).IsTrue();
             }
 
+        }
+
+        [TestCase(Visibility.Private)]
+        [TestCase(Visibility.Public)]
+        public void SendEventWithStateMachineRef_GivenAStateMachineRefAndAMessage_ShouldSendMessageToCorrectStateMachineRef_Test(Visibility visibility)
+        {
+            var session = CreateSession(visibility);
+            var subscriber = session?.CreateSubscriber(ComponentNameA);
+            var publisher = session?.CreatePublisher(ComponentNameA);
+
+            var routingKey = visibility == Visibility.Private ? PrivateCommincationIdentifier : string.Empty;
+
+            IModel channel;
+            CreateConsumer(routingKey, out channel);
+
+            const int timeoutReceive = 10000;
+            var lockEvent = new AutoResetEvent(false);
+            StateMachineRefHeader stateMachineRefHeader = null;
+            Action<MessageEventArgs> messagedReceivedHandler = args =>
+            {
+                stateMachineRefHeader = args.StateMachineRefHeader;
+                lockEvent.Set();
+            };
+
+            subscriber?.Subscribe(StateMachineA, messagedReceivedHandler);
+            publisher?.SendEvent(StateMachineA, TestMessage, visibility);
+
+            var messageReceived = lockEvent.WaitOne(timeoutReceive);
+
+            Check.That(messageReceived).IsTrue();
+
+            var firstStateRefHeader = new StateMachineRefHeader()
+            {
+                StateMachineId = stateMachineRefHeader.StateMachineId,
+                AgentId = stateMachineRefHeader.AgentId,
+                StateMachineCode = stateMachineRefHeader.StateMachineCode,
+                ComponentCode = stateMachineRefHeader.ComponentCode,
+                EventCode = stateMachineRefHeader.EventCode,
+                MessageType = stateMachineRefHeader.MessageType,
+                PublishTopic = stateMachineRefHeader.PublishTopic
+            };
+            
+            publisher?.SendEvent(firstStateRefHeader, 1, visibility);
+
+            var newMessageReceived = lockEvent.WaitOne(timeoutReceive);
+
+            subscriber?.Unsubscribe(StateMachineA, messagedReceivedHandler);
+
+            Check.That(newMessageReceived).IsTrue();
+
+            var secondStateRefHeader = new StateMachineRefHeader()
+            {
+                StateMachineId = stateMachineRefHeader.StateMachineId,
+                AgentId = stateMachineRefHeader.AgentId,
+                StateMachineCode = stateMachineRefHeader.StateMachineCode,
+                ComponentCode = stateMachineRefHeader.ComponentCode,
+                EventCode = stateMachineRefHeader.EventCode,
+                MessageType = stateMachineRefHeader.MessageType,
+                PublishTopic = stateMachineRefHeader.PublishTopic
+            };
+            
+            Check.That(firstStateRefHeader.AgentId == secondStateRefHeader.AgentId).IsTrue();
+            Check.That(firstStateRefHeader.StateMachineId == secondStateRefHeader.StateMachineId).IsTrue();
+            Check.That(firstStateRefHeader.ComponentCode == secondStateRefHeader.ComponentCode).IsTrue();
+            Check.That(firstStateRefHeader.StateMachineCode == secondStateRefHeader.StateMachineCode).IsTrue();
         }
 
         [Test]
@@ -178,10 +243,8 @@ namespace ReactiveXComponentTest.IntegrationTests
         [TestCase(Visibility.Public)]
         public void Subscribe_GivenAcomponentAStateMachineAndACallback_ShouldCreateSubscriptionAndReceiveMessageOnCallback_Test(Visibility visibility)
         {
-            using (var subscriber = CreateSubscriber(visibility))
+            using (var subscriber = CreateSubscriber(ComponentNameA, visibility))
             {
-                const string component = ComponentNameA;
-                const string stateMachine = StateMachineA;
                 string label = null;
                 const int timeoutReceive = 10000;
                 var lockEvent = new AutoResetEvent(false);
@@ -192,12 +255,12 @@ namespace ReactiveXComponentTest.IntegrationTests
                     lockEvent.Set();
                 };
 
-                subscriber.Subscribe(component, stateMachine, messagedReceivedHandler);
-                PublishMessage(component, stateMachine, visibility);
+                subscriber.Subscribe(StateMachineA, messagedReceivedHandler);
+                PublishMessage(ComponentNameA, StateMachineA, visibility);
                
                 var messageReceived = lockEvent.WaitOne(timeoutReceive);
 
-                subscriber.Unsubscribe(component, stateMachine, messagedReceivedHandler);
+                subscriber.Unsubscribe(StateMachineA, messagedReceivedHandler);
 
                 Check.That(messageReceived).IsTrue();
                 Check.That(label).IsNotNull().And.IsNotEmpty().And.Equals(TestMessage);
@@ -211,10 +274,10 @@ namespace ReactiveXComponentTest.IntegrationTests
             return rabbitMqConnection.CreateSession();
         }
 
-        private IXCSubscriber CreateSubscriber(Visibility visibility)
+        private IXCSubscriber CreateSubscriber(string component, Visibility visibility)
         {
             var session = CreateSession(visibility);
-            return session.CreateSubscriber();
+            return session.CreateSubscriber(component);
         }
 
         private void PublishMessage(string component, string stateMachine, Visibility visibility)

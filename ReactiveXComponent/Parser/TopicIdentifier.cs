@@ -2,32 +2,17 @@
 {
     public class TopicIdentifier
     {
-        public TopicIdentifier(long component, long stateMachine, int eventCode, string topicType)
+        protected bool Equals(TopicIdentifier other)
         {
-            Component = component;
-            StateMachine = stateMachine;
-            EventCode = eventCode;
-            TopicType = topicType;
+            return Component == other.Component && StateMachine == other.StateMachine && string.Equals(TopicType, other.TopicType);
         }
-
-        public long Component { get; }
-        public long StateMachine { get; }
-        public int EventCode { get; }
-        public  string TopicType { get; }
 
         public override bool Equals(object obj)
         {
-            var toCompareWith = obj as TopicIdentifier;
-
-            return toCompareWith != null && Equals(toCompareWith);
-        }
-
-        private bool Equals(TopicIdentifier other)
-        {
-            return Component == other.Component &&
-                   StateMachine == other.StateMachine &&
-                   EventCode == other.EventCode &&
-                   TopicType == other.TopicType;
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((TopicIdentifier) obj);
         }
 
         public override int GetHashCode()
@@ -35,11 +20,21 @@
             unchecked
             {
                 var hashCode = Component.GetHashCode();
-                hashCode = (hashCode * 397) ^ StateMachine.GetHashCode();
-                hashCode = (hashCode * 397) ^ EventCode.GetHashCode();
-                hashCode = (hashCode * 397) ^ (TopicType?.GetHashCode() ?? 0);
+                hashCode = (hashCode*397) ^ StateMachine.GetHashCode();
+                hashCode = (hashCode*397) ^ (TopicType != null ? TopicType.GetHashCode() : 0);
                 return hashCode;
             }
         }
+
+        public TopicIdentifier(long component, long stateMachine, string topicType)
+        {
+            Component = component;
+            StateMachine = stateMachine;
+            TopicType = topicType;
+        }
+
+        public long Component { get; }
+        public long StateMachine { get; }
+        public  string TopicType { get; }
     }
 }

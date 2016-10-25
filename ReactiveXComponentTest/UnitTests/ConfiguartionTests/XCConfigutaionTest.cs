@@ -23,7 +23,7 @@ namespace ReactiveXComponentTest.UnitTests.ConfiguartionTests
         {
             var xcConfig = new XCConfiguration(_parser);
             xcConfig.Init(null);
-            var publisher = xcConfig.GetPublisherTopic("", "", 0);
+            var publisher = xcConfig.GetPublisherTopic("", "");
             Check.That(publisher).IsEqualTo(string.Empty);
         }
     }

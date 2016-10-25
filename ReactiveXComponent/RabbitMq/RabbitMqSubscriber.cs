@@ -55,7 +55,6 @@ namespace ReactiveXComponent.RabbitMq
             var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine));
             AddListenerToRepository(subscriberKey, stateMachineListener);
 
-
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
             {
                 InitSubscriber(stateMachine, _privateCommunicationIdentifier);

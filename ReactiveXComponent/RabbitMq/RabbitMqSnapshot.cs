@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -28,7 +29,8 @@ namespace ReactiveXComponent.RabbitMq
         private IModel _snapshotChannel;
         private event EventHandler<MessageEventArgs> SnapshotReceived;
         private event EventHandler<string> ConnectionFailed;
-        public IObservable<MessageEventArgs> SnapshotUpdatesStream { get; private set; }
+
+        public IObservable<MessageEventArgs> SnapshotStream { get; private set; }
 
         public RabbitMqSnapshot(IConnection connection, string component, IXCConfiguration configuration, ISerializer serializer, string privateCommunicationIdentifier)
         {
@@ -38,16 +40,8 @@ namespace ReactiveXComponent.RabbitMq
             _serializer = serializer;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _subscribers = new ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos>();
-            InitObservableCollection();
             CreateSnapshotChannel(connection);
-        }
-
-        private void InitObservableCollection()
-        {
-            SnapshotUpdatesStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
-                handler => (sender, e) => handler(e),
-                h => SnapshotReceived += h,
-                h => SnapshotReceived -= h);
+            InitObservableCollection();
         }
 
         private void CreateSnapshotChannel(IConnection connection)
@@ -60,14 +54,19 @@ namespace ReactiveXComponent.RabbitMq
             _snapshotChannel.ExchangeDeclare(exchangeName, ExchangeType.Topic);
         }
 
-        public void GetSnapshot(string stateMachine, Action<MessageEventArgs> snapshotListener)
+        private void InitObservableCollection()
+        {
+            SnapshotStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
+                handler => (sender, e) => handler(e),
+                h => SnapshotReceived += h,
+                h => SnapshotReceived -= h);
+        }
+
+        public void GetSnapshot(string stateMachine)
         {
             var guid = Guid.NewGuid();
-            SnapshotUpdatesStream = SnapshotUpdatesStream
-                .Where(k => k.ReplyTopic == guid.ToString());
             InitSnapshotSubscriber(stateMachine, guid.ToString());
-            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
-            SnapshotUpdatesStream.Subscribe(snapshotListener);
+            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier); 
         }
 
         private void SendSnapshotRequest(string stateMachine, Guid guid, string privateCommunicationIdentifier = null)
@@ -162,7 +161,7 @@ namespace ReactiveXComponent.RabbitMq
             }
             catch (OperationInterruptedException e)
             {
-                throw new ReactiveXComponentException("Failed to init Subscriber: " + e.Message, e);
+                throw new ReactiveXComponentException("Failed to init Snapshot Subscriber: " + e.Message, e);
             }
         }
 
@@ -231,7 +230,7 @@ namespace ReactiveXComponent.RabbitMq
                 }
                 message = Encoding.UTF8.GetString(mso.ToArray());
             }
-            var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, message, replyTopic);
+            var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, message);
 
             OnSnapshotReceived(msgEventArgs);
         }

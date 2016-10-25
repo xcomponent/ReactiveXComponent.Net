@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reactive;
+using System.Reactive.Linq;
 using RabbitMQ.Client;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
@@ -16,6 +19,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _component;
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
+        private readonly RabbitMqSnapshot _rabbitMqSnapshot;
 
         public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
@@ -25,6 +29,7 @@ namespace ReactiveXComponent.RabbitMq
             _configuration = configuration;
             CreatePublisherChannel(connection);
             _serializer = serializer;
+            _rabbitMqSnapshot = new RabbitMqSnapshot(connection, component, configuration, _serializer, privateCommunicationIdentifier);
         }
 
         private void CreatePublisherChannel(IConnection connection)
@@ -66,6 +71,17 @@ namespace ReactiveXComponent.RabbitMq
             message = message?? 0;
 
             Send(message, routingKey, prop);
+        }
+
+        public IObservable<object> GetSnapshot(string stateMachine)
+        {
+            _rabbitMqSnapshot.GetSnapshot(stateMachine);
+
+            return _rabbitMqSnapshot.SnapshotStream
+                .Where(k => k.StateMachineRefHeader.ComponentCode == _configuration.GetComponentCode(_component) &&
+                            k.StateMachineRefHeader.StateMachineCode ==
+                            _configuration.GetStateMachineCode(_component, stateMachine))
+                .Select(k => k.MessageReceived);
         }
 
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)

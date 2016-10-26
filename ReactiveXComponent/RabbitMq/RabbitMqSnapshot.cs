@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -29,8 +30,9 @@ namespace ReactiveXComponent.RabbitMq
         private IModel _snapshotChannel;
         private event EventHandler<MessageEventArgs> SnapshotReceived;
         private event EventHandler<string> ConnectionFailed;
+        private IObservable<MessageEventArgs> _snapshotStream;
 
-        public IObservable<MessageEventArgs> SnapshotStream { get; private set; }
+        public List<MessageEventArgs> StateMachineInstances;
 
         public RabbitMqSnapshot(IConnection connection, string component, IXCConfiguration configuration, ISerializer serializer, string privateCommunicationIdentifier)
         {
@@ -42,6 +44,7 @@ namespace ReactiveXComponent.RabbitMq
             _subscribers = new ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos>();
             CreateSnapshotChannel(connection);
             InitObservableCollection();
+            StateMachineInstances = new List<MessageEventArgs>();
         }
 
         private void CreateSnapshotChannel(IConnection connection)
@@ -56,17 +59,49 @@ namespace ReactiveXComponent.RabbitMq
 
         private void InitObservableCollection()
         {
-            SnapshotStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
+            _snapshotStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
                 handler => (sender, e) => handler(e),
                 h => SnapshotReceived += h,
                 h => SnapshotReceived -= h);
         }
 
-        public void GetSnapshot(string stateMachine)
+        public void GetSnapshot(string stateMachine, Action<MessageEventArgs> OnSnapshotReceived = null, int timeout = 0)
         {
             var guid = Guid.NewGuid();
             InitSnapshotSubscriber(stateMachine, guid.ToString());
-            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier); 
+            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
+
+            if (OnSnapshotReceived != null)
+            {
+                _snapshotStream.Subscribe(OnSnapshotReceived);
+            }
+
+            if (timeout == 0) return;
+            var lockEvent = new AutoResetEvent(false);
+            SnapshotReceived += (sender, args) =>
+            {
+                var stateMachineInstancesList =
+                    JsonConvert.DeserializeObject<List<StateMachineInstance>>(args.MessageReceived.ToString());
+                foreach (var element in stateMachineInstancesList)
+                {
+                    var stateMachineRefHeader = new StateMachineRefHeader()
+                    {
+                        AgentId = element.AgentId,
+                        StateMachineId = element.StateMachineId,
+                        ComponentCode = element.ComponentCode,
+                        StateMachineCode = element.StateMachineCode,
+                        StateCode = element.StateCode
+                    };
+
+                    var messageEventArgs = new MessageEventArgs(stateMachineRefHeader, element.PublicMember);
+                    StateMachineInstances.Add(messageEventArgs);
+                }
+                lockEvent.Set();
+            }; 
+            if (!lockEvent.WaitOne(timeout))
+            {
+                throw new ReactiveXComponentException("Snapshot not received");
+            }
         }
 
         private void SendSnapshotRequest(string stateMachine, Guid guid, string privateCommunicationIdentifier = null)

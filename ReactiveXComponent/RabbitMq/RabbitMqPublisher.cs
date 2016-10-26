@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reactive;
 using System.Reactive.Linq;
 using RabbitMQ.Client;
 using ReactiveXComponent.Common;
@@ -73,15 +72,15 @@ namespace ReactiveXComponent.RabbitMq
             Send(message, routingKey, prop);
         }
 
-        public IObservable<object> GetSnapshot(string stateMachine)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout)
         {
-            _rabbitMqSnapshot.GetSnapshot(stateMachine);
+            _rabbitMqSnapshot.GetSnapshot(stateMachine, null, timeout);
+            return _rabbitMqSnapshot.StateMachineInstances;
+        }
 
-            return _rabbitMqSnapshot.SnapshotStream
-                .Where(k => k.StateMachineRefHeader.ComponentCode == _configuration.GetComponentCode(_component) &&
-                            k.StateMachineRefHeader.StateMachineCode ==
-                            _configuration.GetStateMachineCode(_component, stateMachine))
-                .Select(k => k.MessageReceived);
+        public void GetSnapshotAsync(string stateMachine, Action<MessageEventArgs> OnSnapshotReceived)
+        {
+            _rabbitMqSnapshot.GetSnapshot(stateMachine, OnSnapshotReceived);
         }
 
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)

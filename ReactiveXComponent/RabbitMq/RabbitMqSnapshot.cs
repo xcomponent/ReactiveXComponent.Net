@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
@@ -28,9 +27,9 @@ namespace ReactiveXComponent.RabbitMq
         private readonly ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos> _subscribers;
 
         private IModel _snapshotChannel;
-        private event EventHandler<MessageEventArgs> SnapshotReceived;
+        private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
         private event EventHandler<string> ConnectionFailed;
-        private IObservable<MessageEventArgs> _snapshotStream;
+        private IObservable<List<MessageEventArgs>> _snapshotStream;
 
         public List<MessageEventArgs> StateMachineInstances;
 
@@ -44,7 +43,6 @@ namespace ReactiveXComponent.RabbitMq
             _subscribers = new ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos>();
             CreateSnapshotChannel(connection);
             InitObservableCollection();
-            StateMachineInstances = new List<MessageEventArgs>();
         }
 
         private void CreateSnapshotChannel(IConnection connection)
@@ -59,43 +57,28 @@ namespace ReactiveXComponent.RabbitMq
 
         private void InitObservableCollection()
         {
-            _snapshotStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
+            _snapshotStream = Observable.FromEvent<EventHandler<List<MessageEventArgs>>, List<MessageEventArgs>>(
                 handler => (sender, e) => handler(e),
                 h => SnapshotReceived += h,
                 h => SnapshotReceived -= h);
         }
 
-        public void GetSnapshot(string stateMachine, Action<MessageEventArgs> OnSnapshotReceived = null, int timeout = 0)
+        public void GetSnapshot(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived = null, int timeout = 0)
         {
             var guid = Guid.NewGuid();
             InitSnapshotSubscriber(stateMachine, guid.ToString());
             SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
 
-            if (OnSnapshotReceived != null)
+            if (onSnapshotReceived != null)
             {
-                _snapshotStream.Subscribe(OnSnapshotReceived);
+                _snapshotStream.Subscribe(onSnapshotReceived);
             }
 
             if (timeout == 0) return;
             var lockEvent = new AutoResetEvent(false);
             SnapshotReceived += (sender, args) =>
             {
-                var stateMachineInstancesList =
-                    JsonConvert.DeserializeObject<List<StateMachineInstance>>(args.MessageReceived.ToString());
-                foreach (var element in stateMachineInstancesList)
-                {
-                    var stateMachineRefHeader = new StateMachineRefHeader()
-                    {
-                        AgentId = element.AgentId,
-                        StateMachineId = element.StateMachineId,
-                        ComponentCode = element.ComponentCode,
-                        StateMachineCode = element.StateMachineCode,
-                        StateCode = element.StateCode
-                    };
-
-                    var messageEventArgs = new MessageEventArgs(stateMachineRefHeader, element.PublicMember);
-                    StateMachineInstances.Add(messageEventArgs);
-                }
+                StateMachineInstances = new List<MessageEventArgs>(args);
                 lockEvent.Set();
             }; 
             if (!lockEvent.WaitOne(timeout))
@@ -250,12 +233,9 @@ namespace ReactiveXComponent.RabbitMq
             
             var stateMachineRefHeader =
                 RabbitMqHeaderConverter.ConvertStateMachineRefHeader(basicAckEventArgs.BasicProperties.Headers);
-            var replyTopic = (stateMachineRefHeader?.MessageType?.Split('.').Last()).Contains("Snapshot")
-                ? basicAckEventArgs.RoutingKey
-                : string.Empty;
             dynamic unzipedObj = JsonConvert.DeserializeObject(obj.ToString());
             byte[] compressed = Convert.FromBase64String(unzipedObj.Items.Value);
-            var message = string.Empty;
+            string message;
             using (var msi = new MemoryStream(compressed))
             using (var mso = new MemoryStream())
             {
@@ -272,7 +252,24 @@ namespace ReactiveXComponent.RabbitMq
 
         private void OnSnapshotReceived(MessageEventArgs e)
         {
-            SnapshotReceived?.Invoke(this, e);
+            var stateMachineInstances = new List<MessageEventArgs>();
+            var messageReceived =
+                JsonConvert.DeserializeObject<List<StateMachineInstance>>(e.MessageReceived.ToString());
+            foreach (var element in messageReceived)
+            {
+                var stateMachineRefHeader = new StateMachineRefHeader()
+                {
+                    AgentId = element.AgentId,
+                    StateMachineId = element.StateMachineId,
+                    ComponentCode = element.ComponentCode,
+                    StateMachineCode = element.StateMachineCode,
+                    StateCode = element.StateCode
+                };
+
+                var messageEventArgs = new MessageEventArgs(stateMachineRefHeader, element.PublicMember);
+                stateMachineInstances.Add(messageEventArgs);
+            }
+            SnapshotReceived?.Invoke(this, stateMachineInstances);
         }
     }
 }

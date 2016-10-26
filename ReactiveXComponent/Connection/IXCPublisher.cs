@@ -10,6 +10,6 @@ namespace ReactiveXComponent.Connection
         void SendEvent(string stateMachine, object message, Visibility visibility = Visibility.Public);
         void SendEvent(StateMachineRefHeader stateMachineRefHeader, object message, Visibility visibility = Visibility.Public);
         List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout);
-        void GetSnapshotAsync(string stateMachine, Action<MessageEventArgs> OnSnapshotReceived);
+        void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived);
     }
 }

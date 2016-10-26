@@ -78,9 +78,9 @@ namespace ReactiveXComponent.RabbitMq
             return _rabbitMqSnapshot.StateMachineInstances;
         }
 
-        public void GetSnapshotAsync(string stateMachine, Action<MessageEventArgs> OnSnapshotReceived)
+        public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
         {
-            _rabbitMqSnapshot.GetSnapshot(stateMachine, OnSnapshotReceived);
+            _rabbitMqSnapshot.GetSnapshot(stateMachine, onSnapshotReceived);
         }
 
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)

@@ -16,7 +16,7 @@ using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponent.RabbitMq
 {
-    public class RabbitMqSnapshotManager
+    public class RabbitMqSnapshotManager : IDisposable
     {
         private readonly IConnection _connection;
         private readonly IXCConfiguration _xcConfiguration;

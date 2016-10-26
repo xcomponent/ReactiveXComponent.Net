@@ -18,7 +18,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _component;
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
-        private readonly RabbitMqSnapshot _rabbitMqSnapshot;
+        private readonly RabbitMqSnapshotManager _rabbitMqSnapshotManager;
 
         public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
@@ -28,7 +28,7 @@ namespace ReactiveXComponent.RabbitMq
             _configuration = configuration;
             CreatePublisherChannel(connection);
             _serializer = serializer;
-            _rabbitMqSnapshot = new RabbitMqSnapshot(connection, component, configuration, _serializer, privateCommunicationIdentifier);
+            _rabbitMqSnapshotManager = new RabbitMqSnapshotManager(connection, component, configuration, _serializer, privateCommunicationIdentifier);
         }
 
         private void CreatePublisherChannel(IConnection connection)
@@ -72,15 +72,14 @@ namespace ReactiveXComponent.RabbitMq
             Send(message, routingKey, prop);
         }
 
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
         {
-            _rabbitMqSnapshot.GetSnapshot(stateMachine, null, timeout);
-            return _rabbitMqSnapshot.StateMachineInstances;
+            return _rabbitMqSnapshotManager.GetSnapshot(stateMachine, timeout);
         }
 
         public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
         {
-            _rabbitMqSnapshot.GetSnapshot(stateMachine, onSnapshotReceived);
+            _rabbitMqSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
         }
 
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)

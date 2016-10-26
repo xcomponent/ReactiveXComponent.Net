@@ -94,7 +94,7 @@
     <Compile Include="Parser\XCApiDescription.cs" />
     <Compile Include="Connection\IXCPublisher.cs" />
     <Compile Include="Connection\IXCSession.cs" />
-    <Compile Include="RabbitMq\RabbitMqSnapshot.cs" />
+    <Compile Include="RabbitMq\RabbitMqSnapshotManager.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriberInfos.cs" />
     <Compile Include="RabbitMq\SubscriberKey.cs" />
     <Compile Include="RabbitMq\MessageEventArgs.cs" />

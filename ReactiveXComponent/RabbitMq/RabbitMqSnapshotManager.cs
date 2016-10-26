@@ -16,7 +16,7 @@ using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponent.RabbitMq
 {
-    public class RabbitMqSnapshot
+    public class RabbitMqSnapshotManager
     {
         private readonly IConnection _connection;
         private readonly IXCConfiguration _xcConfiguration;
@@ -31,9 +31,7 @@ namespace ReactiveXComponent.RabbitMq
         private event EventHandler<string> ConnectionFailed;
         private IObservable<List<MessageEventArgs>> _snapshotStream;
 
-        public List<MessageEventArgs> StateMachineInstances;
-
-        public RabbitMqSnapshot(IConnection connection, string component, IXCConfiguration configuration, ISerializer serializer, string privateCommunicationIdentifier)
+        public RabbitMqSnapshotManager(IConnection connection, string component, IXCConfiguration configuration, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
             _connection = connection;
             _component = component;
@@ -63,28 +61,40 @@ namespace ReactiveXComponent.RabbitMq
                 h => SnapshotReceived -= h);
         }
 
-        public void GetSnapshot(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived = null, int timeout = 0)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
         {
             var guid = Guid.NewGuid();
-            InitSnapshotSubscriber(stateMachine, guid.ToString());
+            SubscribeSnapshot(stateMachine, guid.ToString());
+            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
+
+            List<MessageEventArgs> result = null;
+            var lockEvent = new AutoResetEvent(false);
+            var handler = new EventHandler<List<MessageEventArgs>>((sender, args) =>
+            {
+                result = new List<MessageEventArgs>(args);
+                lockEvent.Set();
+            });
+            SnapshotReceived += handler; 
+
+            lockEvent.WaitOne(timeout);
+
+            SnapshotReceived -= handler;
+            UnsubscribeSnapshot(stateMachine);
+
+            return result;
+        }
+
+        public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
+        {
+            var guid = Guid.NewGuid();
+            SubscribeSnapshot(stateMachine, guid.ToString());
             SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
 
             if (onSnapshotReceived != null)
             {
                 _snapshotStream.Subscribe(onSnapshotReceived);
             }
-
-            if (timeout == 0) return;
-            var lockEvent = new AutoResetEvent(false);
-            SnapshotReceived += (sender, args) =>
-            {
-                StateMachineInstances = new List<MessageEventArgs>(args);
-                lockEvent.Set();
-            }; 
-            if (!lockEvent.WaitOne(timeout))
-            {
-                throw new ReactiveXComponentException("Snapshot not received");
-            }
+            UnsubscribeSnapshot(stateMachine);
         }
 
         private void SendSnapshotRequest(string stateMachine, Guid guid, string privateCommunicationIdentifier = null)
@@ -152,7 +162,7 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
-        private void InitSnapshotSubscriber(string stateMachine, string replyTopic)
+        private void SubscribeSnapshot(string stateMachine, string replyTopic)
         {
             if (_xcConfiguration == null)
                 return;
@@ -271,5 +281,53 @@ namespace ReactiveXComponent.RabbitMq
             }
             SnapshotReceived?.Invoke(this, stateMachineInstances);
         }
+
+        private void UnsubscribeSnapshot(string stateMachineCode)
+        {
+            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachineCode));
+
+            RabbitMqSubscriberInfos rabbitMqSubscriberInfos;
+            _subscribers.TryRemove(subscriberKey, out rabbitMqSubscriberInfos);
+            if (rabbitMqSubscriberInfos == null)
+            {
+                return;
+            }
+
+            rabbitMqSubscriberInfos.Channel.ModelShutdown -= ChannelOnModelShutdown;
+            rabbitMqSubscriberInfos.Subscriber.OnCancel();
+            rabbitMqSubscriberInfos.Channel.Close();
+        }
+
+
+        #region IDisposable implementation
+
+        private bool _disposed;
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // clear managed resources
+                    _snapshotChannel?.Dispose();
+                }
+                // clear unmanaged resources
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~RabbitMqSnapshotManager()
+        {
+            Dispose(false);
+        }
+
+        #endregion
     }
 }

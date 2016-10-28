@@ -51,8 +51,9 @@ namespace ReactiveXComponent.RabbitMq
         public void Subscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
         {
             if (stateMachineListener == null) return;
-            
-            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine));
+
+            var routingKey = string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _xcConfiguration.GetSubscriberTopic(_component, stateMachine) : _privateCommunicationIdentifier;
+            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
             AddListenerToRepository(subscriberKey, stateMachineListener);
 
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
@@ -60,7 +61,14 @@ namespace ReactiveXComponent.RabbitMq
                 InitSubscriber(stateMachine, _privateCommunicationIdentifier);
             }
 
-            StateMachineUpdatesStream.Subscribe(stateMachineListener);
+            StateMachineUpdatesStream.Subscribe(args =>
+            {
+                if (args.StateMachineRefHeader.StateMachineCode == _xcConfiguration.GetStateMachineCode(_component, stateMachine))
+                {
+                    stateMachineListener(args);
+                }
+            });
+
             InitSubscriber(stateMachine);
         }
 
@@ -76,20 +84,22 @@ namespace ReactiveXComponent.RabbitMq
 
             try
             {
-                IModel channel;
-                EventingBasicConsumer subscriber;
-                CreateExchangeChannel(exchangeName, routingKey, out channel, out subscriber);
-                if (channel == null || subscriber == null) return;
-                var rabbitMqSubscriberInfos = new RabbitMqSubscriberInfos
+                var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
+                if (!_subscribers.ContainsKey(subscriberKey))
                 {
-                    Channel = channel,
-                    Subscriber = subscriber
-                };
+                    IModel channel;
+                    EventingBasicConsumer subscriber;
+                    CreateExchangeChannel(exchangeName, routingKey, out channel, out subscriber);
+                    if (channel == null || subscriber == null) return;
+                    var rabbitMqSubscriberInfos = new RabbitMqSubscriberInfos
+                    {
+                        Channel = channel,
+                        Subscriber = subscriber
+                    };
 
-                var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine));
-                _subscribers.AddOrUpdate(subscriberKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
-
-                ReceiveMessage(subscriberKey);
+                    _subscribers.AddOrUpdate(subscriberKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
+                    ReceiveMessage(subscriberKey);
+                }  
             }
             catch (OperationInterruptedException e)
             {
@@ -188,7 +198,8 @@ namespace ReactiveXComponent.RabbitMq
 
         public void Unsubscribe(string stateMachineCode, Action<MessageEventArgs> stateMachineListener)
         {
-            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachineCode));
+            var routingKey = string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _xcConfiguration.GetSubscriberTopic(_component, stateMachineCode) : _privateCommunicationIdentifier;
+            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachineCode), routingKey);
 
             DeleteSubscription(subscriberKey);
 

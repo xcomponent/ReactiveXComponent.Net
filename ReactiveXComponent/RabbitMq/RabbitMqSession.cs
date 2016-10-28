@@ -28,6 +28,8 @@ namespace ReactiveXComponent.RabbitMq
                     return SerializerFactory.CreateSerializer(SerializationType.Binary);
                 case XCApiTags.Json:
                     return SerializerFactory.CreateSerializer(SerializationType.Json);
+                case XCApiTags.Bson:
+                    return SerializerFactory.CreateSerializer(SerializationType.Bson);
                 default:
                     throw new XCSerializationException("Serialization type not supported");
             }

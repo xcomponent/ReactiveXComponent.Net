@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reactive.Linq;
 using RabbitMQ.Client;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
@@ -98,7 +97,7 @@ namespace ReactiveXComponent.RabbitMq
                 MessageType = messageType,
                 EventCode = _configuration.GetPublisherEventCode(messageType),
                 IncomingEventType = (int)IncomingEventType.Transition,
-                PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty                
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : string.Empty                
             };
 
             return header;

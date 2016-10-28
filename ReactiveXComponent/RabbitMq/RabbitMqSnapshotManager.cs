@@ -94,7 +94,6 @@ namespace ReactiveXComponent.RabbitMq
             {
                 _snapshotStream.Subscribe(onSnapshotReceived);
             }
-            UnsubscribeSnapshot(stateMachine);
         }
 
         private void SendSnapshotRequest(string stateMachine, Guid guid, string privateCommunicationIdentifier = null)
@@ -182,7 +181,7 @@ namespace ReactiveXComponent.RabbitMq
                     Subscriber = subscriber
                 };
 
-                var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine));
+                var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
                 _subscribers.AddOrUpdate(subscriberKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
 
                 ReceiveMessage(subscriberKey);
@@ -282,9 +281,10 @@ namespace ReactiveXComponent.RabbitMq
             SnapshotReceived?.Invoke(this, stateMachineInstances);
         }
 
-        private void UnsubscribeSnapshot(string stateMachineCode)
+        private void UnsubscribeSnapshot(string stateMachine)
         {
-            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachineCode));
+            var routingKey = string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _xcConfiguration.GetSubscriberTopic(_component, stateMachine) : _privateCommunicationIdentifier;
+            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
 
             RabbitMqSubscriberInfos rabbitMqSubscriberInfos;
             _subscribers.TryRemove(subscriberKey, out rabbitMqSubscriberInfos);

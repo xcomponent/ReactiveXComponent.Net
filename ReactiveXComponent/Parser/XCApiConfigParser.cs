@@ -236,6 +236,16 @@ namespace ReactiveXComponent.Parser
             return publisherTopic;
         }
 
+        public string GetPublisherTopic(long componentCode, long stateMachineCode)
+        {
+            string publisherTopic;
+            var topicId = new TopicIdentifier(componentCode, stateMachineCode, XCApiTags.Output);
+
+            _publisherTopicByIdentifier.TryGetValue(topicId, out publisherTopic);
+            
+            return publisherTopic;
+        }
+
         public string GetSubscriberTopic(string component, string stateMachine)
         {
             string subscriberTopic;

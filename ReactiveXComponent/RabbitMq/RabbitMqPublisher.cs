@@ -61,8 +61,9 @@ namespace ReactiveXComponent.RabbitMq
             if (stateMachineRefHeader == null) return;
 
             var stateMachineRefNewHeader = CreateStateMachineRefHeader(stateMachineRefHeader, message);
+            var componentCode = _configuration.GetComponentCode(_component);
 
-            string routingKey = _configuration.GetPublisherTopic(_component, stateMachineRefHeader.StateMachineCode.ToString());
+            string routingKey = _configuration.GetPublisherTopic(componentCode, stateMachineRefHeader.StateMachineCode);
 
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRefNewHeader, IncomingEventType.Transition);

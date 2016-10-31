@@ -164,7 +164,7 @@ namespace ReactiveXComponent.RabbitMq
             MessageReceived?.Invoke(this, e);
         }
 
-        public void Unsubscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
+        public void Unsubscribe(string stateMachine)
         {
             var componentCode = _xcConfiguration.GetComponentCode(_component);
             var stateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine);

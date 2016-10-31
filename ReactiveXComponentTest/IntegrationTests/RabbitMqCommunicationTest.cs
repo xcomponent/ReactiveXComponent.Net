@@ -68,6 +68,7 @@ namespace ReactiveXComponentTest.IntegrationTests
             _xcConfiguration.GetStateMachineCode(null, null).ReturnsForAnyArgs(0);
             _xcConfiguration.GetComponentCode(null).ReturnsForAnyArgs(Convert.ToInt32(_exchangeName));
             _xcConfiguration.GetPublisherTopic(null, null).ReturnsForAnyArgs(_routingKey);
+            _xcConfiguration.GetPublisherTopic(0, 0).ReturnsForAnyArgs(_routingKey);
             _xcConfiguration.GetSubscriberTopic(null, null).ReturnsForAnyArgs(_routingKey);
         }
 
@@ -178,7 +179,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                 PublishTopic = stateMachineRefHeader.PublishTopic
             };
             
-            publisher?.SendEvent(firstStateRefHeader, 1, visibility);
+            publisher?.SendEvent(firstStateRefHeader, TestMessage, visibility);
 
             var newMessageReceived = lockEvent.WaitOne(timeoutReceive);
 

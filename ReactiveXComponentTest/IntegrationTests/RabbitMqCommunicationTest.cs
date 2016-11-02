@@ -183,7 +183,7 @@ namespace ReactiveXComponentTest.IntegrationTests
 
             var newMessageReceived = lockEvent.WaitOne(timeoutReceive);
 
-            subscriber?.Unsubscribe(StateMachineA, messagedReceivedHandler);
+            subscriber?.Unsubscribe(StateMachineA);
 
             Check.That(newMessageReceived).IsTrue();
 
@@ -261,7 +261,7 @@ namespace ReactiveXComponentTest.IntegrationTests
                
                 var messageReceived = lockEvent.WaitOne(timeoutReceive);
 
-                subscriber.Unsubscribe(StateMachineA, messagedReceivedHandler);
+                subscriber.Unsubscribe(StateMachineA);
 
                 Check.That(messageReceived).IsTrue();
                 Check.That(label).IsNotNull().And.IsNotEmpty().And.Equals(TestMessage);

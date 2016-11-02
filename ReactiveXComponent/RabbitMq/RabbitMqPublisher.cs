@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using RabbitMQ.Client;
 using ReactiveXComponent.Common;
@@ -16,6 +17,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _component;
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
+        private readonly RabbitMqSnapshotManager _rabbitMqSnapshotManager;
 
         public RabbitMqPublisher(string component, IXCConfiguration configuration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
@@ -25,6 +27,7 @@ namespace ReactiveXComponent.RabbitMq
             _configuration = configuration;
             CreatePublisherChannel(connection);
             _serializer = serializer;
+            _rabbitMqSnapshotManager = new RabbitMqSnapshotManager(connection, component, configuration, _serializer, privateCommunicationIdentifier);
         }
 
         private void CreatePublisherChannel(IConnection connection)
@@ -58,14 +61,25 @@ namespace ReactiveXComponent.RabbitMq
             if (stateMachineRefHeader == null) return;
 
             var stateMachineRefNewHeader = CreateStateMachineRefHeader(stateMachineRefHeader, message);
+            var componentCode = _configuration.GetComponentCode(_component);
 
-            string routingKey = _configuration.GetPublisherTopic(_component, stateMachineRefHeader.StateMachineCode.ToString());
+            string routingKey = _configuration.GetPublisherTopic(componentCode, stateMachineRefHeader.StateMachineCode);
 
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRefNewHeader, IncomingEventType.Transition);
             message = message?? 0;
 
             Send(message, routingKey, prop);
+        }
+
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
+        {
+            return _rabbitMqSnapshotManager.GetSnapshot(stateMachine, timeout);
+        }
+
+        public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
+        {
+            _rabbitMqSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
         }
 
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)
@@ -84,7 +98,7 @@ namespace ReactiveXComponent.RabbitMq
                 MessageType = messageType,
                 EventCode = _configuration.GetPublisherEventCode(messageType),
                 IncomingEventType = (int)IncomingEventType.Transition,
-                PublishTopic = visibility == Visibility.Private ? _privateCommunicationIdentifier : string.Empty                
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : string.Empty                
             };
 
             return header;
@@ -150,6 +164,7 @@ namespace ReactiveXComponent.RabbitMq
                 {
                     // clear managed resources
                     _publisherChannel?.Dispose();
+                    _rabbitMqSnapshotManager?.Dispose();
                 }
 
                 // clear unmanaged resources

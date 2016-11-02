@@ -61,9 +61,19 @@ namespace ReactiveXComponent.Configuration
             return _parser.GetPublisherTopic(component, stateMachine);
         }
 
+        public string GetPublisherTopic(long componentCode, long stateMachineCode)
+        {
+            return _parser.GetPublisherTopic(componentCode, stateMachineCode);
+        }
+
         public string GetSubscriberTopic(string component, string stateMachine)
         {
             return _parser.GetSubscriberTopic(component, stateMachine);
+        }
+
+        public string GetSnapshotTopic(string component)
+        {
+            return _parser.GetSnapshotTopic(component);
         }
     }
 }

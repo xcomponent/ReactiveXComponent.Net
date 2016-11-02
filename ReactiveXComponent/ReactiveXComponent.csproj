@@ -76,8 +76,12 @@
     <Compile Include="Common\Header.cs" />
     <Compile Include="Common\HeaderElement.cs" />
     <Compile Include="Common\IncomingEventType.cs" />
+    <Compile Include="Common\SnapshotMessage.cs" />
+    <Compile Include="Common\StateMachineInstance.cs" />
     <Compile Include="Common\StateMachineRefHeader.cs" />
     <Compile Include="Common\ThreadSafeList.cs" />
+    <Compile Include="Common\PrivateTopic.cs" />
+    <Compile Include="Common\ReplyTopic.cs" />
     <Compile Include="Common\Visibility.cs" />
     <Compile Include="Configuration\BusDetails.cs" />
     <Compile Include="Configuration\IXCConfiguration.cs" />
@@ -90,6 +94,7 @@
     <Compile Include="Parser\XCApiDescription.cs" />
     <Compile Include="Connection\IXCPublisher.cs" />
     <Compile Include="Connection\IXCSession.cs" />
+    <Compile Include="RabbitMq\RabbitMqSnapshotManager.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriberInfos.cs" />
     <Compile Include="RabbitMq\SubscriberKey.cs" />
     <Compile Include="RabbitMq\MessageEventArgs.cs" />
@@ -104,7 +109,9 @@
     <Compile Include="RabbitMq\RabbitMqSession.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriber.cs" />
     <Compile Include="Common\ReactiveXComponentException.cs" />
+    <Compile Include="RabbitMq\SubscriptionKey.cs" />
     <Compile Include="Serializer\BinarySerializer.cs" />
+    <Compile Include="Serializer\BsonSerializer.cs" />
     <Compile Include="Serializer\ISerializer.cs" />
     <Compile Include="Serializer\JsonSerializer.cs" />
     <Compile Include="Serializer\SerializationType.cs" />

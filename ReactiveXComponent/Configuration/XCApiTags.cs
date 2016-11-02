@@ -26,5 +26,7 @@
         public const string DefaultPassword = "guest";
         public const string Binary = "Binary";
         public const string Json = "Json";
+        public const string Bson = "Bson";
+        public const string GzipJson = "GzipJson";
     }
 }

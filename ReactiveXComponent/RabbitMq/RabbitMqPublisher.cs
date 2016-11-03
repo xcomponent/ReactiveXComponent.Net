@@ -30,16 +30,7 @@ namespace ReactiveXComponent.RabbitMq
             _rabbitMqSnapshotManager = new RabbitMqSnapshotManager(connection, component, configuration, _serializer, privateCommunicationIdentifier);
         }
 
-        private void CreatePublisherChannel(IConnection connection)
-        {
-            if (connection == null || !connection.IsOpen)
-            {
-                return;
-            }
-
-            _publisherChannel = connection.CreateModel();
-            _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
-        }
+        #region IXCPublisher implementation
 
         public void SendEvent(string stateMachine, object message, Visibility visibility = Visibility.Public)
         {
@@ -67,7 +58,7 @@ namespace ReactiveXComponent.RabbitMq
 
             var prop = _publisherChannel.CreateBasicProperties();
             prop.Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRefNewHeader, IncomingEventType.Transition);
-            message = message?? 0;
+            message = message ?? 0;
 
             Send(message, routingKey, prop);
         }
@@ -80,6 +71,19 @@ namespace ReactiveXComponent.RabbitMq
         public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
         {
             _rabbitMqSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
+        }
+
+        #endregion
+
+        private void CreatePublisherChannel(IConnection connection)
+        {
+            if (connection == null || !connection.IsOpen)
+            {
+                return;
+            }
+
+            _publisherChannel = connection.CreateModel();
+            _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
         }
 
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)

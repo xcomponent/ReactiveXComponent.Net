@@ -20,33 +20,27 @@ namespace ReactiveXComponent.RabbitMq
         private readonly ISerializer _serializer;
         private readonly string _component;
 
-        private readonly ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos> _subscribers;
-        private readonly ConcurrentDictionary<SubscriptionKey, IDisposable> _subscriptionsRepo;
+        private readonly ConcurrentDictionary<SubscriptionKey, RabbitMqSubscriberInfos> _subscribersDico;
+        private readonly ConcurrentDictionary<StreamSubscriptionKey, IDisposable> _streamSubscriptionsDico;
 
         private event EventHandler<MessageEventArgs> MessageReceived;
         private event EventHandler<string> ConnectionFailed;
-
-        public IObservable<MessageEventArgs> StateMachineUpdatesStream { get; private set; }
 
         public RabbitMqSubscriber(string component, IXCConfiguration xcConfiguration, IConnection connection, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
             _component = component;
             _xcConfiguration = xcConfiguration;
             _connection = connection;
-            _subscribers = new ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos>();
-            _subscriptionsRepo = new ConcurrentDictionary<SubscriptionKey, IDisposable>();
+            _subscribersDico = new ConcurrentDictionary<SubscriptionKey, RabbitMqSubscriberInfos>();
+            _streamSubscriptionsDico = new ConcurrentDictionary<StreamSubscriptionKey, IDisposable>();
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _serializer = serializer;
             InitObservableCollection();
         }
 
-        private void InitObservableCollection()
-        {
-            StateMachineUpdatesStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
-                handler => (sender, e) => handler(e),
-                h => MessageReceived += h,
-                h => MessageReceived -= h);
-        }
+        #region IXCSubscriber implementation
+
+        public IObservable<MessageEventArgs> StateMachineUpdatesStream { get; private set; }
 
         public void Subscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
         {
@@ -58,27 +52,53 @@ namespace ReactiveXComponent.RabbitMq
             var componentCode = _xcConfiguration.GetComponentCode(_component);
             var stateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine);
             var routingKey = string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _xcConfiguration.GetSubscriberTopic(_component, stateMachine) : _privateCommunicationIdentifier;
-            var subscriberKey = new SubscriberKey(componentCode, stateMachineCode, routingKey);
-            var susbcriptionKey = new SubscriptionKey(subscriberKey, stateMachineListener);
+            var subscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, routingKey);
+            var streamSusbcriptionKey = new StreamSubscriptionKey(subscriptionKey, stateMachineListener);
 
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
             {
                 InitSubscriber(stateMachine, _privateCommunicationIdentifier);
             }
 
-            var handler = new Action<MessageEventArgs>(args =>
-            {
-                if (args.StateMachineRefHeader.StateMachineCode == stateMachineCode)
+            var handler = new Action<MessageEventArgs>(args => 
                 {
-                    stateMachineListener(args);
-                }
-            });
+                    if (args.StateMachineRefHeader.StateMachineCode == stateMachineCode)
+                    {
+                        stateMachineListener(args);
+                    }
+                });
 
             var subscription = StateMachineUpdatesStream.Subscribe(handler);
 
-            _subscriptionsRepo.AddOrUpdate(susbcriptionKey, subscription, (key, oldSubscription) => subscription);
+            _streamSubscriptionsDico.AddOrUpdate(streamSusbcriptionKey, subscription, (key, oldSubscription) => subscription);
 
             InitSubscriber(stateMachine);
+        }
+
+        public void Unsubscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
+        {
+            var componentCode = _xcConfiguration.GetComponentCode(_component);
+            var stateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine);
+            var publicRoutingKey = _xcConfiguration.GetSubscriberTopic(_component, stateMachine);
+            var publicSubscriberKey = new SubscriptionKey(componentCode, stateMachineCode, publicRoutingKey);
+
+            DeleteSubscription(publicSubscriberKey, stateMachineListener);
+
+            if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
+            {
+                var privateSubscriberKey = new SubscriptionKey(componentCode, stateMachineCode, _privateCommunicationIdentifier);
+                DeleteSubscription(privateSubscriberKey, stateMachineListener);
+            }
+        }
+
+        #endregion
+
+        private void InitObservableCollection()
+        {
+            StateMachineUpdatesStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
+                handler => (sender, e) => handler(e),
+                h => MessageReceived += h,
+                h => MessageReceived -= h);
         }
 
         private void OnMessageReceived(MessageEventArgs e)
@@ -100,13 +120,18 @@ namespace ReactiveXComponent.RabbitMq
 
             try
             {
-                var subscriberKey = new SubscriberKey(componentCode, stateMachineCode, routingKey);
-                if (!_subscribers.ContainsKey(subscriberKey))
+                var subscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, routingKey);
+                if (!_subscribersDico.ContainsKey(subscriptionKey))
                 {
                     IModel channel;
                     EventingBasicConsumer subscriber;
                     CreateExchangeChannel(exchangeName, routingKey, out channel, out subscriber);
-                    if (channel == null || subscriber == null) return;
+
+                    if (channel == null || subscriber == null)
+                    {
+                        return;
+                    }
+
                     var rabbitMqSubscriberInfos = new RabbitMqSubscriberInfos
                     {
                         Channel = channel,
@@ -129,7 +154,7 @@ namespace ReactiveXComponent.RabbitMq
                         }
                     };
 
-                    _subscribers.AddOrUpdate(subscriberKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
+                    _subscribersDico.AddOrUpdate(subscriptionKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
                 }  
             }
             catch (OperationInterruptedException e)
@@ -162,12 +187,13 @@ namespace ReactiveXComponent.RabbitMq
             ConnectionFailed?.Invoke(this, shutdownEventArgs.ReplyText);
         }
 
-        private void DeleteSubscriber(SubscriberKey subscriberkey)
+        private void DeleteSubscriber(SubscriptionKey subscriptionKey)
         {
             var canBeRemoved = true;
-            foreach (var element in _subscriptionsRepo.Keys)
+
+            foreach (var element in _streamSubscriptionsDico.Keys)
             {
-                if (subscriberkey.Equals(element.SubscriberKey))
+                if (subscriptionKey.Equals(element.SubscriberKey))
                 {
                     canBeRemoved = false;
                 }
@@ -176,7 +202,7 @@ namespace ReactiveXComponent.RabbitMq
             if (canBeRemoved)
             {
                 RabbitMqSubscriberInfos rabbitMqSubscriberInfos;
-                if (_subscribers.TryRemove(subscriberkey, out rabbitMqSubscriberInfos))
+                if (_subscribersDico.TryRemove(subscriptionKey, out rabbitMqSubscriberInfos))
                 {
                     rabbitMqSubscriberInfos.Channel.ModelShutdown -= ChannelOnModelShutdown;
                     rabbitMqSubscriberInfos.Channel.BasicCancel(rabbitMqSubscriberInfos.Subscriber.ConsumerTag);
@@ -185,31 +211,16 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
-        private void DeleteSubscription(SubscriberKey subscriberKey, Action<MessageEventArgs> stateMachineListener)
+        private void DeleteSubscription(SubscriptionKey subscriptionKey, Action<MessageEventArgs> stateMachineListener)
         {
-            var subscriptionKey = new SubscriptionKey(subscriberKey, stateMachineListener);
+            var streamSubscriptionKey = new StreamSubscriptionKey(subscriptionKey, stateMachineListener);
 
             IDisposable subscription;
-            if (_subscriptionsRepo.TryRemove(subscriptionKey, out subscription))
+
+            if (_streamSubscriptionsDico.TryRemove(streamSubscriptionKey, out subscription))
             {
                 subscription.Dispose();
-                DeleteSubscriber(subscriberKey);
-            }
-        }
-
-        public void Unsubscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
-        {
-            var componentCode = _xcConfiguration.GetComponentCode(_component);
-            var stateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine);
-            var publicRoutingKey = _xcConfiguration.GetSubscriberTopic(_component, stateMachine);
-            var publicSubscriberKey = new SubscriberKey(componentCode, stateMachineCode, publicRoutingKey);
-
-            DeleteSubscription(publicSubscriberKey, stateMachineListener);
-            
-            if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))
-            {
-                var privateSubscriberKey = new SubscriberKey(componentCode, stateMachineCode, _privateCommunicationIdentifier);
-                DeleteSubscription(privateSubscriberKey, stateMachineListener);
+                DeleteSubscriber(subscriptionKey);
             }
         }
 
@@ -224,21 +235,21 @@ namespace ReactiveXComponent.RabbitMq
                 if (disposing)
                 {
                     // clear managed resources
-                    foreach (var subscriberInfo in _subscribers.Values)
+                    foreach (var subscriberInfo in _subscribersDico.Values)
                     {
                         subscriberInfo.Channel.ModelShutdown -= ChannelOnModelShutdown;
                         subscriberInfo.Channel.BasicCancel(subscriberInfo.Subscriber.ConsumerTag);
                         subscriberInfo.Channel.Dispose();
                     }
 
-                    _subscribers.Clear();
+                    _subscribersDico.Clear();
 
-                    foreach (var subscription in _subscriptionsRepo.Values)
+                    foreach (var subscription in _streamSubscriptionsDico.Values)
                     {
                         subscription.Dispose();    
                     }
 
-                    _subscriptionsRepo.Clear();
+                    _streamSubscriptionsDico.Clear();
                     _connection?.Dispose();
                 }
 

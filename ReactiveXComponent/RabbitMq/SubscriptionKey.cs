@@ -1,21 +1,23 @@
-﻿using System;
-
-namespace ReactiveXComponent.RabbitMq
+﻿namespace ReactiveXComponent.RabbitMq
 {
     public class SubscriptionKey
     {
-        public SubscriberKey SubscriberKey { get; }
-        public Action<MessageEventArgs> StateMachineListener { get; }
+        private long ComponentCode { get; }
 
-        public SubscriptionKey(SubscriberKey subscriberKey, Action<MessageEventArgs> stateMachineListener)
+        private long StateMachineCode { get; }
+
+        private string RoutingKey { get; }
+
+        public SubscriptionKey(long componentCode, long stateMachineCode, string routingKey)
         {
-            SubscriberKey = subscriberKey;
-            StateMachineListener = stateMachineListener;
+            ComponentCode = componentCode;
+            StateMachineCode = stateMachineCode;
+            RoutingKey = routingKey;
         }
 
         protected bool Equals(SubscriptionKey other)
         {
-            return SubscriberKey.Equals(other.SubscriberKey) && StateMachineListener.Equals(other.StateMachineListener);
+            return ComponentCode == other.ComponentCode && StateMachineCode == other.StateMachineCode && RoutingKey == other.RoutingKey;
         }
 
         public override bool Equals(object obj)
@@ -23,14 +25,14 @@ namespace ReactiveXComponent.RabbitMq
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((SubscriptionKey)obj);
+            return Equals((SubscriptionKey) obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (SubscriberKey.GetHashCode() * 397) ^ (StateMachineListener.GetHashCode()* 397);
+                return (((ComponentCode.GetHashCode() * 397) ^ StateMachineCode.GetHashCode()) * 397) ^ (RoutingKey?.GetHashCode() ?? 0);
             }
         }
     }

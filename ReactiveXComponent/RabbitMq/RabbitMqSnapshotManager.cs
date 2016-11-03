@@ -24,7 +24,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly ISerializer _serializer;
         private readonly string _component;
 
-        private readonly ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos> _subscribers;
+        private readonly ConcurrentDictionary<SubscriptionKey, RabbitMqSubscriberInfos> _subscribers;
 
         private IModel _snapshotChannel;
         private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
@@ -38,7 +38,7 @@ namespace ReactiveXComponent.RabbitMq
             _xcConfiguration = configuration;
             _serializer = serializer;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
-            _subscribers = new ConcurrentDictionary<SubscriberKey, RabbitMqSubscriberInfos>();
+            _subscribers = new ConcurrentDictionary<SubscriptionKey, RabbitMqSubscriberInfos>();
             CreateSnapshotChannel(connection);
             InitObservableCollection();
         }
@@ -181,7 +181,7 @@ namespace ReactiveXComponent.RabbitMq
                     Subscriber = subscriber
                 };
 
-                var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
+                var subscriberKey = new SubscriptionKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
                 _subscribers.AddOrUpdate(subscriberKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
 
                 ReceiveMessage(subscriberKey);
@@ -215,7 +215,7 @@ namespace ReactiveXComponent.RabbitMq
             ConnectionFailed?.Invoke(this, shutdownEventArgs.ReplyText);
         }
 
-        private void ReceiveMessage(SubscriberKey subscriberKey)
+        private void ReceiveMessage(SubscriptionKey subscriberKey)
         {
             RabbitMqSubscriberInfos rabbitMqSubscriberInfos;
             _subscribers.TryGetValue(subscriberKey, out rabbitMqSubscriberInfos);
@@ -284,7 +284,7 @@ namespace ReactiveXComponent.RabbitMq
         private void UnsubscribeSnapshot(string stateMachine)
         {
             var routingKey = string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _xcConfiguration.GetSubscriberTopic(_component, stateMachine) : _privateCommunicationIdentifier;
-            var subscriberKey = new SubscriberKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
+            var subscriberKey = new SubscriptionKey(_xcConfiguration.GetComponentCode(_component), _xcConfiguration.GetStateMachineCode(_component, stateMachine), routingKey);
 
             RabbitMqSubscriberInfos rabbitMqSubscriberInfos;
             _subscribers.TryRemove(subscriberKey, out rabbitMqSubscriberInfos);

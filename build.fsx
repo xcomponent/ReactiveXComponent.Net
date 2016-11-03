@@ -8,6 +8,10 @@ open Fake.XMLHelper
 let releaseConfig = "release"
 let configuration = getBuildParamOrDefault "config" releaseConfig
 
+let getMSBuildFn =
+    let properties = [("Configuration", configuration)]
+    fun (outputPath:string) targets (projects:FileIncludes) ->              
+            MSBuild outputPath targets properties projects
 
 
 // Targets
@@ -22,14 +26,14 @@ Target "RestorePackages" (fun _ ->
 Target "Clean" (fun _ ->    
     trace ("Cleaning")
     !! "./ReactiveXComponent.sln"
-    |> MSBuild "" "Clean" []
+    |> getMSBuildFn "" "Clean"
     |> Log "MSBuild Clean Output: "
 )
 
 Target "Compile" (fun _ ->    
     trace ("Compiling ReactiveXComponent Solution")
     !! "./ReactiveXComponent.sln"
-    |> MSBuildRelease "" "Build"
+    |> getMSBuildFn "" "Build"
     |> Log "MSBuild build Output: "
 )
 

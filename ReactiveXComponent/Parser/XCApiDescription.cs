@@ -38,5 +38,10 @@ namespace ReactiveXComponent.Parser
         {
             return _doc.SelectNodes("//xc:serialization", _xmlManager);
         }
+
+        public XmlNodeList GetSnapshotsNode()
+        {
+            return _doc.SelectNodes("//xc:snapshot", _xmlManager);
+        }
     }
 }

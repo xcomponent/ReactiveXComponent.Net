@@ -17,6 +17,7 @@ namespace ReactiveXComponent.Parser
         private HashSet<string> _eventNames;
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
         private Dictionary<TopicIdentifier, string> _subscriberTopicByIdentifier;
+        private Dictionary<long, string> _snapshotTopicByComponent;
 
         public void Parse(Stream xcApiStream)
         {
@@ -31,6 +32,7 @@ namespace ReactiveXComponent.Parser
             _eventNames = CreateEventNamesRepository(_xcApiDescription.GetPublishersNode());
             _publisherTopicByIdentifier = CreatePublisherTopicByComponentAndStateMachineRepository(_xcApiDescription.GetPublishersNode());
             _subscriberTopicByIdentifier = CreateConsumerTopicByComponentAndStateMachineAndRepository(_xcApiDescription.GetConsumersNode());
+            _snapshotTopicByComponent = CreateSnapshotTopicByComponentRepository(_xcApiDescription.GetSnapshotsNode()); ;
         }
 
         private Dictionary<string, long> CreateComponentCodeByNameRepository(XmlNodeList components)
@@ -129,6 +131,16 @@ namespace ReactiveXComponent.Parser
             return topicByIdentifierRepo;
         }
 
+        private Dictionary<long, string> CreateSnapshotTopicByComponentRepository(XmlNodeList snapshotNodes)
+        {
+            Dictionary<long, string> SnapshotTopicByComponentRepo = new Dictionary<long, string>();
+            foreach (XmlNode node in snapshotNodes)
+            {
+                AddSnapshotTopicToRepository(SnapshotTopicByComponentRepo, node);
+            }
+            return SnapshotTopicByComponentRepo;
+        }
+
         private void AddTopicToRepository(Dictionary<TopicIdentifier, string> repository, XmlNode node)
         {
             var componentCode = Convert.ToInt64(node?.Attributes[XCApiTags.ComponentCode]?.Value);
@@ -142,6 +154,17 @@ namespace ReactiveXComponent.Parser
             {
                 XmlNode topicNode = node?.FirstChild;
                 repository.Add(topicIdentifier, topicNode?.InnerText);
+            }
+        }
+
+        private void AddSnapshotTopicToRepository(Dictionary<long, string> repository, XmlNode node)
+        {
+            var componentCode = Convert.ToInt64(node?.Attributes[XCApiTags.ComponentCode]?.Value);
+
+            if (!repository.ContainsKey(componentCode))
+            {
+                XmlNode topicNode = node?.FirstChild;
+                repository.Add(componentCode, topicNode?.InnerText);
             }
         }
 
@@ -205,23 +228,41 @@ namespace ReactiveXComponent.Parser
         public string GetPublisherTopic(string component, string stateMachine)
         {
             string publisherTopic;
-            long code;
             var componentCode = GetComponentCode(component);
-            var stateMachineCode = Int64.TryParse(stateMachine, out code) ? code : GetStateMachineCode(component, stateMachine);
+            var stateMachineCode = GetStateMachineCode(component, stateMachine);
             var topicId = new TopicIdentifier(componentCode, stateMachineCode, XCApiTags.Output);
+
             _publisherTopicByIdentifier.TryGetValue(topicId, out publisherTopic);
+            return publisherTopic;
+        }
+
+        public string GetPublisherTopic(long componentCode, long stateMachineCode)
+        {
+            string publisherTopic;
+            var topicId = new TopicIdentifier(componentCode, stateMachineCode, XCApiTags.Output);
+
+            _publisherTopicByIdentifier.TryGetValue(topicId, out publisherTopic);
+            
             return publisherTopic;
         }
 
         public string GetSubscriberTopic(string component, string stateMachine)
         {
             string subscriberTopic;
-            long code;
             var componentCode = GetComponentCode(component);
-            var stateMachineCode = Int64.TryParse(stateMachine, out code)? code : GetStateMachineCode(component, stateMachine);
+            var stateMachineCode = GetStateMachineCode(component, stateMachine);
             var topicId = new TopicIdentifier(componentCode, stateMachineCode, XCApiTags.Input);
+
             _subscriberTopicByIdentifier.TryGetValue(topicId, out subscriberTopic);
             return subscriberTopic;
+        }
+
+        public string GetSnapshotTopic(string component)
+        {
+            string snapshotTopic;
+            var componentCode = GetComponentCode(component);
+            _snapshotTopicByComponent.TryGetValue(componentCode, out snapshotTopic);
+            return snapshotTopic;
         }
     }
 }

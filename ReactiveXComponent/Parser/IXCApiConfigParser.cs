@@ -12,7 +12,9 @@ namespace ReactiveXComponent.Parser
         long GetStateMachineCode(string component, string stateMachine);
         int GetPublisherEventCode(string eventName);
         string GetPublisherTopic(string component, string stateMachine);
+        string GetPublisherTopic(long componentCode, long stateMachineCode);
         string GetSubscriberTopic(string component, string stateMachine);
         string GetSerializationType();
+        string GetSnapshotTopic(string component);
     }
 }

@@ -9,7 +9,7 @@ namespace ReactiveXComponent.RabbitMq
         public MessageEventArgs(StateMachineRefHeader stateMachineRefHeader, object messageReceived)
         {
             StateMachineRefHeader = stateMachineRefHeader;
-            MessageReceived = messageReceived;            
+            MessageReceived = messageReceived;
         }
 
         public  StateMachineRefHeader StateMachineRefHeader { get; }

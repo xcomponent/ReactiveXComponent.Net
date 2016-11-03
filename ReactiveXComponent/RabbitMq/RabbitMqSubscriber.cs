@@ -73,6 +73,7 @@ namespace ReactiveXComponent.RabbitMq
                     stateMachineListener(args);
                 }
             });
+
             var subscription = StateMachineUpdatesStream.Subscribe(handler);
 
             _subscriptionsRepo.AddOrUpdate(susbcriptionKey, subscription, (key, oldSubscription) => subscription);
@@ -181,7 +182,7 @@ namespace ReactiveXComponent.RabbitMq
                     rabbitMqSubscriberInfos.Channel.BasicCancel(rabbitMqSubscriberInfos.Subscriber.ConsumerTag);
                     rabbitMqSubscriberInfos.Channel.Dispose();
                 }
-            } 
+            }
         }
 
         private void DeleteSubscription(SubscriberKey subscriberKey, Action<MessageEventArgs> stateMachineListener)

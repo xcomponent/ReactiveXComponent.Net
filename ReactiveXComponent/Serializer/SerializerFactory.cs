@@ -10,6 +10,8 @@ namespace ReactiveXComponent.Serializer
                     return new BinarySerializer();
                 case SerializationType.Json:
                     return new JsonSerializer();
+                case SerializationType.Bson:
+                    return new BsonSerializer();
                 default:
                     throw new XCSerializationException("Unhandled serialization type " + serializationType);
             }

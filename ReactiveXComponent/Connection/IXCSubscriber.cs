@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ReactiveXComponent.RabbitMq;
 
 namespace ReactiveXComponent.Connection

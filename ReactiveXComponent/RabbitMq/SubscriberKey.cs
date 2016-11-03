@@ -8,7 +8,6 @@
 
         private string RoutingKey { get; }
 
-
         public SubscriberKey(long componentCode, long stateMachineCode, string routingKey)
         {
             ComponentCode = componentCode;
@@ -33,7 +32,7 @@
         {
             unchecked
             {
-                return (((ComponentCode.GetHashCode()*397) ^ StateMachineCode.GetHashCode()) * 397) ^ (RoutingKey?.GetHashCode() ?? 0);
+                return (((ComponentCode.GetHashCode() * 397) ^ StateMachineCode.GetHashCode()) * 397) ^ (RoutingKey?.GetHashCode() ?? 0);
             }
         }
     }

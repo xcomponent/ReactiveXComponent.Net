@@ -109,6 +109,7 @@
     <Compile Include="RabbitMq\RabbitMqSession.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriber.cs" />
     <Compile Include="Common\ReactiveXComponentException.cs" />
+    <Compile Include="RabbitMq\SubscriptionKey.cs" />
     <Compile Include="Serializer\BinarySerializer.cs" />
     <Compile Include="Serializer\BsonSerializer.cs" />
     <Compile Include="Serializer\ISerializer.cs" />

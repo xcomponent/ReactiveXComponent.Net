@@ -193,7 +193,7 @@ Target "CreatePackage" (fun _ ->
         // Uses the files we copied to libDir and outputs to buildDir
         pack buildDir            
         
-        //removeDir nugetDir
+        removeDir nugetDir
 
     !! ("./ReactiveXComponent/bin/"+ configuration + "/*.dll")
     ++ ("./ReactiveXComponent/bin/"+ configuration + "/*.pdb")

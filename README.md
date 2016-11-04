@@ -9,47 +9,47 @@ Use Nuget to install the latest version of the API:
 
 Usage example of ReactiveXComponent.Net API
 ```csharp
-        // All the info we need is in the xcApi file..
-        var xcApiStream = new FileStream("HelloWorld.xcApi", FileMode.Open);
+// All the info we need is in the xcApi file..
+var xcApiStream = new FileStream("HelloWorld.xcApi", FileMode.Open);
 
-        // Get a XComponentApi..
-        using (IXComponentApi xcApi = XComponentApi.CreateFromXCApi(xcApiStream))
-        {
-            // Create a session..
-            IXCSession _xcSession = xcApi.CreateSession();
+// Get a XComponentApi..
+using (IXComponentApi xcApi = XComponentApi.CreateFromXCApi(xcApiStream))
+{
+    // Create a session..
+    IXCSession _xcSession = xcApi.CreateSession();
 
-            var componentName = "HelloWorld";
-            var helloWorldManagerStateMachineName = "HelloWorldManager";
-            var helloWorldResponseStateMachineCode = 1837059171;
+    var componentName = "HelloWorld";
+    var helloWorldManagerStateMachineName = "HelloWorldManager";
+    var helloWorldResponseStateMachineCode = 1837059171;
 
-            // Create a subscriber..
-            var subscriber = _xcSession.CreateSubscriber(componentName);
+    // Create a subscriber..
+    var subscriber = _xcSession.CreateSubscriber(componentName);
 
-            // Create a publisher..
-            var publisher = _xcSession.CreatePublisher(componentName);
+    // Create a publisher..
+    var publisher = _xcSession.CreatePublisher(componentName);
 
-            // Subscribe to state machine updates via the IObservable collection..
-            var eventReceived = new ManualResetEvent(false);
-            var observer = Observer.Create<MessageEventArgs>(args =>
-            {
-                Console.WriteLine(args.MessageReceived);
-                eventReceived.Set();
-            });
+    // Subscribe to state machine updates via the IObservable collection..
+    var eventReceived = new ManualResetEvent(false);
+    var observer = Observer.Create<MessageEventArgs>(args =>
+    {
+        Console.WriteLine(args.MessageReceived);
+        eventReceived.Set();
+    });
 
-            var subscription = subscriber.StateMachineUpdatesStream
-                                        .Where(e => e.StateMachineRefHeader.StateMachineCode == helloWorldResponseStateMachineCode)
-                                        .Subscribe(observer);
+    var subscription = subscriber.StateMachineUpdatesStream
+                                .Where(e => e.StateMachineRefHeader.StateMachineCode == helloWorldResponseStateMachineCode)
+                                .Subscribe(observer);
 
-            // Send an event to a state machine..
-            var sayHiEvent = new SayHi() { To = "World" };
+    // Send an event to a state machine..
+    var sayHiEvent = new SayHi() { To = "World" };
 
-            publisher.SendEvent(helloWorldManagerStateMachineName, sayHiEvent);
+    publisher.SendEvent(helloWorldManagerStateMachineName, sayHiEvent);
 
-            // Wait for state machine update and dispose subscription..
-            eventReceived.WaitOne(5000);
+    // Wait for state machine update and dispose subscription..
+    eventReceived.WaitOne(5000);
 
-            subscription.Dispose();
-        }
+    subscription.Dispose();
+}
 ```
 
 ## Build from source

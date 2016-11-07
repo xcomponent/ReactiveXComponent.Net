@@ -1,4 +1,7 @@
 ## .Net Reactive XComponent API
+
+<img src="logo.png" width="64" height="64" />
+
 ReactiveXComponent.Net is a .Net client API that allows you to interact with microservices generated with XComponent software.
 
 ## Install

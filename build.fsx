@@ -31,6 +31,8 @@ let buildDir = "./build/"
 let nugetDir = buildDir @@ "nuget"
 let libDir = nugetDir @@ @"lib/net45/"
 
+let defaultPushSource = "https://www.nuget.org/api/v2/package"
+
 // helper functions
         
 let formatAssemblyVersion (strVersion:string) =        
@@ -207,7 +209,7 @@ Target "PublishPackage" (fun _ ->
         let rec publishPackage accessKey trialsLeft packageFile =
             let tracing = enableProcessTracing
             enableProcessTracing <- false
-            let args pack key = sprintf "push \"%s\" %s" pack key                
+            let args pack key = sprintf "push \"%s\" %s -Source %s" pack key defaultPushSource                
 
             tracefn "Pushing %s Attempts left: %d" (FullName packageFile) trialsLeft
             try 

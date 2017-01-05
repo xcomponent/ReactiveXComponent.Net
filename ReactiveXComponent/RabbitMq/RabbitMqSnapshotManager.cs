@@ -246,13 +246,15 @@ namespace ReactiveXComponent.RabbitMq
             byte[] compressed = Convert.FromBase64String(zipedObj.Items);
             string message;
             using (var compressedMessage = new MemoryStream(compressed))
-            using (var decompressedMessage = new MemoryStream())
             {
-                using (var tmpMessage = new GZipStream(compressedMessage, CompressionMode.Decompress))
+                using (var decompressedMessage = new MemoryStream())
                 {
-                    tmpMessage.CopyTo(decompressedMessage);
+                    using (var tmpMessage = new GZipStream(compressedMessage, CompressionMode.Decompress))
+                    {
+                        tmpMessage.CopyTo(decompressedMessage);
+                    }
+                    message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
                 }
-                message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
             }
             var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, message);
 

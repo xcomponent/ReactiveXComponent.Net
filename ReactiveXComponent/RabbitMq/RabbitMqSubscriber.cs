@@ -250,11 +250,9 @@ namespace ReactiveXComponent.RabbitMq
                     }
 
                     _streamSubscriptionsDico.Clear();
-                    _connection?.Dispose();
                 }
 
                 // clear unmanaged resources
-
                 _disposed = true;
             }
         }

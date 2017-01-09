@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 
 namespace ReactiveXComponent.Parser
@@ -200,6 +201,31 @@ namespace ReactiveXComponent.Parser
             }
 
             return busDetails;
+        }
+
+        public WebSocketEndpoint GetWebSocketEndpoint()
+        {
+            WebSocketEndpoint webSocketEndpoint = null;
+
+            XmlNode connection = _xcApiDescription.GetCommunicationNode().Item(0)?.FirstChild;
+
+            if (connection?.Attributes != null)
+            {
+                WebSocketType webSocketType;
+                var webSocketTypeString = connection.Attributes["type"]?.Value;
+                if (!Enum.TryParse(webSocketTypeString, out webSocketType))
+                {
+                    throw new ReactiveXComponentException($"Could not parse communication type: {webSocketTypeString}");
+                }
+
+                webSocketEndpoint = new WebSocketEndpoint(
+                    connection.Attributes["name"]?.Value,
+                    connection.Attributes["host"]?.Value,
+                    connection.Attributes["port"]?.Value,
+                    webSocketType);
+            }
+
+            return webSocketEndpoint;
         }
 
         public long GetComponentCode(string component)

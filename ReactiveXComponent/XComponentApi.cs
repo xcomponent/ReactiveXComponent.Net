@@ -16,7 +16,8 @@ namespace ReactiveXComponent
             var xcConfiguration = new XCConfiguration(parser);
             xcConfiguration.Init(xcApiStream);
             AbstractXCConnectionFactory connectionFactory = new XCConnectionFactory(xcConfiguration, privateCommunicationIdentifier);
-            _xcConnection = connectionFactory.CreateConnection();
+            var connectionType = xcConfiguration.GetConnectionType();
+            _xcConnection = connectionFactory.CreateConnection(connectionType);
         }
 
         public static IXComponentApi CreateFromXCApi(Stream xcApiStream, string privateCommunicationIdentifier = null)

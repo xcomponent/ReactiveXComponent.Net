@@ -17,6 +17,7 @@ namespace ReactiveXComponent.RabbitMq
                            {
                                {HeaderElement.StateMachineCode, header?.StateMachineCode ?? defaultValue},
                                {HeaderElement.ComponentCode, header?.ComponentCode ?? defaultValue},
+                               {HeaderElement.StateCode, header?.StateCode ?? defaultValue},
                                {HeaderElement.EventType, header?.EventCode ?? defaultValue},
                                {HeaderElement.IncomingEventType, header?.IncomingEventType ?? defaultValue},
                                {HeaderElement.PublishTopic, header?.PublishTopic != null ? encoding.GetBytes(header.PublishTopic) : encoding.GetBytes(string.Empty) },

@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveXComponent", "ReactiveXComponent\ReactiveXComponent.csproj", "{C5DC5337-3E5B-4038-87A3-B57272226659}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveXComponentTest", "ReactiveXComponentTest\ReactiveXComponentTest.csproj", "{C06144BE-083F-49D3-B938-8A1B926FAC1C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XComponentClientApi", "XComponentClientApi\XComponentClientApi.csproj", "{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{C06144BE-083F-49D3-B938-8A1B926FAC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C06144BE-083F-49D3-B938-8A1B926FAC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C06144BE-083F-49D3-B938-8A1B926FAC1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E4C3DFC-96B1-4BC6-8EDA-3494026C9947}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

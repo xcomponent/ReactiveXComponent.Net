@@ -83,6 +83,7 @@
     <Compile Include="Common\IncomingEventType.cs" />
     <Compile Include="Common\MessageEventArgs.cs" />
     <Compile Include="Common\Option.cs" />
+    <Compile Include="Common\SnapshotItems.cs" />
     <Compile Include="Common\SnapshotMessage.cs" />
     <Compile Include="Common\StateMachineInstance.cs" />
     <Compile Include="Common\StateMachineRefHeader.cs" />

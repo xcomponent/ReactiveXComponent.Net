@@ -2,11 +2,11 @@
 {
     public class SubscriptionKey
     {
-        private long ComponentCode { get; }
+        public long ComponentCode { get; }
 
-        private long StateMachineCode { get; }
+        public long StateMachineCode { get; }
 
-        private string RoutingKey { get; }
+        public string RoutingKey { get; }
 
         public SubscriptionKey(long componentCode, long stateMachineCode, string routingKey)
         {

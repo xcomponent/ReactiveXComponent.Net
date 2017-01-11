@@ -1,4 +1,7 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
+using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.Serializer;
@@ -8,18 +11,47 @@ namespace ReactiveXComponent.RabbitMq
     public class RabbitMqSession : IXCSession
     {
         private readonly IXCConfiguration _xcConfiguration;
-        private readonly IConnection _connection;
+        private IConnection _connection;
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
+        private ConnectionFactory _factory;
 
-        public RabbitMqSession(IXCConfiguration xcConfiguration, IConnection connection , string privateCommunicationIdentifier = null)
+        public event EventHandler<string> ConnectionStatus;
+
+        public RabbitMqSession(IXCConfiguration xcConfiguration, BusDetails busDetails , string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = xcConfiguration;
-            _connection = connection;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _serializer = SelectSerializer();
+            InitConnection(busDetails);
         }
 
+        private void InitConnection(BusDetails busDetails)
+        {
+            try
+            {
+                _factory = new ConnectionFactory()
+                {
+                    UserName = busDetails.Username ?? XCApiTags.DefaultUserName,
+                    Password = busDetails.Password ?? XCApiTags.DefaultPassword,
+                    VirtualHost = ConnectionFactory.DefaultVHost,
+                    HostName = busDetails.Host,
+                    Port = busDetails.Port,
+                    Protocol = Protocols.DefaultProtocol
+                };
+
+                _connection = _factory?.CreateConnection();
+                _connection.ConnectionBlocked += (sender, args) =>
+                {
+                    ConnectionStatus?.Invoke(this, args.Reason);
+                };
+            }
+            catch (BrokerUnreachableException e)
+            {
+                throw new ReactiveXComponentException("Error while creating Rabbit Mq connection: " + e.Message, e);
+            }
+
+        }
         private ISerializer SelectSerializer()
         {
             switch (_xcConfiguration.GetSerializationType())
@@ -44,5 +76,47 @@ namespace ReactiveXComponent.RabbitMq
         {
             return new RabbitMqSubscriber(component, _xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
         }
+
+        private void CloseConnection()
+        {
+            if (_connection == null) return;
+            _connection.ConnectionShutdown += (sender, args) =>
+            {
+                ConnectionStatus?.Invoke(this, args.ReplyText);
+            };
+            _connection.Dispose();
+        }
+
+        #region IDisposable implementation
+
+        private bool _disposed;
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    CloseConnection();
+                }
+
+                // clear unmanaged resources
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~RabbitMqSession()
+        {
+            Dispose(false);
+        }
+
+        #endregion
     }
 }

@@ -40,7 +40,6 @@ namespace ReactiveXComponent
                 if (disposing)
                 {
                     // clear managed resources
-                    _xcConnection.Dispose();
                 }
 
                 // clear unmanaged resources

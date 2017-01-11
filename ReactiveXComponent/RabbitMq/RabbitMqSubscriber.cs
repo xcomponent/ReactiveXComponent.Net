@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Reactive.Linq;
@@ -60,17 +61,19 @@ namespace ReactiveXComponent.RabbitMq
                 InitSubscriber(stateMachine, _privateCommunicationIdentifier);
             }
 
-            var handler = new Action<MessageEventArgs>(args => 
-                {
+            if (!_streamSubscriptionsDico.ContainsKey(streamSusbcriptionKey))
+            {
+                var handler = new Action<MessageEventArgs>(args => {
                     if (args.StateMachineRefHeader.StateMachineCode == stateMachineCode)
                     {
                         stateMachineListener(args);
                     }
                 });
 
-            var subscription = StateMachineUpdatesStream.Subscribe(handler);
+                var subscription = StateMachineUpdatesStream.Subscribe(handler);
 
-            _streamSubscriptionsDico.AddOrUpdate(streamSusbcriptionKey, subscription, (key, oldSubscription) => subscription);
+                _streamSubscriptionsDico.AddOrUpdate(streamSusbcriptionKey, subscription, (key, oldSubscription) => subscription);
+            }
 
             InitSubscriber(stateMachine);
         }
@@ -123,22 +126,10 @@ namespace ReactiveXComponent.RabbitMq
                 var subscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, routingKey);
                 if (!_subscribersDico.ContainsKey(subscriptionKey))
                 {
-                    IModel channel;
-                    EventingBasicConsumer subscriber;
-                    CreateExchangeChannel(exchangeName, routingKey, out channel, out subscriber);
+                    bool createExchangeChannel = false;
+                    RabbitMqSubscriberInfos rabbitMqSubscriberInfos = null;
 
-                    if (channel == null || subscriber == null)
-                    {
-                        return;
-                    }
-
-                    var rabbitMqSubscriberInfos = new RabbitMqSubscriberInfos
-                    {
-                        Channel = channel,
-                        Subscriber = subscriber
-                    };
-
-                    rabbitMqSubscriberInfos.Subscriber.Received += (o, basicAckEventArgs) => 
+                    EventHandler<BasicDeliverEventArgs> handler = (o, basicAckEventArgs) => 
                     {
                         rabbitMqSubscriberInfos.Channel?.BasicAck(basicAckEventArgs.DeliveryTag, false);
 
@@ -154,7 +145,46 @@ namespace ReactiveXComponent.RabbitMq
                         }
                     };
 
-                    _subscribersDico.AddOrUpdate(subscriptionKey, rabbitMqSubscriberInfos, (key, oldValue) => rabbitMqSubscriberInfos);
+                    if (!string.IsNullOrEmpty(privateCommunicationIdentifier))
+                    {
+                        var privateSubscriptionKey =
+                            _subscribersDico.Keys.FirstOrDefault(
+                                k => k.ComponentCode == componentCode && k.RoutingKey == routingKey);
+
+                        createExchangeChannel = (privateSubscriptionKey == null);
+
+                        if (!createExchangeChannel)
+                        {
+                            rabbitMqSubscriberInfos = _subscribersDico[privateSubscriptionKey];
+                        }
+                    }
+                    else
+                    {
+                        createExchangeChannel = true;
+                    }
+
+                    if (createExchangeChannel)
+                    {
+                        IModel channel;
+                        EventingBasicConsumer subscriber;
+
+                        CreateExchangeChannel(exchangeName, routingKey, out channel, out subscriber);
+
+                        if (channel == null || subscriber == null)
+                        {
+                            return;
+                        }
+
+                        rabbitMqSubscriberInfos = new RabbitMqSubscriberInfos(channel, subscriber, handler);
+                        // Add the new element..
+                        _subscribersDico.AddOrUpdate(subscriptionKey, rabbitMqSubscriberInfos,
+                            (key, oldValue) => rabbitMqSubscriberInfos);
+                    }
+                    else
+                    {
+                        // Update the existing subscription for that routing key to subscribe the new handler..
+                        rabbitMqSubscriberInfos.AddHandler(handler);
+                    }
                 }  
             }
             catch (OperationInterruptedException e)
@@ -207,6 +237,11 @@ namespace ReactiveXComponent.RabbitMq
                     rabbitMqSubscriberInfos.Channel.ModelShutdown -= ChannelOnModelShutdown;
                     rabbitMqSubscriberInfos.Channel.BasicCancel(rabbitMqSubscriberInfos.Subscriber.ConsumerTag);
                     rabbitMqSubscriberInfos.Channel.Dispose();
+
+                    foreach (var handler in rabbitMqSubscriberInfos.Handlers)
+                    {
+                        rabbitMqSubscriberInfos.Subscriber.Received -= handler;
+                    }
                 }
             }
         }
@@ -240,6 +275,11 @@ namespace ReactiveXComponent.RabbitMq
                         subscriberInfo.Channel.ModelShutdown -= ChannelOnModelShutdown;
                         subscriberInfo.Channel.BasicCancel(subscriberInfo.Subscriber.ConsumerTag);
                         subscriberInfo.Channel.Dispose();
+
+                        foreach (var handler in subscriberInfo.Handlers)
+                        {
+                            subscriberInfo.Subscriber.Received -= handler;
+                        }
                     }
 
                     _subscribersDico.Clear();
@@ -250,11 +290,9 @@ namespace ReactiveXComponent.RabbitMq
                     }
 
                     _streamSubscriptionsDico.Clear();
-                    _connection?.Dispose();
                 }
 
                 // clear unmanaged resources
-
                 _disposed = true;
             }
         }

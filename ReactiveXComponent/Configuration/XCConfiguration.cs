@@ -26,9 +26,21 @@ namespace ReactiveXComponent.Configuration
             }
         }
 
-        public string GetConnectionType()
+        public ConnectionType GetConnectionType()
         {
-            return _parser.GetConnectionType();   
+            var type = _parser.GetConnectionType();
+
+            if (type == "bus")
+            {
+                return ConnectionType.RabbitMq;
+            }
+
+            if (type == "websocket")
+            {
+                return ConnectionType.WebSocket;
+            }
+
+            throw new ReactiveXComponentException($"Unrecognized connection type: {type}");
         }
 
         public string GetSerializationType()
@@ -54,6 +66,11 @@ namespace ReactiveXComponent.Configuration
         public BusDetails GetBusDetails()
         {
             return _parser.GetBusDetails();
+        }
+
+        public WebSocketEndpoint GetWebSocketEndpoint()
+        {
+            return _parser.GetWebSocketEndpoint();
         }
 
         public string GetPublisherTopic(string component, string stateMachine)

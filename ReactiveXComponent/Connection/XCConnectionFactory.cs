@@ -1,5 +1,7 @@
-﻿using ReactiveXComponent.Configuration;
+﻿using ReactiveXComponent.Common;
+using ReactiveXComponent.Configuration;
 using ReactiveXComponent.RabbitMq;
+using ReactiveXComponent.WebSocket;
 
 namespace ReactiveXComponent.Connection
 {
@@ -14,9 +16,19 @@ namespace ReactiveXComponent.Connection
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
         }
 
-        public override IXCConnection CreateConnection()
+        public override IXCConnection CreateConnection(ConnectionType connectionType, int connectionTimeout = 10000)
         {
-            return new RabbitMqConnection(_xcConfiguration, _privateCommunicationIdentifier);
+            var webSocketEndpoint = _xcConfiguration.GetWebSocketEndpoint();
+
+            switch (connectionType)
+            {
+                case ConnectionType.RabbitMq:
+                    return new RabbitMqConnection(_xcConfiguration, _privateCommunicationIdentifier);
+                case ConnectionType.WebSocket:
+                    return new WebSocketConnection(_xcConfiguration, webSocketEndpoint, connectionTimeout, _privateCommunicationIdentifier);
+                default:
+                    throw new ReactiveXComponentException($"Unsupported connection type: {connectionType}");
+            }
         }
     }
 }

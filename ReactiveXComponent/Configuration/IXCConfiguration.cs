@@ -1,12 +1,15 @@
 ﻿using System.IO;
+using ReactiveXComponent.Common;
 
 namespace ReactiveXComponent.Configuration
 {
     public interface IXCConfiguration
     {
         void Init(Stream xcApiStream);
-        string GetConnectionType();
+        ConnectionType GetConnectionType();
+        // TODO: replace these two methods with a GetCommunicationInfo() method
         BusDetails GetBusDetails();
+        WebSocketEndpoint GetWebSocketEndpoint();
         long GetStateMachineCode(string component, string stateMachine);
         long GetComponentCode(string component);
         int GetPublisherEventCode(string evnt);

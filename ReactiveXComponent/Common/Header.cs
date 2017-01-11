@@ -8,6 +8,8 @@ namespace ReactiveXComponent.Common
 
         public int EventCode { get; set; }
 
+        public int StateCode { get; set; }
+
         public int IncomingEventType { get; set; }
 
         public string MessageType { get; set; }

@@ -71,19 +71,31 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="websocket-sharp, Version=1.0.2.59610, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocketSharp.1.0.3-rc10\lib\websocket-sharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\ConnectionType.cs" />
     <Compile Include="Common\Header.cs" />
     <Compile Include="Common\HeaderElement.cs" />
     <Compile Include="Common\IncomingEventType.cs" />
+    <Compile Include="Common\MessageEventArgs.cs" />
+    <Compile Include="Common\Option.cs" />
     <Compile Include="Common\SnapshotItems.cs" />
     <Compile Include="Common\SnapshotMessage.cs" />
     <Compile Include="Common\StateMachineInstance.cs" />
     <Compile Include="Common\StateMachineRefHeader.cs" />
+    <Compile Include="Common\StreamSubscriptionKey.cs" />
+    <Compile Include="Common\SubscriptionKey.cs" />
     <Compile Include="Common\ThreadSafeList.cs" />
     <Compile Include="Common\PrivateTopic.cs" />
     <Compile Include="Common\ReplyTopic.cs" />
     <Compile Include="Common\Visibility.cs" />
+    <Compile Include="Common\WebSocketEndpoint.cs" />
+    <Compile Include="Common\WebSocketEngineHeader.cs" />
+    <Compile Include="Common\WebSocketType.cs" />
     <Compile Include="Configuration\BusDetails.cs" />
     <Compile Include="Configuration\IXCConfiguration.cs" />
     <Compile Include="Configuration\XCApiTags.cs" />
@@ -97,8 +109,6 @@
     <Compile Include="Connection\IXCSession.cs" />
     <Compile Include="RabbitMq\RabbitMqSnapshotManager.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriberInfos.cs" />
-    <Compile Include="RabbitMq\SubscriptionKey.cs" />
-    <Compile Include="RabbitMq\MessageEventArgs.cs" />
     <Compile Include="RabbitMq\RabbitMqConnection.cs" />
     <Compile Include="Connection\XCConnectionFactory.cs" />
     <Compile Include="RabbitMq\RabbitMqHeaderConverter.cs" />
@@ -110,7 +120,6 @@
     <Compile Include="RabbitMq\RabbitMqSession.cs" />
     <Compile Include="RabbitMq\RabbitMqSubscriber.cs" />
     <Compile Include="Common\ReactiveXComponentException.cs" />
-    <Compile Include="RabbitMq\StreamSubscriptionKey.cs" />
     <Compile Include="Serializer\BinarySerializer.cs" />
     <Compile Include="Serializer\BsonSerializer.cs" />
     <Compile Include="Serializer\ISerializer.cs" />
@@ -118,6 +127,19 @@
     <Compile Include="Serializer\SerializationType.cs" />
     <Compile Include="Serializer\SerializerFactory.cs" />
     <Compile Include="Serializer\XCSerializationException.cs" />
+    <Compile Include="WebSocket\IWebSocketClient.cs" />
+    <Compile Include="WebSocket\WebSocketClient.cs" />
+    <Compile Include="WebSocket\WebSocketCommand.cs" />
+    <Compile Include="WebSocket\WebSocketConnection.cs" />
+    <Compile Include="WebSocket\WebSocketMessage.cs" />
+    <Compile Include="WebSocket\WebSocketMessageHelper.cs" />
+    <Compile Include="WebSocket\WebSocketPacket.cs" />
+    <Compile Include="WebSocket\WebSocketPublisher.cs" />
+    <Compile Include="WebSocket\WebSocketSession.cs" />
+    <Compile Include="WebSocket\WebSocketSubscriber.cs" />
+    <Compile Include="WebSocket\WebSocketSubscription.cs" />
+    <Compile Include="WebSocket\WebSocketTopic.cs" />
+    <Compile Include="WebSocket\WebSocketTopicKind.cs" />
     <Compile Include="XComponentApi.cs" />
   </ItemGroup>
   <ItemGroup>

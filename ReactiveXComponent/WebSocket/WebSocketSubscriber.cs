@@ -77,7 +77,6 @@ namespace ReactiveXComponent.WebSocket
             var routingKey = isPrivateSubscription ? _privateCommunicationIdentifier : _xcConfiguration.GetSubscriberTopic(_component, stateMachine);
 
             var subscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, routingKey);
-            // Stream subscription key doesn't actually depend on the routing key. We should remove the routing key from this class..
             var streamSusbscriptionKey = new StreamSubscriptionKey(subscriptionKey, stateMachineListener);
 
             if (!string.IsNullOrEmpty(_privateCommunicationIdentifier))

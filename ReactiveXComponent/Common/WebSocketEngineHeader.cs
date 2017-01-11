@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace ReactiveXComponent.Common
 {
+    /// <summary>
+    /// This class is a sort of copy of the XComponent engine header.
+    /// The purpose is to be able to deserialize incoming messages from the
+    /// WebSocket bridge.
+    /// </summary>
     public class WebSocketEngineHeader
     {
         public Option<long> StateMachineId { get; set; }

@@ -1,8 +1,4 @@
-﻿using System;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Exceptions;
-using ReactiveXComponent.Common;
-using ReactiveXComponent.Configuration;
+﻿using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent.RabbitMq

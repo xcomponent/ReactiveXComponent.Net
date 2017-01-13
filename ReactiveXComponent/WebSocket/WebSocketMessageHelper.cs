@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.IO.Compression;
 using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReactiveXComponent.Common;
-using ReactiveXComponent.Serializer;
+using JsonSerializer = ReactiveXComponent.Serializer.JsonSerializer;
 
 namespace ReactiveXComponent.WebSocket
 {
@@ -85,7 +84,7 @@ namespace ReactiveXComponent.WebSocket
         public static WebSocketPacket DeserializePacket(WebSocketMessage request)
         {
             var jResult = DeserializeString(request.Json) as JObject;
-            var packet = jResult.ToObject<WebSocketPacket>();
+            var packet = jResult?.ToObject<WebSocketPacket>();
             return packet;
         }
 
@@ -112,7 +111,7 @@ namespace ReactiveXComponent.WebSocket
 
             string json = request.Substring(firstCurlyBrace, requestTerminatorIndex - firstCurlyBrace);
             var beforeJson = request.Substring(0, firstCurlyBrace).TrimEnd();
-            string[] tokensBeforeJson = beforeJson.Split();
+            string[] tokensBeforeJson = !string.IsNullOrEmpty(beforeJson)? beforeJson.Split() : new string[]{};
 
             // the request is of one of the types 
             //      command {json}, e.g. subscribe {json} (this is a request from the client)
@@ -135,13 +134,13 @@ namespace ReactiveXComponent.WebSocket
                 int firstDotIndex = firstPartBeforeJson.IndexOf('.');
 
                 // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
-                key = firstDotIndex >= 0 ? firstPartBeforeJson.Substring(0, firstDotIndex) : WebSocketCommand.Input;
-                topic = tokensBeforeJson[0];
+                key = firstDotIndex > 0 ? firstPartBeforeJson.Substring(0, firstDotIndex) : WebSocketCommand.Input;
+                topic = firstDotIndex == 0? tokensBeforeJson[0].Substring(1, tokensBeforeJson[0].Length - 1): tokensBeforeJson[0];
                 componentCode = tokensBeforeJson[1];
             }
             else if (tokensBeforeJson.Length == 3)
             {
-                key = tokensBeforeJson[0];
+                key = !string.IsNullOrEmpty(tokensBeforeJson[0]) ? tokensBeforeJson[0] : WebSocketCommand.Input;
                 topic = tokensBeforeJson[1];
                 componentCode = tokensBeforeJson[2];
             }
@@ -160,6 +159,7 @@ namespace ReactiveXComponent.WebSocket
 
                 throw new InvalidOperationException(errorMessage);
             }
+            IsValidKey(key);
 
             return new WebSocketMessage(key, topic, json, componentCode);
         }
@@ -185,6 +185,32 @@ namespace ReactiveXComponent.WebSocket
             }
         }
 
-        
+        private static void IsValidKey(string key)
+        {
+            if (string.Equals(key, WebSocketCommand.Input) || string.Equals(key, WebSocketCommand.Error)
+                || string.Equals(key, WebSocketCommand.Subscribe) || string.Equals(key, WebSocketCommand.Unsubscribe)
+                || string.Equals(key, WebSocketCommand.Snapshot) || string.Equals(key, WebSocketCommand.Update)) return;
+            throw new InvalidOperationException($"Invalid command received: {key}");
+        }
+
+        public static string DeserializeSnapshot(string receivedMessage)
+        {
+            var snapshotHeader = JsonConvert.DeserializeObject<WebSocketHeader>(receivedMessage);
+            var zipedMessage = JsonConvert.DeserializeObject<SnapshotItems>(snapshotHeader.JsonMessage);
+            byte[] compressedMessage = Convert.FromBase64String(zipedMessage.Items);
+            string message;
+            using (var compressedStream = new MemoryStream(compressedMessage))
+            {
+                using (var decompressedMessage = new MemoryStream())
+                {
+                    using (var unzippedMessage = new GZipStream(compressedStream, CompressionMode.Decompress))
+                    {
+                        unzippedMessage.CopyTo(decompressedMessage);
+                    }
+                    message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
+                }
+            }
+            return message;
+        }
     }
 }

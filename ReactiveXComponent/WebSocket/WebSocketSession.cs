@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using ReactiveXComponent.Common;
-using ReactiveXComponent.Configuration;
+﻿using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent.WebSocket
@@ -26,7 +18,7 @@ namespace ReactiveXComponent.WebSocket
 
         public IXCPublisher CreatePublisher(string component)
         {
-            throw new NotImplementedException();
+            return new WebSocketPublisher(component, _webSocketClient, _xcConfiguration, _privateCommunicationIdentifier);
         }
 
         public IXCSubscriber CreateSubscriber(string component)

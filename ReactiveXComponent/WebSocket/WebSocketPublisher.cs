@@ -1,35 +1,110 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ReactiveXComponent.Common;
+using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent.WebSocket
 {
     public class WebSocketPublisher : IXCPublisher
     {
+        private readonly string _component;
+        private readonly IWebSocketClient _webSocketClient;
+        private readonly IXCConfiguration _xcConfiguration;
+        private readonly string _privateCommunicationIdentifier;
+        private readonly WebSocketSnapshotManager _webSocketSnapshotManager;
+
+        public WebSocketPublisher(string component, IWebSocketClient webSocketClient, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier = null)
+        {
+            _component = component;
+            _webSocketClient = webSocketClient;
+            _xcConfiguration = xcConfiguration;
+            _privateCommunicationIdentifier = privateCommunicationIdentifier;
+            _webSocketSnapshotManager = new WebSocketSnapshotManager(component, webSocketClient, xcConfiguration, privateCommunicationIdentifier);
+        }
+
+        #region IXCPublisher implementation
         public void SendEvent(string stateMachine, object message, Visibility visibility = Visibility.Public)
         {
-            throw new NotImplementedException();
+            if (!_webSocketClient.IsOpen) return;
+            
+            var inputHeader = CreateWebSocketHeader(stateMachine, message, visibility);
+            var componentCode = _xcConfiguration.GetComponentCode(_component);
+            var topic = _xcConfiguration.GetPublisherTopic(_component, stateMachine);
+            var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
+                    WebSocketCommand.Input,
+                    inputHeader,
+                    message,
+                    componentCode.ToString(),
+                    topic);
+
+            _webSocketClient.Send(webSocketRequest);
         }
 
         public void SendEvent(StateMachineRefHeader stateMachineRefHeader, object message, Visibility visibility = Visibility.Public)
         {
-            throw new NotImplementedException();
+            if (!_webSocketClient.IsOpen) return;
+
+            var inputHeader = CreateStateMachineRefWebSocketHeader(stateMachineRefHeader, message);
+            var componentCode = _xcConfiguration.GetComponentCode(_component);
+            var topic = _xcConfiguration.GetPublisherTopic(componentCode, stateMachineRefHeader.StateMachineCode);
+            var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
+                    WebSocketCommand.Input,
+                    inputHeader,
+                    message,
+                    componentCode.ToString(),
+                    topic);
+
+            _webSocketClient.Send(webSocketRequest);
         }
 
         public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
         {
-            throw new NotImplementedException();
+            return _webSocketSnapshotManager.GetSnapshot(stateMachine, timeout);
         }
 
         public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
         {
-            throw new NotImplementedException();
+            _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
+        }
+        #endregion
+
+        private WebSocketEngineHeader CreateWebSocketHeader(string stateMachine, object message, Visibility visibility = Visibility.Public)
+        {
+            var messageType = message?.GetType();
+            var webSocketEngineHeader = new WebSocketEngineHeader
+            {
+                ComponentCode = new Option<long>(_xcConfiguration.GetComponentCode(_component)),
+                StateMachineCode = new Option<long>(_xcConfiguration.GetStateMachineCode(_component, stateMachine)),
+                EventCode = _xcConfiguration.GetPublisherEventCode(messageType?.ToString()),
+                MessageType = new Option<string>(messageType?.ToString()),
+                PublishTopic = visibility == Visibility.Private ? new Option<string>(_privateCommunicationIdentifier) : null
+            };
+
+            return webSocketEngineHeader;
         }
 
+        private WebSocketEngineHeader CreateStateMachineRefWebSocketHeader(StateMachineRefHeader smRefHeader, object message)
+        {
+            var messageType = message?.GetType();
+            var webSocketEngineHeader = new WebSocketEngineHeader
+            {
+                AgentId = new Option<int>(smRefHeader.AgentId),
+                StateMachineId = new Option<long>(smRefHeader.StateMachineId),
+                ComponentCode = new Option<long>(smRefHeader.ComponentCode),
+                StateMachineCode = new Option<long>(smRefHeader.StateMachineCode),
+                StateCode = new Option<int>(smRefHeader.StateCode),
+                EventCode = smRefHeader.EventCode,
+                MessageType = new Option<string>(messageType?.ToString()),
+                PublishTopic = new Option<string>(smRefHeader.PublishTopic)
+            };
+
+            return webSocketEngineHeader;
+        }
+        private T GetOptionalValue<T>(Option<T> optionalValue)
+        {
+            return optionalValue != null ? optionalValue.Fields[0] : default(T);
+        }
 
         #region IDisposable implementation
 
@@ -42,6 +117,7 @@ namespace ReactiveXComponent.WebSocket
                 if (disposing)
                 {
                     // clear managed resources
+                    _webSocketSnapshotManager?.Dispose();
                 }
 
                 // clear unmanaged resources

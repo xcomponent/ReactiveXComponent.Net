@@ -63,8 +63,17 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="websocket-sharp, Version=1.0.2.59610, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WebSocketSharp.1.0.3-rc10\lib\websocket-sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="XComponent.HelloWorld.UserObject">
+      <HintPath>..\..\xc-community\xcomponent\Examples\xc.helloworld\helloworld\HelloWorldClientApplication\lib\xcassemblies\XComponent.HelloWorld.UserObject.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IntegrationTests\WebSocketCommunicationTest.cs" />
+    <Compile Include="UnitTests\WebSocketUnitTests\WebsocketMessageHelperTest.cs" />
     <Compile Include="UnitTests\ConfiguartionTests\XCConfigutaionTest.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="UnitTests\ParserTests\XCApiConfigParserTest.cs" />

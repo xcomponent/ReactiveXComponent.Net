@@ -131,11 +131,14 @@
     <Compile Include="WebSocket\WebSocketClient.cs" />
     <Compile Include="WebSocket\WebSocketCommand.cs" />
     <Compile Include="WebSocket\WebSocketConnection.cs" />
+    <Compile Include="WebSocket\WebsocketHeader.cs" />
     <Compile Include="WebSocket\WebSocketMessage.cs" />
     <Compile Include="WebSocket\WebSocketMessageHelper.cs" />
     <Compile Include="WebSocket\WebSocketPacket.cs" />
     <Compile Include="WebSocket\WebSocketPublisher.cs" />
     <Compile Include="WebSocket\WebSocketSession.cs" />
+    <Compile Include="WebSocket\WebSocketSnapshotManager.cs" />
+    <Compile Include="WebSocket\WebSocketSnapshotMessage.cs" />
     <Compile Include="WebSocket\WebSocketSubscriber.cs" />
     <Compile Include="WebSocket\WebSocketSubscription.cs" />
     <Compile Include="WebSocket\WebSocketTopic.cs" />

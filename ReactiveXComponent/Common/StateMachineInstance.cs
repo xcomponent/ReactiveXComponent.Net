@@ -7,9 +7,9 @@ namespace ReactiveXComponent.Common
     {
         public long StateMachineId { get; set; }
 
-        public long AgentId { get; set; }
+        public int AgentId { get; set; }
 
-        public long StateCode { get; set; }
+        public int StateCode { get; set; }
 
         public long StateMachineCode { get; set; }
 

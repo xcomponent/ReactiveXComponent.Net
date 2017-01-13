@@ -3,7 +3,7 @@ using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent
 {
-    public interface IXComponentApi : IDisposable
+    public interface IXComponentApi
     {
         IXCSession CreateSession();
     }

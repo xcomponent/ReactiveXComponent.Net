@@ -2,7 +2,7 @@
 
 namespace ReactiveXComponent.Connection
 {
-    public interface IXCConnection : IDisposable
+    public interface IXCConnection
     {
         IXCSession CreateSession();
     }

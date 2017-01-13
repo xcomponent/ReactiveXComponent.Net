@@ -1,4 +1,4 @@
-﻿using ReactiveXComponent.Configuration;
+using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent.WebSocket
@@ -9,9 +9,11 @@ namespace ReactiveXComponent.WebSocket
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
 
-        public WebSocketSession(IWebSocketClient webSocketClient, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier)
+        public WebSocketSession(WebSocketEndpoint endpoint, int timeout, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier)
         {
-            _webSocketClient = webSocketClient;
+            _webSocketClient = new WebSocketClient();
+            _webSocketClient.Init(endpoint, timeout);
+            _webSocketClient.Open();
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
         }
@@ -25,5 +27,37 @@ namespace ReactiveXComponent.WebSocket
         {
             return new WebSocketSubscriber(component, _webSocketClient, _xcConfiguration, _privateCommunicationIdentifier);
         }
+
+        #region IDisposable implementation
+
+        private bool _disposed;
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _webSocketClient.Dispose();
+                }
+
+                // clear unmanaged resources
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~WebSocketSession()
+        {
+            Dispose(false);
+        }
+
+        #endregion
     }
 }

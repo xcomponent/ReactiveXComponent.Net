@@ -16,11 +16,10 @@ Usage example of ReactiveXComponent.Net API
 var xcApiStream = new FileStream("HelloWorld.xcApi", FileMode.Open);
 
 // Get a XComponentApi..
-using (IXComponentApi xcApi = XComponentApi.CreateFromXCApi(xcApiStream))
+IXComponentApi xcApi = XComponentApi.CreateFromXCApi(xcApiStream);
+// Create a session..
+using (IXCSession _xcSession = xcApi.CreateSession())
 {
-    // Create a session..
-    IXCSession _xcSession = xcApi.CreateSession();
-
     var componentName = "HelloWorld";
     var helloWorldManagerStateMachineName = "HelloWorldManager";
     var helloWorldResponseStateMachineCode = 1837059171;

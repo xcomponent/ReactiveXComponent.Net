@@ -4,7 +4,7 @@ using NUnit.Framework;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.RabbitMq;
 
-namespace ReactiveXComponentTest.UnitTests.RabbitMqUnitTests
+namespace ReactiveXComponentTest.RabbitMq
 {
     [TestFixture]
     public class RabbitMqHeaderConverterTest

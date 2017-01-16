@@ -72,7 +72,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IntegrationTests\WebSocketCommunicationTest.cs" />
     <Compile Include="UnitTests\WebSocketUnitTests\WebsocketMessageHelperTest.cs" />
     <Compile Include="UnitTests\ConfiguartionTests\XCConfigutaionTest.cs" />
     <Compile Include="GlobalSuppressions.cs" />

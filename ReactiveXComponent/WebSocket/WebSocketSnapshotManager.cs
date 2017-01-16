@@ -16,7 +16,7 @@ namespace ReactiveXComponent.WebSocket
         private readonly string _privateCommunicationIdentifier;
         private readonly IWebSocketClient _webSocketClient;
         private readonly IXCConfiguration _xcConfiguration;
-        private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>> _subscriptionsDico;
+        private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>> _subscriptions;
         private readonly ConcurrentDictionary<SubscriptionKey, IDisposable> _streamSubscriptionsDico;
 
         private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
@@ -29,7 +29,7 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient = webSocketClient;
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
-            _subscriptionsDico = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>>();
+            _subscriptions = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<SubscriptionKey, IDisposable>();
 
             InitSnapshotStream();
@@ -82,7 +82,7 @@ namespace ReactiveXComponent.WebSocket
 
             SendWebSocketSnapshotRequest(stateMachine, replyTopic);
 
-            _subscriptionsDico.AddOrUpdate(subscriptionKey, key => subscriptionHandler, (oldKey, oldValue) => oldValue);
+            _subscriptions.AddOrUpdate(subscriptionKey, key => subscriptionHandler, (oldKey, oldValue) => oldValue);
             _streamSubscriptionsDico.AddOrUpdate(subscriptionKey, key => snapshotSubscription, (oldKey, oldValue) => oldValue);
         }
         #endregion
@@ -165,7 +165,7 @@ namespace ReactiveXComponent.WebSocket
 
         private void UnsubscribeAll()
         {
-            foreach (var subscription in _subscriptionsDico)
+            foreach (var subscription in _subscriptions)
             {
                 var subscriptionKey = subscription.Key;
                 var subscriptionHandler = subscription.Value;
@@ -173,7 +173,7 @@ namespace ReactiveXComponent.WebSocket
                 _webSocketClient.MessageReceived -= subscriptionHandler;
                 SendUnsubscribeSnapshot(subscriptionKey.RoutingKey);
             }
-            _subscriptionsDico.Clear();
+            _subscriptions.Clear();
 
             foreach (var streamSubscription in _streamSubscriptionsDico)
             {

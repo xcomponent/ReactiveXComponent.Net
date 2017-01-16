@@ -32,10 +32,10 @@ namespace ReactiveXComponent.WebSocket
             _subscriptionsDico = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<SubscriptionKey, IDisposable>();
 
-            InitObservableCollection();
+            InitSnapshotStream();
         }
 
-        private void InitObservableCollection()
+        private void InitSnapshotStream()
         {
             _snapshotStream = Observable.FromEvent<EventHandler<List<MessageEventArgs>>, List<MessageEventArgs>>(
                 handler => (sender, e) => handler(e),

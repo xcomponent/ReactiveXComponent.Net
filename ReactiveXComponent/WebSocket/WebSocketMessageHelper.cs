@@ -117,51 +117,80 @@ namespace ReactiveXComponent.WebSocket
             //      command {json}, e.g. subscribe {json} (this is a request from the client)
             //      topic componentCode {json} (this is an input event)
             //      requestKey topic componentCode {json} (this is a response to a snapshot request, an output or an error)
-
-            string key;
-            string topic;
-            string componentCode;
-            if (tokensBeforeJson.Length == 1)
+            if(tokensBeforeJson.Length == 0 || tokensBeforeJson.Length > 3)
             {
-                key = tokensBeforeJson[0];
-                topic = null;
-                componentCode = null;
-            }
-            else if (tokensBeforeJson.Length == 2)
-            {
-                string firstPartBeforeJson = tokensBeforeJson[0];
-
-                int firstDotIndex = firstPartBeforeJson.IndexOf('.');
-
-                // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
-                key = firstDotIndex > 0 ? firstPartBeforeJson.Substring(0, firstDotIndex) : WebSocketCommand.Input;
-                topic = firstDotIndex == 0? tokensBeforeJson[0].Substring(1, tokensBeforeJson[0].Length - 1): tokensBeforeJson[0];
-                componentCode = tokensBeforeJson[1];
-            }
-            else if (tokensBeforeJson.Length == 3)
-            {
-                key = !string.IsNullOrEmpty(tokensBeforeJson[0]) ? tokensBeforeJson[0] : WebSocketCommand.Input;
-                topic = tokensBeforeJson[1];
-                componentCode = tokensBeforeJson[2];
-            }
-            else
-            {
-                string errorMessage;
-
-                if (tokensBeforeJson.Length == 0)
-                {
-                    errorMessage = $"Invalid request received, with no command, topic and component code: {request}";
-                }
-                else
-                {
-                    errorMessage = $"Invalid request received, with too many parts before json: {request}";
-                }
+                var errorMessage = tokensBeforeJson.Length == 0 ? 
+                    $"Invalid request received, with no command, topic and component code: {request}" 
+                    : $"Invalid request received, with too many parts before json: {request}";
 
                 throw new InvalidOperationException(errorMessage);
             }
-            IsValidKey(key);
+
+            var key = GetKey(tokensBeforeJson);
+            var topic = GetTopic(tokensBeforeJson);
+            var componentCode = GetComponentCode(tokensBeforeJson);
+            if (!IsValidKey(key))
+            { 
+                throw new InvalidOperationException($"Invalid command received: {key}");
+            }
 
             return new WebSocketMessage(key, topic, json, componentCode);
+        }
+
+        private static string GetKey(string[] tokensBeforeJson)
+        {
+            string key;
+            if (tokensBeforeJson.Length == 2)
+            {
+                // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
+                var firstDotIndex = tokensBeforeJson[0].IndexOf('.');
+                key = firstDotIndex > 0 ? tokensBeforeJson[0].Substring(0, firstDotIndex) : WebSocketCommand.Input;
+            }
+            else
+            {
+                key  = !string.IsNullOrEmpty(tokensBeforeJson[0]) ? tokensBeforeJson[0] : WebSocketCommand.Input;
+            }
+            return key;
+        }
+
+        private static string GetTopic(string[] tokensBeforeJson)
+        {
+            string topic;
+            switch (tokensBeforeJson.Length)
+            {
+                case 3:
+                    topic = tokensBeforeJson[1];
+                    break;
+                case 2:
+                    // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
+                    var firstDotIndex = tokensBeforeJson[0].IndexOf('.');
+                    // In case the topic format is : .*.*.* (e.g. .1_0.engine1.OrderService.CreationFacade)
+                    const int startIndex = 1; 
+                    topic = firstDotIndex == 0 ? tokensBeforeJson[0].Substring(startIndex, tokensBeforeJson[0].Length - startIndex) : tokensBeforeJson[0];
+                    break;
+                default:
+                    topic = null;
+                    break;
+            }
+            return topic;
+        }
+
+        private static string GetComponentCode(string[] tokensBeforeJson)
+        {
+            string componentCode;
+            switch (tokensBeforeJson.Length)
+            {
+                case 3:
+                    componentCode = tokensBeforeJson[2];
+                    break;
+                case 2:
+                    componentCode = tokensBeforeJson[1];
+                    break;
+                default:
+                    componentCode = null;
+                    break;
+            }
+            return componentCode;
         }
 
         public static object DeserializeString(string jsonMessage)
@@ -185,17 +214,17 @@ namespace ReactiveXComponent.WebSocket
             }
         }
 
-        private static void IsValidKey(string key)
+        private static bool IsValidKey(string key)
         {
             if (string.Equals(key, WebSocketCommand.Input) || string.Equals(key, WebSocketCommand.Error)
                 || string.Equals(key, WebSocketCommand.Subscribe) || string.Equals(key, WebSocketCommand.Unsubscribe)
-                || string.Equals(key, WebSocketCommand.Snapshot) || string.Equals(key, WebSocketCommand.Update)) return;
-            throw new InvalidOperationException($"Invalid command received: {key}");
+                || string.Equals(key, WebSocketCommand.Snapshot) || string.Equals(key, WebSocketCommand.Update)) return true;
+            return false;
         }
 
         public static string DeserializeSnapshot(string receivedMessage)
         {
-            var snapshotHeader = JsonConvert.DeserializeObject<WebSocketHeader>(receivedMessage);
+            var snapshotHeader = JsonConvert.DeserializeObject<WebSocketPacket>(receivedMessage);
             var zipedMessage = JsonConvert.DeserializeObject<SnapshotItems>(snapshotHeader.JsonMessage);
             byte[] compressedMessage = Convert.FromBase64String(zipedMessage.Items);
             string message;

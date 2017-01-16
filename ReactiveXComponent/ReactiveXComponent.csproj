@@ -131,7 +131,6 @@
     <Compile Include="WebSocket\WebSocketClient.cs" />
     <Compile Include="WebSocket\WebSocketCommand.cs" />
     <Compile Include="WebSocket\WebSocketConnection.cs" />
-    <Compile Include="WebSocket\WebsocketHeader.cs" />
     <Compile Include="WebSocket\WebSocketMessage.cs" />
     <Compile Include="WebSocket\WebSocketMessageHelper.cs" />
     <Compile Include="WebSocket\WebSocketPacket.cs" />

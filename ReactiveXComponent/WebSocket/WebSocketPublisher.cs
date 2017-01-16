@@ -45,7 +45,7 @@ namespace ReactiveXComponent.WebSocket
         {
             if (!_webSocketClient.IsOpen) return;
 
-            var inputHeader = CreateStateMachineRefWebSocketHeader(stateMachineRefHeader, message);
+            var inputHeader = CreateWebSocketHeaderFromStateMachineRef(stateMachineRefHeader, message);
             var componentCode = _xcConfiguration.GetComponentCode(_component);
             var topic = _xcConfiguration.GetPublisherTopic(componentCode, stateMachineRefHeader.StateMachineCode);
             var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
@@ -84,7 +84,7 @@ namespace ReactiveXComponent.WebSocket
             return webSocketEngineHeader;
         }
 
-        private WebSocketEngineHeader CreateStateMachineRefWebSocketHeader(StateMachineRefHeader smRefHeader, object message)
+        private WebSocketEngineHeader CreateWebSocketHeaderFromStateMachineRef(StateMachineRefHeader smRefHeader, object message)
         {
             var messageType = message?.GetType();
             var webSocketEngineHeader = new WebSocketEngineHeader

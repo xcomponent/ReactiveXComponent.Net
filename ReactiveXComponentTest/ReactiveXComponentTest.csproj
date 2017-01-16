@@ -67,9 +67,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\WebSocketSharp.1.0.3-rc10\lib\websocket-sharp.dll</HintPath>
     </Reference>
-    <Reference Include="XComponent.HelloWorld.UserObject">
-      <HintPath>..\..\xc-community\xcomponent\Examples\xc.helloworld\helloworld\HelloWorldClientApplication\lib\xcassemblies\XComponent.HelloWorld.UserObject.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="UnitTests\WebSocketUnitTests\WebsocketMessageHelperTest.cs" />

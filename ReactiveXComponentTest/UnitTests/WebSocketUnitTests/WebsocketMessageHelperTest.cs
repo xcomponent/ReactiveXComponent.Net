@@ -30,17 +30,7 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
             {
                 ComponentCode = new Option<long>(_helloworldComponent),
                 StateMachineCode = new Option<long>(helloworldStateMachine),
-                EventCode = 0,
                 MessageType = new Option<string>(_message.GetType().ToString()),
-                PublishTopic = null,
-                AgentId = null,
-                EngineCode = null,
-                IncomingType = 0,
-                Probes = null,
-                SessionData = null,
-                SessionId = null,
-                StateCode = null,
-                StateMachineId = null
             };
             _webSocketPacket = new WebSocketPacket
             {
@@ -81,7 +71,10 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
             var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(request);
             var expectedWebSocketMessage = new WebSocketMessage(command, _topic ,json, _helloworldComponent.ToString());
 
-            Check.That(webSocketMessage).IsEqualTo(expectedWebSocketMessage);
+            Check.That(webSocketMessage.Command == expectedWebSocketMessage.Command 
+                && webSocketMessage.Topic == expectedWebSocketMessage.Topic 
+                && webSocketMessage.ComponentCode == expectedWebSocketMessage.ComponentCode
+                && webSocketMessage.Json == expectedWebSocketMessage.Json).IsTrue();
         }
 
         [TestCase("")]
@@ -93,7 +86,10 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
             var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(request);
             var expectedWebSocketMessage = new WebSocketMessage(WebSocketCommand.Input, _topic, json, _helloworldComponent.ToString());
 
-            Check.That(webSocketMessage).IsEqualTo(expectedWebSocketMessage);
+            Check.That(webSocketMessage.Command == expectedWebSocketMessage.Command
+                && webSocketMessage.Topic == expectedWebSocketMessage.Topic
+                && webSocketMessage.ComponentCode == expectedWebSocketMessage.ComponentCode
+                && webSocketMessage.Json == expectedWebSocketMessage.Json).IsTrue();
         }
 
         [Test]
@@ -105,7 +101,10 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
             var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(request);
             var expectedWebSocketMessage = new WebSocketMessage(WebSocketCommand.Input, _topic, json, _helloworldComponent.ToString());
 
-            Check.That(webSocketMessage).IsEqualTo(expectedWebSocketMessage);
+            Check.That(webSocketMessage.Command == expectedWebSocketMessage.Command
+                && webSocketMessage.Topic == expectedWebSocketMessage.Topic
+                && webSocketMessage.ComponentCode == expectedWebSocketMessage.ComponentCode
+                && webSocketMessage.Json == expectedWebSocketMessage.Json).IsTrue();
         }
 
         [TestCase(WebSocketCommand.Input)]
@@ -123,11 +122,14 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
             var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(request);
             var expectedWebSocketMessage = new WebSocketMessage(command, newTopic, json, _helloworldComponent.ToString());
 
-            Check.That(webSocketMessage).IsEqualTo(expectedWebSocketMessage);
+            Check.That(webSocketMessage.Command == expectedWebSocketMessage.Command
+                && webSocketMessage.Topic == expectedWebSocketMessage.Topic
+                && webSocketMessage.ComponentCode == expectedWebSocketMessage.ComponentCode
+                && webSocketMessage.Json == expectedWebSocketMessage.Json).IsTrue();
         }
 
         [TestCase("")]
-        public void DeserializeRequest_WithDotAttachedToTopic_SuccessfulDeserialization_Test(string command)
+        public void DeserializeRequest_WithBlankCommandAttachedByDotToTopic_SuccessfulDeserialization_Test(string command)
         {
             var json = SerializeToString(_webSocketPacket);
             var newTopic = $"{command}.{_topic}";
@@ -136,7 +138,10 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
             var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(request);
             var expectedWebSocketMessage = new WebSocketMessage(WebSocketCommand.Input, _topic, json, _helloworldComponent.ToString());
 
-            Check.That(webSocketMessage).IsEqualTo(expectedWebSocketMessage);
+            Check.That(webSocketMessage.Command == expectedWebSocketMessage.Command
+                && webSocketMessage.Topic == expectedWebSocketMessage.Topic
+                && webSocketMessage.ComponentCode == expectedWebSocketMessage.ComponentCode
+                && webSocketMessage.Json == expectedWebSocketMessage.Json).IsTrue();
         }
 
         [Test]
@@ -154,7 +159,7 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
         [TestCase(WebSocketCommand.Snapshot)]
         [TestCase(WebSocketCommand.Error)]
         [TestCase(WebSocketCommand.Update)]
-        public void DeserializeRequest_WithCommandAttachedToTopicWithDots_ThrowsInvalidOperationException_Test(string command)
+        public void DeserializeRequest_WithCommandAndTopicAttachedWithoutDot_ThrowsInvalidOperationException_Test(string command)
         {
             var json = SerializeToString(_webSocketPacket);
             var newTopic = $"{command}{_topic}.{_topic}";
@@ -162,7 +167,6 @@ namespace ReactiveXComponentTest.UnitTests.WebSocketUnitTests
 
             Check.ThatCode(() => { WebSocketMessageHelper.DeserializeRequest(request); }).Throws<InvalidOperationException>();
         }
-
 
         private string SerializeToString(object message)
         {

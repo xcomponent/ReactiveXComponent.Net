@@ -12,10 +12,9 @@ using ReactiveXComponent.Connection;
 using ReactiveXComponent.RabbitMq;
 using ReactiveXComponent.Serializer;
 
-namespace ReactiveXComponentTest.IntegrationTests
+namespace ReactiveXComponentTest.RabbitMq
 {
     [TestFixture]
-    [Category("Integration Tests")]
     public class RabbitMqCommunicationTest
     {
         private const string User = "guest";

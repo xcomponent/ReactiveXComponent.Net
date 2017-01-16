@@ -4,7 +4,7 @@ using NUnit.Framework;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Parser;
 
-namespace ReactiveXComponentTest.UnitTests.ParserTests
+namespace ReactiveXComponentTest.Configuration
 {
     [TestFixture]
     public class XCApiConfigParserTest

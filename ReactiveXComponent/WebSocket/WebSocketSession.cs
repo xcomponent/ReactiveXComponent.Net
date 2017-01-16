@@ -1,3 +1,5 @@
+﻿using System;
+using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 

@@ -5,7 +5,7 @@ using NUnit.Framework;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Parser;
 
-namespace ReactiveXComponentTest.UnitTests.ConfiguartionTests
+namespace ReactiveXComponentTest.Configuration
 {
     [TestFixture]
     public class XCConfigutaionTest

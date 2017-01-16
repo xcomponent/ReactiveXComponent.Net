@@ -69,18 +69,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitTests\WebSocketUnitTests\WebsocketMessageHelperTest.cs" />
-    <Compile Include="UnitTests\ConfiguartionTests\XCConfigutaionTest.cs" />
+    <Compile Include="Configuration\XCApiConfigParserTest.cs" />
+    <Compile Include="Configuration\XCConfigutaionTest.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="UnitTests\ParserTests\XCApiConfigParserTest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UnitTests\RabbitMqUnitTests\RabbitMqHeaderConverterTest.cs" />
-    <Compile Include="IntegrationTests\RabbitMqCommunicationTest.cs" />
+    <Compile Include="RabbitMq\RabbitMqCommunicationTest.cs" />
+    <Compile Include="RabbitMq\RabbitMqHeaderConverterTest.cs" />
+    <Compile Include="WebSocket\WebSocketTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

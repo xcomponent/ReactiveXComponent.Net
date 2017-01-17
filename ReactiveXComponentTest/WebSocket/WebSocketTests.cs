@@ -172,6 +172,7 @@ namespace ReactiveXComponentTest.WebSocket
                   + "\\\"PrivateTopic\\\":{\\\"Case\\\":\\\"Some\\\",\\\"Fields\\\":[[null]]}}\"}" + Environment.NewLine;
 
             Assert.AreEqual(webSocketRequest, snaphsotRequest);
+
         }
     }
 }

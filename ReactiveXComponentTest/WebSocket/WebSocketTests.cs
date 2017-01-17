@@ -139,7 +139,7 @@ namespace ReactiveXComponentTest.WebSocket
                 : "input input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager -824151934 {\"Header\":{\"StateMachineId\":{\"Case\":\"Some\",\"Fields\":[0]}," 
                  +"\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]}," 
                  +"\"StateCode\":{\"Case\":\"Some\",\"Fields\":[0]},\"EventCode\":9,\"IncomingType\":0,\"AgentId\":{\"Case\":\"Some\",\"Fields\":[0]}," 
-                 +"\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"System.String\"]}},\"JsonMessage\":\"\\\"Hello\\\"\"}" + Environment.NewLine;
+                 + "\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"System.String\"]},\"PublishTopic\":{\"Case\":\"Some\",\"Fields\":[null]}},\"JsonMessage\":\"\\\"Hello\\\"\"}" + Environment.NewLine;
 
             Assert.AreEqual(webSocketRequest, publishRequest);
         }

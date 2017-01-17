@@ -51,7 +51,7 @@ namespace ReactiveXComponent.RabbitMq
         {
             if (stateMachineRefHeader == null) return;
 
-            var stateMachineRefNewHeader = CreateStateMachineRefHeader(stateMachineRefHeader, message);
+            var stateMachineRefNewHeader = CreateStateMachineRefHeader(stateMachineRefHeader, message, visibility);
             var componentCode = _configuration.GetComponentCode(_component);
 
             string routingKey = _configuration.GetPublisherTopic(componentCode, stateMachineRefHeader.StateMachineCode);
@@ -108,7 +108,7 @@ namespace ReactiveXComponent.RabbitMq
             return header;
         }
 
-        private StateMachineRefHeader CreateStateMachineRefHeader(StateMachineRefHeader stateMachineRefHeader, object message)
+        private StateMachineRefHeader CreateStateMachineRefHeader(StateMachineRefHeader stateMachineRefHeader, object message, Visibility visibility)
         {
             var messageType = message?.GetType().ToString() ?? string.Empty;
 
@@ -126,7 +126,7 @@ namespace ReactiveXComponent.RabbitMq
                 ComponentCode = stateMachineRefHeader.ComponentCode,
                 MessageType = messageType,
                 EventCode = _configuration.GetPublisherEventCode(messageType),
-                PublishTopic = stateMachineRefHeader.PublishTopic
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _privateCommunicationIdentifier : string.Empty
             };
 
             return stateMachineRefheader;

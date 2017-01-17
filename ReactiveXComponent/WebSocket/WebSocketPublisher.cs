@@ -45,7 +45,7 @@ namespace ReactiveXComponent.WebSocket
         {
             if (!_webSocketClient.IsOpen) return;
 
-            var inputHeader = CreateWebSocketHeaderFromStateMachineRef(stateMachineRefHeader, message);
+            var inputHeader = CreateWebSocketHeaderFromStateMachineRef(stateMachineRefHeader, message, visibility);
             var componentCode = _xcConfiguration.GetComponentCode(_component);
             var topic = _xcConfiguration.GetPublisherTopic(componentCode, stateMachineRefHeader.StateMachineCode);
             var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
@@ -84,7 +84,7 @@ namespace ReactiveXComponent.WebSocket
             return webSocketEngineHeader;
         }
 
-        private WebSocketEngineHeader CreateWebSocketHeaderFromStateMachineRef(StateMachineRefHeader smRefHeader, object message)
+        private WebSocketEngineHeader CreateWebSocketHeaderFromStateMachineRef(StateMachineRefHeader smRefHeader, object message, Visibility visibility)
         {
             var messageType = message?.GetType();
             var webSocketEngineHeader = new WebSocketEngineHeader
@@ -96,7 +96,7 @@ namespace ReactiveXComponent.WebSocket
                 StateCode = new Option<int>(smRefHeader.StateCode),
                 EventCode = smRefHeader.EventCode,
                 MessageType = new Option<string>(messageType?.ToString()),
-                PublishTopic = new Option<string>(smRefHeader.PublishTopic)
+                PublishTopic = visibility == Visibility.Private ? new Option<string>(_privateCommunicationIdentifier) : null
             };
 
             return webSocketEngineHeader;

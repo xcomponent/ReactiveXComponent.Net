@@ -129,10 +129,6 @@ namespace ReactiveXComponent.WebSocket
             var key = GetKey(tokensBeforeJson);
             var topic = GetTopic(tokensBeforeJson);
             var componentCode = GetComponentCode(tokensBeforeJson);
-            if (!IsValidKey(key))
-            { 
-                throw new InvalidOperationException($"Invalid command received: {key}");
-            }
 
             return new WebSocketMessage(key, topic, json, componentCode);
         }
@@ -144,11 +140,11 @@ namespace ReactiveXComponent.WebSocket
             {
                 // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
                 var firstDotIndex = tokensBeforeJson[0].IndexOf('.');
-                key = firstDotIndex > 0 ? tokensBeforeJson[0].Substring(0, firstDotIndex) : WebSocketCommand.Input;
+                key = firstDotIndex >= 0 ? tokensBeforeJson[0].Substring(0, firstDotIndex) : WebSocketCommand.Input;
             }
             else
             {
-                key  = !string.IsNullOrEmpty(tokensBeforeJson[0]) ? tokensBeforeJson[0] : WebSocketCommand.Input;
+                key = tokensBeforeJson[0];
             }
             return key;
         }
@@ -162,11 +158,7 @@ namespace ReactiveXComponent.WebSocket
                     topic = tokensBeforeJson[1];
                     break;
                 case 2:
-                    // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
-                    var firstDotIndex = tokensBeforeJson[0].IndexOf('.');
-                    // In case the topic format is : .*.*.* (e.g. .1_0.engine1.OrderService.CreationFacade)
-                    const int startIndex = 1; 
-                    topic = firstDotIndex == 0 ? tokensBeforeJson[0].Substring(startIndex, tokensBeforeJson[0].Length - startIndex) : tokensBeforeJson[0];
+                    topic = tokensBeforeJson[0];
                     break;
                 default:
                     topic = null;
@@ -212,14 +204,6 @@ namespace ReactiveXComponent.WebSocket
                 string serializedMessage = Encoding.UTF8.GetString(stream.ToArray());
                 return serializedMessage;
             }
-        }
-
-        private static bool IsValidKey(string key)
-        {
-            if (string.Equals(key, WebSocketCommand.Input) || string.Equals(key, WebSocketCommand.Error)
-                || string.Equals(key, WebSocketCommand.Subscribe) || string.Equals(key, WebSocketCommand.Unsubscribe)
-                || string.Equals(key, WebSocketCommand.Snapshot) || string.Equals(key, WebSocketCommand.Update)) return true;
-            return false;
         }
 
         public static string DeserializeSnapshot(string receivedMessage)

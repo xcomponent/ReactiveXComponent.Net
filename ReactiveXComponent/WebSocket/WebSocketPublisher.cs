@@ -101,10 +101,6 @@ namespace ReactiveXComponent.WebSocket
 
             return webSocketEngineHeader;
         }
-        private T GetOptionalValue<T>(Option<T> optionalValue)
-        {
-            return optionalValue != null ? optionalValue.Fields[0] : default(T);
-        }
 
         #region IDisposable implementation
 

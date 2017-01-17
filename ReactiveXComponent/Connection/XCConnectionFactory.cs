@@ -18,13 +18,12 @@ namespace ReactiveXComponent.Connection
 
         public override IXCConnection CreateConnection(ConnectionType connectionType, int connectionTimeout = 10000)
         {
-            var webSocketEndpoint = _xcConfiguration.GetWebSocketEndpoint();
-
             switch (connectionType)
             {
                 case ConnectionType.RabbitMq:
                     return new RabbitMqConnection(_xcConfiguration, _privateCommunicationIdentifier);
                 case ConnectionType.WebSocket:
+                    var webSocketEndpoint = _xcConfiguration.GetWebSocketEndpoint();
                     return new WebSocketConnection(_xcConfiguration, webSocketEndpoint, connectionTimeout, _privateCommunicationIdentifier);
                 default:
                     throw new ReactiveXComponentException($"Unsupported connection type: {connectionType}");

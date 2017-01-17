@@ -146,6 +146,9 @@ namespace ReactiveXComponent.WebSocket
             {
                 if (disposing)
                 {
+                    _socketOpenEvent.Dispose();
+                    _socketCloseEvent.Dispose();
+
                     _webSocket.OnOpen -= OnWebSocketOpened;
                     _webSocket.OnClose -= OnWebSocketClosed;
                     _webSocket.OnError -= OnWebSocketError;

@@ -168,7 +168,7 @@ namespace ReactiveXComponent.RabbitMq
                 {
                     // clear managed resources
                     _publisherChannel?.Dispose();
-                    _rabbitMqSnapshotManager?.Dispose();
+                    _rabbitMqSnapshotManager.Dispose();
                 }
 
                 // clear unmanaged resources

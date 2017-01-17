@@ -244,18 +244,16 @@ namespace ReactiveXComponent.RabbitMq
                 RabbitMqHeaderConverter.ConvertStateMachineRefHeader(basicAckEventArgs.BasicProperties.Headers);
             var zipedObj = JsonConvert.DeserializeObject<SnapshotItems>(obj.ToString());
             byte[] compressed = Convert.FromBase64String(zipedObj.Items);
-            string message;
-            using (var compressedMessage = new MemoryStream(compressed))
+            var compressedMessage = new MemoryStream(compressed);
+            var decompressedMessage = new MemoryStream();
+
+            using (var tmpMessage = new GZipStream(compressedMessage, CompressionMode.Decompress))
             {
-                using (var decompressedMessage = new MemoryStream())
-                {
-                    using (var tmpMessage = new GZipStream(compressedMessage, CompressionMode.Decompress))
-                    {
-                        tmpMessage.CopyTo(decompressedMessage);
-                    }
-                    message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
-                }
+                tmpMessage.CopyTo(decompressedMessage);
             }
+
+            var message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
+
             var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, message);
 
             OnSnapshotReceived(msgEventArgs);

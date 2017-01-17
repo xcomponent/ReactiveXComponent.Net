@@ -16,8 +16,6 @@ namespace ReactiveXComponent.RabbitMq
         private readonly ISerializer _serializer;
         private ConnectionFactory _factory;
 
-        public event EventHandler<string> ConnectionStatus;
-
         public RabbitMqSession(IXCConfiguration xcConfiguration, BusDetails busDetails , string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = xcConfiguration;
@@ -41,17 +39,20 @@ namespace ReactiveXComponent.RabbitMq
                 };
 
                 _connection = _factory?.CreateConnection();
-                _connection.ConnectionBlocked += (sender, args) =>
-                {
-                    ConnectionStatus?.Invoke(this, args.Reason);
-                };
+
+                _connection.ConnectionShutdown += ConnectionOnConnectionShutdown;
             }
             catch (BrokerUnreachableException e)
             {
                 throw new ReactiveXComponentException("Error while creating Rabbit Mq connection: " + e.Message, e);
             }
-
         }
+
+        private void ConnectionOnConnectionShutdown(object sender, ShutdownEventArgs shutdownEventArgs)
+        {
+            SessionClosed?.Invoke(this, EventArgs.Empty);
+        }
+
         private ISerializer SelectSerializer()
         {
             switch (_xcConfiguration.GetSerializationType())
@@ -67,6 +68,10 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
+        public bool IsOpen => _connection.IsOpen;
+
+        public event EventHandler SessionClosed;
+
         public IXCPublisher CreatePublisher(string component)
         {
             return new RabbitMqPublisher(component, _xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
@@ -80,10 +85,8 @@ namespace ReactiveXComponent.RabbitMq
         private void CloseConnection()
         {
             if (_connection == null) return;
-            _connection.ConnectionShutdown += (sender, args) =>
-            {
-                ConnectionStatus?.Invoke(this, args.ReplyText);
-            };
+
+            _connection.ConnectionShutdown -= ConnectionOnConnectionShutdown;
             _connection.Dispose();
         }
 

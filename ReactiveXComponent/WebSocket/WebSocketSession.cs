@@ -16,9 +16,19 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient = new WebSocketClient();
             _webSocketClient.Init(endpoint, timeout);
             _webSocketClient.Open();
+            _webSocketClient.ConnectionClosed += WebSocketClientOnConnectionClosed;
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
         }
+
+        private void WebSocketClientOnConnectionClosed(object sender, EventArgs eventArgs)
+        {
+            SessionClosed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public bool IsOpen => _webSocketClient.IsOpen;
+
+        public event EventHandler SessionClosed;
 
         public IXCPublisher CreatePublisher(string component)
         {
@@ -40,6 +50,7 @@ namespace ReactiveXComponent.WebSocket
             {
                 if (disposing)
                 {
+                    _webSocketClient.ConnectionClosed -= WebSocketClientOnConnectionClosed;
                     _webSocketClient.Dispose();
                 }
 

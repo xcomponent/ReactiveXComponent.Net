@@ -34,16 +34,12 @@ namespace ReactiveXComponent.WebSocket
             _subscriptionsDico = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<StreamSubscriptionKey, IDisposable>();
 
-            InitObservableCollection();
-            SubscribeToPrivateTopic();
-        }
-
-        private void InitObservableCollection()
-        {
             StateMachineUpdatesStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
                 handler => (sender, e) => handler(e),
                 h => MessageReceived += h,
                 h => MessageReceived -= h);
+
+            SubscribeToPrivateTopic();
         }
 
         private void SubscribeToPrivateTopic()
@@ -62,7 +58,7 @@ namespace ReactiveXComponent.WebSocket
             }
         }
 
-        public IObservable<MessageEventArgs> StateMachineUpdatesStream { get; private set; }
+        public IObservable<MessageEventArgs> StateMachineUpdatesStream { get; }
 
         public void Subscribe(string stateMachine, Action<MessageEventArgs> stateMachineListener)
         {
@@ -135,6 +131,7 @@ namespace ReactiveXComponent.WebSocket
                             MessageType = GetOptionalValue(receivedPacket.Header.MessageType),
                             StateMachineCode = GetOptionalValue(receivedPacket.Header.StateMachineCode),
                             StateCode = GetOptionalValue(receivedPacket.Header.StateCode),
+                            StateMachineId = GetOptionalValue(receivedPacket.Header.StateMachineId),
                             PublishTopic = GetOptionalValue(receivedPacket.Header.PublishTopic)
                         };
 

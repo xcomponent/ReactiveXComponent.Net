@@ -24,6 +24,7 @@ namespace ReactiveXComponent.WebSocket
         }
 
         #region IXCPublisher implementation
+
         public void SendEvent(string stateMachine, object message, Visibility visibility = Visibility.Public)
         {
             if (!_webSocketClient.IsOpen) return;
@@ -67,6 +68,7 @@ namespace ReactiveXComponent.WebSocket
         {
             _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
         }
+
         #endregion
 
         private WebSocketEngineHeader CreateWebSocketHeader(string stateMachine, object message, Visibility visibility = Visibility.Public)
@@ -94,7 +96,7 @@ namespace ReactiveXComponent.WebSocket
                 ComponentCode = new Option<long>(smRefHeader.ComponentCode),
                 StateMachineCode = new Option<long>(smRefHeader.StateMachineCode),
                 StateCode = new Option<int>(smRefHeader.StateCode),
-                EventCode = smRefHeader.EventCode,
+                EventCode = _xcConfiguration.GetPublisherEventCode(messageType?.ToString()),
                 MessageType = new Option<string>(messageType?.ToString()),
                 PublishTopic = visibility == Visibility.Private ? new Option<string>(_privateCommunicationIdentifier) : null
             };
@@ -113,7 +115,7 @@ namespace ReactiveXComponent.WebSocket
                 if (disposing)
                 {
                     // clear managed resources
-                    _webSocketSnapshotManager?.Dispose();
+                    _webSocketSnapshotManager.Dispose();
                 }
 
                 // clear unmanaged resources

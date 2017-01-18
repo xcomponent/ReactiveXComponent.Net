@@ -21,7 +21,7 @@ namespace ReactiveXComponent.WebSocket
 
         private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
 
-        private IObservable<List<MessageEventArgs>> _snapshotStream;
+        private readonly IObservable<List<MessageEventArgs>> _snapshotStream;
 
         public WebSocketSnapshotManager(string component, IWebSocketClient webSocketClient, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier)
         {
@@ -32,18 +32,12 @@ namespace ReactiveXComponent.WebSocket
             _subscriptions = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<SubscriptionKey, IDisposable>();
 
-            InitSnapshotStream();
-        }
-
-        private void InitSnapshotStream()
-        {
             _snapshotStream = Observable.FromEvent<EventHandler<List<MessageEventArgs>>, List<MessageEventArgs>>(
                 handler => (sender, e) => handler(e),
                 h => SnapshotReceived += h,
                 h => SnapshotReceived -= h);
         }
-
-        #region Snapshot implementation
+        
         public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
         {
             var replyTopic = Guid.NewGuid().ToString();
@@ -57,6 +51,7 @@ namespace ReactiveXComponent.WebSocket
                 result = new List<MessageEventArgs>(message);
                 lockEvent.Set();
             });
+
             var snapshotSubscription = _snapshotStream.Subscribe(observer);
 
             SendWebSocketSnapshotRequest(stateMachine, replyTopic);
@@ -85,7 +80,6 @@ namespace ReactiveXComponent.WebSocket
             _subscriptions.AddOrUpdate(subscriptionKey, key => subscriptionHandler, (oldKey, oldValue) => oldValue);
             _streamSubscriptionsDico.AddOrUpdate(subscriptionKey, key => snapshotSubscription, (oldKey, oldValue) => oldValue);
         }
-        #endregion
 
         private void SendWebSocketSnapshotRequest(string stateMachine, string replyTopic)
         {
@@ -126,8 +120,8 @@ namespace ReactiveXComponent.WebSocket
                 {
                     var receivedPacket = WebSocketMessageHelper.DeserializeSnapshot(webSocketMessage.Json);
                     var stateMachineInstances = new List<MessageEventArgs>();
-                    var snapshotReceived =
-                        JsonConvert.DeserializeObject<List<StateMachineInstance>>(receivedPacket);
+                    var snapshotReceived = JsonConvert.DeserializeObject<List<StateMachineInstance>>(receivedPacket);
+
                     foreach (var element in snapshotReceived)
                     {
                         var stateMachineRefHeader = new StateMachineRefHeader()
@@ -142,6 +136,7 @@ namespace ReactiveXComponent.WebSocket
                         var messageEventArgs = new MessageEventArgs(stateMachineRefHeader, element.PublicMember);
                         stateMachineInstances.Add(messageEventArgs);
                     }
+
                     SnapshotReceived?.Invoke(this, stateMachineInstances);
                 }
             };
@@ -160,6 +155,7 @@ namespace ReactiveXComponent.WebSocket
                 WebSocketCommand.Unsubscribe,
                 subscriptionHeader,
                 webSocketSubscription);
+
             _webSocketClient.Send(webSocketRequest);
         }
 
@@ -173,6 +169,7 @@ namespace ReactiveXComponent.WebSocket
                 _webSocketClient.MessageReceived -= subscriptionHandler;
                 SendUnsubscribeSnapshot(subscriptionKey.RoutingKey);
             }
+
             _subscriptions.Clear();
 
             foreach (var streamSubscription in _streamSubscriptionsDico)
@@ -180,6 +177,7 @@ namespace ReactiveXComponent.WebSocket
                 var streamSubscriber = streamSubscription.Value;
                 streamSubscriber.Dispose();
             }
+
             _streamSubscriptionsDico.Clear();
         }
 
@@ -195,6 +193,7 @@ namespace ReactiveXComponent.WebSocket
                 {
                     UnsubscribeAll();
                 }
+
                 // clear unmanaged resources
                 _disposed = true;
             }

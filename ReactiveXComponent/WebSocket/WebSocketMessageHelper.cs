@@ -111,78 +111,56 @@ namespace ReactiveXComponent.WebSocket
 
             string json = request.Substring(firstCurlyBrace, requestTerminatorIndex - firstCurlyBrace);
             var beforeJson = request.Substring(0, firstCurlyBrace).TrimEnd();
-            string[] tokensBeforeJson = !string.IsNullOrEmpty(beforeJson)? beforeJson.Split() : new string[]{};
+            string[] tokensBeforeJson = beforeJson.Split();
 
             // the request is of one of the types 
             //      command {json}, e.g. subscribe {json} (this is a request from the client)
             //      topic componentCode {json} (this is an input event)
             //      requestKey topic componentCode {json} (this is a response to a snapshot request, an output or an error)
-            if(tokensBeforeJson.Length == 0 || tokensBeforeJson.Length > 3)
+
+            string key;
+            string topic;
+            string componentCode;
+            if (tokensBeforeJson.Length == 1)
             {
-                var errorMessage = tokensBeforeJson.Length == 0 ? 
-                    $"Invalid request received, with no command, topic and component code: {request}" 
-                    : $"Invalid request received, with too many parts before json: {request}";
+                key = tokensBeforeJson[0];
+                topic = null;
+                componentCode = null;
+            }
+            else if (tokensBeforeJson.Length == 2)
+            {
+                string firstPartBeforeJson = tokensBeforeJson[0];
+
+                int firstDotIndex = firstPartBeforeJson.IndexOf('.');
+
+                // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
+                key = firstDotIndex >= 0 ? firstPartBeforeJson.Substring(0, firstDotIndex) : WebSocketCommand.Input;
+                topic = tokensBeforeJson[0];
+                componentCode = tokensBeforeJson[1];
+            }
+            else if (tokensBeforeJson.Length == 3)
+            {
+                key = tokensBeforeJson[0];
+                topic = tokensBeforeJson[1];
+                componentCode = tokensBeforeJson[2];
+            }
+            else
+            {
+                string errorMessage;
+
+                if (tokensBeforeJson.Length == 0)
+                {
+                    errorMessage = $"Invalid request received, with no command, topic and component code: {request}";
+                }
+                else
+                {
+                    errorMessage = $"Invalid request received, with too many parts before json: {request}";
+                }
 
                 throw new InvalidOperationException(errorMessage);
             }
 
-            var key = GetKey(tokensBeforeJson);
-            var topic = GetTopic(tokensBeforeJson);
-            var componentCode = GetComponentCode(tokensBeforeJson);
-
             return new WebSocketMessage(key, topic, json, componentCode);
-        }
-
-        private static string GetKey(string[] tokensBeforeJson)
-        {
-            string key;
-            if (tokensBeforeJson.Length == 2)
-            {
-                // Assume it is an input on a custom type of topic if it doesn't have the format  topic = {key}.*.*.* (e.g. output.1_0.engine1.OrderService.CreationFacade)
-                var firstDotIndex = tokensBeforeJson[0].IndexOf('.');
-                key = firstDotIndex >= 0 ? tokensBeforeJson[0].Substring(0, firstDotIndex) : WebSocketCommand.Input;
-            }
-            else
-            {
-                key = tokensBeforeJson[0];
-            }
-            return key;
-        }
-
-        private static string GetTopic(string[] tokensBeforeJson)
-        {
-            string topic;
-            switch (tokensBeforeJson.Length)
-            {
-                case 3:
-                    topic = tokensBeforeJson[1];
-                    break;
-                case 2:
-                    topic = tokensBeforeJson[0];
-                    break;
-                default:
-                    topic = null;
-                    break;
-            }
-            return topic;
-        }
-
-        private static string GetComponentCode(string[] tokensBeforeJson)
-        {
-            string componentCode;
-            switch (tokensBeforeJson.Length)
-            {
-                case 3:
-                    componentCode = tokensBeforeJson[2];
-                    break;
-                case 2:
-                    componentCode = tokensBeforeJson[1];
-                    break;
-                default:
-                    componentCode = null;
-                    break;
-            }
-            return componentCode;
         }
 
         public static object DeserializeString(string jsonMessage)
@@ -212,17 +190,18 @@ namespace ReactiveXComponent.WebSocket
             var zipedMessage = JsonConvert.DeserializeObject<SnapshotItems>(snapshotHeader.JsonMessage);
             byte[] compressedMessage = Convert.FromBase64String(zipedMessage.Items);
             string message;
-            using (var compressedStream = new MemoryStream(compressedMessage))
+            var compressedStream = new MemoryStream(compressedMessage);
+
+            using (var decompressedMessage = new MemoryStream())
             {
-                using (var decompressedMessage = new MemoryStream())
+                using (var unzippedMessage = new GZipStream(compressedStream, CompressionMode.Decompress))
                 {
-                    using (var unzippedMessage = new GZipStream(compressedStream, CompressionMode.Decompress))
-                    {
-                        unzippedMessage.CopyTo(decompressedMessage);
-                    }
-                    message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
+                    unzippedMessage.CopyTo(decompressedMessage);
                 }
+
+                message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
             }
+
             return message;
         }
     }

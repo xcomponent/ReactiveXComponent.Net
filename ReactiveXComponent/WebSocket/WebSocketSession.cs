@@ -32,7 +32,7 @@ namespace ReactiveXComponent.WebSocket
 
         public IXCPublisher CreatePublisher(string component)
         {
-            throw new NotImplementedException();
+            return new WebSocketPublisher(component, _webSocketClient, _xcConfiguration, _privateCommunicationIdentifier);
         }
 
         public IXCSubscriber CreateSubscriber(string component)

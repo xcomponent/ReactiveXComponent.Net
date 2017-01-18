@@ -136,6 +136,8 @@
     <Compile Include="WebSocket\WebSocketPacket.cs" />
     <Compile Include="WebSocket\WebSocketPublisher.cs" />
     <Compile Include="WebSocket\WebSocketSession.cs" />
+    <Compile Include="WebSocket\WebSocketSnapshotManager.cs" />
+    <Compile Include="WebSocket\WebSocketSnapshotMessage.cs" />
     <Compile Include="WebSocket\WebSocketSubscriber.cs" />
     <Compile Include="WebSocket\WebSocketSubscription.cs" />
     <Compile Include="WebSocket\WebSocketTopic.cs" />

@@ -37,7 +37,7 @@ namespace ReactiveXComponentTest.RabbitMq
             var headerDico = RabbitMqHeaderConverter.ConvertHeader(_header);
 
             Check.That(headerDico.Values).Contains(_header.ComponentCode).And.Contains(_header.StateMachineCode).And.Contains(_header.EventCode);
-            Assert.AreEqual(headerDico["PublishTopic"], _encoding.GetBytes(_header.PublishTopic));
+            Assert.AreEqual(headerDico["PrivateTopic"], _encoding.GetBytes(_header.PublishTopic));
             Assert.AreEqual(headerDico["MessageType"], _encoding.GetBytes(_header.MessageType));
         }
 

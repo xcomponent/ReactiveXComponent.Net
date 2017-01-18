@@ -12,7 +12,7 @@ namespace ReactiveXComponent.Common
         public const string IncomingEventType = "IncomingEventType";
         public const string IsContainsHashCode = "IsContainsHashCode";
         public const string EventType = "EventType";
-        public const string PublishTopic = "PublishTopic";
+        public const string PublishTopic = "PrivateTopic";
         public const string MessageType = "MessageType";
         public const string RoutingKey = "RoutingKey";
     }

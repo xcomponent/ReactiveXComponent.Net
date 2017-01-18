@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.IO.Compression;
 using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ReactiveXComponent.Common;
-using ReactiveXComponent.Serializer;
+using JsonSerializer = ReactiveXComponent.Serializer.JsonSerializer;
 
 namespace ReactiveXComponent.WebSocket
 {
@@ -85,7 +84,7 @@ namespace ReactiveXComponent.WebSocket
         public static WebSocketPacket DeserializePacket(WebSocketMessage request)
         {
             var jResult = DeserializeString(request.Json) as JObject;
-            var packet = jResult.ToObject<WebSocketPacket>();
+            var packet = jResult?.ToObject<WebSocketPacket>();
             return packet;
         }
 
@@ -185,6 +184,25 @@ namespace ReactiveXComponent.WebSocket
             }
         }
 
-        
+        public static string DeserializeSnapshot(string receivedMessage)
+        {
+            var snapshotHeader = JsonConvert.DeserializeObject<WebSocketPacket>(receivedMessage);
+            var zipedMessage = JsonConvert.DeserializeObject<SnapshotItems>(snapshotHeader.JsonMessage);
+            byte[] compressedMessage = Convert.FromBase64String(zipedMessage.Items);
+            string message;
+            var compressedStream = new MemoryStream(compressedMessage);
+
+            using (var decompressedMessage = new MemoryStream())
+            {
+                using (var unzippedMessage = new GZipStream(compressedStream, CompressionMode.Decompress))
+                {
+                    unzippedMessage.CopyTo(decompressedMessage);
+                }
+
+                message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
+            }
+
+            return message;
+        }
     }
 }

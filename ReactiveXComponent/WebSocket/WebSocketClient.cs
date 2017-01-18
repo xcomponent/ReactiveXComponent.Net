@@ -146,15 +146,15 @@ namespace ReactiveXComponent.WebSocket
             {
                 if (disposing)
                 {
-                    _socketOpenEvent.Dispose();
-                    _socketCloseEvent.Dispose();
+                    CloseConnection();
 
                     _webSocket.OnOpen -= OnWebSocketOpened;
                     _webSocket.OnClose -= OnWebSocketClosed;
                     _webSocket.OnError -= OnWebSocketError;
                     _webSocket.OnMessage -= OnMessageReceived;
 
-                    CloseConnection();
+                    _socketOpenEvent.Dispose();
+                    _socketCloseEvent.Dispose();
                 }
 
                 // clear unmanaged resources

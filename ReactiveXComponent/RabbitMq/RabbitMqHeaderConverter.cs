@@ -15,11 +15,11 @@ namespace ReactiveXComponent.RabbitMq
 
             var dico = new Dictionary<string, object>
                            {
-                               {HeaderElement.StateMachineCode, header?.StateMachineCode ?? defaultValue},
-                               {HeaderElement.ComponentCode, header?.ComponentCode ?? defaultValue},
-                               {HeaderElement.StateCode, header?.StateCode ?? defaultValue},
-                               {HeaderElement.EventType, header?.EventCode ?? defaultValue},
-                               {HeaderElement.IncomingEventType, header?.IncomingEventType ?? defaultValue},
+                               {HeaderElement.StateMachineCode, header?.StateMachineCode},
+                               {HeaderElement.ComponentCode, header?.ComponentCode},
+                               {HeaderElement.StateCode, defaultValue},
+                               {HeaderElement.EventType, header?.EventCode},
+                               {HeaderElement.IncomingEventType, header?.IncomingEventType},
                                {HeaderElement.PublishTopic, header?.PublishTopic != null ? encoding.GetBytes(header.PublishTopic) : encoding.GetBytes(string.Empty) },
                                {HeaderElement.MessageType, header?.MessageType != null ? encoding.GetBytes(header.MessageType) : encoding.GetBytes(string.Empty)}
                            };
@@ -28,17 +28,16 @@ namespace ReactiveXComponent.RabbitMq
 
         public static Dictionary<string, object> CreateHeaderFromStateMachineRefHeader(StateMachineRefHeader stateMachineRefHeader, IncomingEventType incomingEventType)
         {
-            const int defaultValue = -1;
             var encoding = new UTF8Encoding();
 
             var dico = new Dictionary<string, object>
                            {
-                                {HeaderElement.StateMachineId, stateMachineRefHeader?.StateMachineId ?? defaultValue},
-                                {HeaderElement.AgentId, stateMachineRefHeader?.AgentId ?? defaultValue},
-                                {HeaderElement.StateCode, stateMachineRefHeader?.StateCode ?? defaultValue},
-                                {HeaderElement.StateMachineCode, stateMachineRefHeader?.StateMachineCode ?? defaultValue},
-                                {HeaderElement.ComponentCode, stateMachineRefHeader?.ComponentCode ?? defaultValue},
-                                {HeaderElement.EventType, stateMachineRefHeader?.EventCode ?? defaultValue},
+                                {HeaderElement.StateMachineId, stateMachineRefHeader?.StateMachineId},
+                                {HeaderElement.AgentId, stateMachineRefHeader?.AgentId},
+                                {HeaderElement.StateCode, stateMachineRefHeader?.StateCode},
+                                {HeaderElement.StateMachineCode, stateMachineRefHeader?.StateMachineCode},
+                                {HeaderElement.ComponentCode, stateMachineRefHeader?.ComponentCode},
+                                {HeaderElement.EventType, stateMachineRefHeader?.EventCode},
                                 {HeaderElement.PublishTopic, stateMachineRefHeader?.PublishTopic != null ? encoding.GetBytes(stateMachineRefHeader.PublishTopic) : encoding.GetBytes(string.Empty) },
                                 {HeaderElement.MessageType, stateMachineRefHeader?.MessageType != null ? encoding.GetBytes(stateMachineRefHeader.MessageType) : encoding.GetBytes(string.Empty)},
                                 {HeaderElement.IncomingEventType, (int)incomingEventType}
@@ -55,8 +54,8 @@ namespace ReactiveXComponent.RabbitMq
             var stateMachineCode = -1;
             var componentCode = -1;
             var eventType = -1;           
-            var publishTopic = String.Empty;
-            var messageType = String.Empty;
+            var publishTopic = string.Empty;
+            var messageType = string.Empty;
 
             if (stateMachineRefHeader.ContainsKey(HeaderElement.StateMachineId))
                 stateMachineId = Convert.ToInt32(stateMachineRefHeader[HeaderElement.StateMachineId]);

@@ -27,6 +27,7 @@ namespace ReactiveXComponentTest.RabbitMq
                 ComponentCode = componentCode,
                 EventCode = eventCode,
                 MessageType = Event,
+                StateCode = -1,
                 PublishTopic = visibility
             };
         }
@@ -40,8 +41,8 @@ namespace ReactiveXComponentTest.RabbitMq
             Check.That(headerDico.Values)
                 .Contains(_header.ComponentCode)
                 .And.Contains(_header.StateMachineCode)
-                .And.Contains(_header.EventCode);
-            Check.That(headerDico.ContainsKey(HeaderElement.StateCode));
+                .And.Contains(_header.EventCode)
+                .And.Contains(_header.StateCode);
             Check.That(headerDico[HeaderElement.StateCode]).Equals(defaultValue);
             Assert.AreEqual(headerDico["PublishTopic"], _encoding.GetBytes(_header.PublishTopic));
             Assert.AreEqual(headerDico["MessageType"], _encoding.GetBytes(_header.MessageType));

@@ -10,14 +10,13 @@ namespace ReactiveXComponent.RabbitMq
     {
         public static Dictionary<string, object> ConvertHeader(Header header)
         {
-            const int defaultValue = -1;
             var encoding = new UTF8Encoding();
 
             var dico = new Dictionary<string, object>
                            {
                                {HeaderElement.StateMachineCode, header?.StateMachineCode},
                                {HeaderElement.ComponentCode, header?.ComponentCode},
-                               {HeaderElement.StateCode, defaultValue},
+                               {HeaderElement.StateCode, header?.StateCode},
                                {HeaderElement.EventType, header?.EventCode},
                                {HeaderElement.IncomingEventType, header?.IncomingEventType},
                                {HeaderElement.PublishTopic, header?.PublishTopic != null ? encoding.GetBytes(header.PublishTopic) : encoding.GetBytes(string.Empty) },

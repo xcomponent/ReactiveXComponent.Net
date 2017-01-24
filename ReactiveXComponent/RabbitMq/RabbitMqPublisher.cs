@@ -88,6 +88,7 @@ namespace ReactiveXComponent.RabbitMq
 
         private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)
         {
+            var defaultValue = -1;
             var messageType = message?.GetType().ToString() ?? string.Empty;
 
             if (_configuration == null)
@@ -100,6 +101,7 @@ namespace ReactiveXComponent.RabbitMq
                 StateMachineCode = _configuration.GetStateMachineCode(component, stateMachine),
                 ComponentCode = _configuration.GetComponentCode(component),
                 MessageType = messageType,
+                StateCode = defaultValue,
                 EventCode = _configuration.GetPublisherEventCode(messageType),
                 IncomingEventType = (int)IncomingEventType.Transition,
                 PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : string.Empty                

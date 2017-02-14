@@ -89,12 +89,12 @@
     <Compile Include="Common\StateMachineRefHeader.cs" />
     <Compile Include="Common\StreamSubscriptionKey.cs" />
     <Compile Include="Common\SubscriptionKey.cs" />
-    <Compile Include="Common\ThreadSafeList.cs" />
     <Compile Include="Common\PrivateTopic.cs" />
     <Compile Include="Common\ReplyTopic.cs" />
     <Compile Include="Common\Visibility.cs" />
     <Compile Include="Common\WebSocketEndpoint.cs" />
     <Compile Include="Common\WebSocketEngineHeader.cs" />
+    <Compile Include="Common\WebSocketMessageEventArgs.cs" />
     <Compile Include="Common\WebSocketType.cs" />
     <Compile Include="Configuration\BusDetails.cs" />
     <Compile Include="Configuration\IXCConfiguration.cs" />

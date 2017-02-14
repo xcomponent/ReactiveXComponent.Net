@@ -14,6 +14,6 @@ namespace ReactiveXComponent.WebSocket
         event EventHandler<EventArgs> ConnectionOpened;
         event EventHandler<EventArgs> ConnectionClosed;
         event EventHandler<System.IO.ErrorEventArgs> ConnectionError;
-        event EventHandler<WebSocketSharp.MessageEventArgs> MessageReceived;
+        event EventHandler<WebSocketMessageEventArgs> MessageReceived;
     }
 }

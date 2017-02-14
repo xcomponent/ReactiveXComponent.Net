@@ -1,6 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
+using System.Text;
+using System.Threading;
+using Newtonsoft.Json;
+using NFluent;
+using NSubstitute;
 using NUnit.Framework;
 using ReactiveXComponent.Common;
+using ReactiveXComponent.Configuration;
 using ReactiveXComponent.WebSocket;
 
 namespace ReactiveXComponentTest.WebSocket
@@ -8,170 +17,237 @@ namespace ReactiveXComponentTest.WebSocket
     [TestFixture]
     public class WebSocketTests
     {
-        private long _componentCode;
-        private long _stateMachineCode;
-        private string _publicTopic;
-        private string _privateTopic;
+        private const string PrivateTopic = "d5c59d2b-58c9-4a1d-b305-150accfe6cd6";
 
-        [SetUp]
-        public void SetUp()
+        [Test]
+        public void SubscriberTest()
         {
-            _componentCode = -824151934;
-            _stateMachineCode = 405360011;
-            _publicTopic = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
-            _privateTopic = "d5c59d2b-58c9-4a1d-b305-150accfe6cd6";
+            var millisecondsTimeout = 10000;
+            var componentName = "GoodByeWorld";
+            var componentCode = -824151934;
+            var stateMachineName = "Result";
+            var stateMachineCode = 405360011;
+            var subscriberPublicTopic = "output.1_0.HelloWorldMicroservice.GoodByeWorld.Result";
+            var snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
+
+            var xcConfiguration = Substitute.For<IXCConfiguration>();
+            xcConfiguration.GetComponentCode(componentName).Returns(x => componentCode);
+            xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCode);
+            xcConfiguration.GetSubscriberTopic(componentName, stateMachineName).Returns(x => subscriberPublicTopic);
+            xcConfiguration.GetSnapshotTopic(componentName).Returns(x => snapshotTopic);
+
+            var webSocketClient = Substitute.For<IWebSocketClient>();
+            webSocketClient.IsOpen.Returns(true);
+            webSocketClient.When(x => x.Open()).DoNotCallBase();
+            webSocketClient.When(x => x.Close()).DoNotCallBase();
+            webSocketClient.When(x => x.Dispose()).DoNotCallBase();
+            webSocketClient.WhenForAnyArgs(x => x.Send("")).DoNotCallBase();
+
+            using (var webSocketSubscriber = new WebSocketSubscriber(componentName, webSocketClient, xcConfiguration, PrivateTopic))
+            using (var messageReceivedEvent = new AutoResetEvent(false))
+            using (var messageReceivedInStreamEvent = new AutoResetEvent(false))
+            {
+                var handler = new Action<MessageEventArgs>(args =>
+                {
+                    if (args.StateMachineRefHeader.ComponentCode == componentCode
+                        && args.StateMachineRefHeader.StateMachineCode == stateMachineCode)
+                    {
+                        messageReceivedEvent.Set();
+                    }
+                });
+
+                webSocketSubscriber.Subscribe(stateMachineName, handler);
+
+                var updatesObserver = Observer.Create<MessageEventArgs>(args => {
+                    if (args.StateMachineRefHeader.ComponentCode == componentCode
+                        && args.StateMachineRefHeader.StateMachineCode == stateMachineCode)
+                    {
+                        messageReceivedInStreamEvent.Set();
+                    }
+                });
+
+                var subscription = webSocketSubscriber.StateMachineUpdatesStream.Subscribe(updatesObserver);
+
+                var data =
+                    "update " + subscriberPublicTopic + " -824151934 {\"Header\":{\"StateCode\":{\"Case\":\"Some\",\"Fields\":[0]},\"StateMachineId\":{\"Case\":\"Some\",\"Fields\":[81]},\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]},\"EventCode\":0,\"Probes\":[],\"IncomingType\":9,\"AgentId\":{\"Case\":\"Some\",\"Fields\":[0]},\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.GoodByeWorld.UserObject.Result\"]}},\"JsonMessage\":\"{\\\"Value\\\":\\\"GoodBye\\\"}\"}";
+                var rawData = Encoding.UTF8.GetBytes(data);
+                var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
+                webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
+
+                var messageReceived = messageReceivedEvent.WaitOne(millisecondsTimeout);
+                var messageReceivedInStream = messageReceivedInStreamEvent.WaitOne(millisecondsTimeout);
+
+                // Make sure that subscription works
+                Check.That(messageReceived).IsTrue();
+                Check.That(messageReceivedInStream).IsTrue();
+
+                subscription.Dispose();
+
+                webSocketSubscriber.Unsubscribe(stateMachineName, handler);
+                webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
+
+                messageReceived = messageReceivedEvent.WaitOne(millisecondsTimeout / 2);
+
+                // Make sure that we are unsubscribed
+                Check.That(messageReceived).IsFalse();
+            }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public void SubscriptionTest(bool isPrivate)
+        [TestCase(true, false)]
+        [TestCase(false, false)]
+        [TestCase(true, true)]
+        [TestCase(false, true)]
+        public void PublisherSendMessageTest(bool isPrivate, bool withStateMachineRef)
         {
-            var webSocketTopic = isPrivate ? WebSocketTopic.Private(_privateTopic) : WebSocketTopic.Public(_publicTopic);
-            var webSocketSubscription = new WebSocketSubscription(webSocketTopic);
-            var subscriptionHeader = new WebSocketEngineHeader();
-            var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
-                WebSocketCommand.Subscribe,
-                subscriptionHeader,
-                webSocketSubscription);
+            var componentName = "HelloWorld";
+            var componentCode = -824151934;
+            var stateMachineName = "HelloWorldManager";
+            var stateMachineCode = 405360011;
+            var publisherTopic = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
 
-            var subscribeRequest = isPrivate
-                ? "subscribe {\"Header\":{\"EventCode\":0,\"IncomingType\":0},\"JsonMessage\":\"{\\\"Topic\\\":{\\\"Key\\\":\\\"" +
-                  _privateTopic + "\\\",\\\"Kind\\\":2}}\"}" + Environment.NewLine
-                : "subscribe {\"Header\":{\"EventCode\":0,\"IncomingType\":0},\"JsonMessage\":\"{\\\"Topic\\\":{\\\"Key\\\":\\\"" +
-                  _publicTopic + "\\\",\\\"Kind\\\":3}}\"}" + Environment.NewLine;
+            var stateMachineRef = new StateMachineRefHeader() {
+                AgentId = 0,
+                StateMachineId = 0,
+                ComponentCode = componentCode,
+                StateMachineCode = stateMachineCode,
+                StateCode = 0,
+                EventCode = 9,
+                PublishTopic = isPrivate ? PrivateTopic : null
+            };
 
-            Assert.AreEqual(webSocketRequest, subscribeRequest);
+            var messageToSend = "Hello";
+            WebSocketMessage webSocketMessage = null;
+            var messageSentEvent = new AutoResetEvent(false);
+
+            var xcConfiguration = Substitute.For<IXCConfiguration>();
+            xcConfiguration.GetComponentCode(componentName).Returns(x => componentCode);
+            xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCode);
+            xcConfiguration.GetPublisherTopic(componentName, stateMachineName).Returns(x => publisherTopic);
+            xcConfiguration.GetPublisherEventCode("System.String").Returns(9);
+
+            var webSocketClient = Substitute.For<IWebSocketClient>();
+            webSocketClient.IsOpen.Returns(true);
+            webSocketClient.When(x => x.Open()).DoNotCallBase();
+            webSocketClient.When(x => x.Close()).DoNotCallBase();
+            webSocketClient.When(x => x.Dispose()).DoNotCallBase();
+            webSocketClient.WhenForAnyArgs(x => x.Send("")).Do(callInfo => 
+            {
+                var message = (string)callInfo.Args()[0];
+                webSocketMessage = WebSocketMessageHelper.DeserializeRequest(message);
+                
+                messageSentEvent.Set();
+            });
+
+            using (var webSocketPublisher = new WebSocketPublisher(componentName, webSocketClient, xcConfiguration, PrivateTopic))
+            {
+                if (withStateMachineRef)
+                {
+                    webSocketPublisher.SendEvent(stateMachineRef, messageToSend, isPrivate ? Visibility.Private : Visibility.Public);
+                }
+                else
+                {
+                    webSocketPublisher.SendEvent(stateMachineName, messageToSend, isPrivate ? Visibility.Private : Visibility.Public);
+                }
+
+                var messageWasSent = messageSentEvent.WaitOne(10000);
+
+                Check.That(messageWasSent).IsTrue();
+                Check.That(webSocketMessage).IsNotNull();
+
+                Check.That(webSocketMessage.Command).IsEqualTo(WebSocketCommand.Input);
+
+                if (!withStateMachineRef)
+                {
+                    Check.That(webSocketMessage.Topic).IsEqualTo(publisherTopic);
+                }
+
+                Check.That(int.Parse(webSocketMessage.ComponentCode)).IsEqualTo(componentCode);
+
+                var webSocketPacket = WebSocketMessageHelper.DeserializePacket(webSocketMessage);
+
+                if (isPrivate)
+                {
+                    Check.That(webSocketPacket.Header.PublishTopic.Fields[0]).IsEqualTo(PrivateTopic);
+                }
+                else
+                {
+                    Check.That(webSocketPacket.Header.PublishTopic).IsNull();
+                }
+
+                if (withStateMachineRef)
+                {
+                    Check.That(webSocketPacket.Header.ComponentCode.Fields[0]).IsEqualTo(stateMachineRef.ComponentCode);
+                    Check.That(webSocketPacket.Header.StateMachineCode.Fields[0]).IsEqualTo(stateMachineRef.StateMachineCode);
+                    Check.That(webSocketPacket.Header.EventCode).IsEqualTo(stateMachineRef.EventCode);
+                }
+
+                var sentMessage = (string)JsonConvert.DeserializeObject(webSocketPacket.JsonMessage);
+                Check.That(sentMessage).IsNotNull();
+                Check.That(sentMessage).IsNotEmpty();
+                Check.That(sentMessage).IsEqualTo(messageToSend);
+            }
         }
 
         [Test]
-        public void UpdateReceivedTest()
+        public void SnapshotTest()
         {
-            string rawRequest =
-                "update output.1_0.HelloWorldMicroservice.GoodByeWorld.Result -824151934 {\"Header\":{\"StateCode\":{\"Case\":\"Some\",\"Fields\":[0]},\"StateMachineId\":{\"Case\":\"Some\",\"Fields\":[81]},\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]},\"EventCode\":0,\"Probes\":[],\"IncomingType\":9,\"AgentId\":{\"Case\":\"Some\",\"Fields\":[0]},\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.GoodByeWorld.UserObject.Result\"]}},\"JsonMessage\":\"{\\\"Value\\\":\\\"GoodBye\\\"}\"}";
-            var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(rawRequest);
+            var componentName = "HelloWorld";
+            var componentCode = -69981087;
+            var stateMachineName = "HelloResponse";
+            var stateMachineCode = 1837059171;
+            var publisherTopic = "input.1_0.MyHelloWorldService.HelloWorld.HelloResponse";
+            var privateTopic = "d5c59d2b-58c9-4a1d-b305-150accfe6cd6";
+            var snapshotTopic = "snapshot.1_0.MyHelloWorldService.HelloWorld";
 
-            Assert.IsNotNullOrEmpty(webSocketMessage.Command);
-            Assert.AreEqual(webSocketMessage.Command, WebSocketCommand.Update);
-            Assert.IsNotNullOrEmpty(webSocketMessage.Topic);
-            Assert.IsNotNullOrEmpty(webSocketMessage.ComponentCode);
-            Assert.AreEqual(webSocketMessage.ComponentCode, _componentCode.ToString());
+            var xcConfiguration = Substitute.For<IXCConfiguration>();
+            xcConfiguration.GetComponentCode(componentName).Returns(x => componentCode);
+            xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCode);
+            xcConfiguration.GetPublisherTopic(componentName, stateMachineName).Returns(x => publisherTopic);
+            xcConfiguration.GetSnapshotTopic(componentName).Returns(x => snapshotTopic);
 
-            var webSocketPacket = WebSocketMessageHelper.DeserializePacket(webSocketMessage);
-
-            Assert.AreEqual(webSocketPacket.Header.ComponentCode.Fields[0], _componentCode);
-            Assert.AreEqual(webSocketPacket.Header.StateMachineCode.Fields[0], _stateMachineCode);
-        }
-
-        [TestCase(true)]
-        [TestCase(false)]
-        public void SendMessageTest(bool isPrivate)
-        {
-            var message = "Hello";
-            var messageType = message?.GetType();
-            var inputHeader = new WebSocketEngineHeader
+            var snapshotReplyTopic = string.Empty;
+            var webSocketClient = Substitute.For<IWebSocketClient>();
+            webSocketClient.IsOpen.Returns(true);
+            webSocketClient.When(x => x.Open()).DoNotCallBase();
+            webSocketClient.When(x => x.Close()).DoNotCallBase();
+            webSocketClient.When(x => x.Dispose()).DoNotCallBase();
+            webSocketClient.WhenForAnyArgs(x => x.Send("")).Do(callInfo =>
             {
-                ComponentCode = new Option<long>(_componentCode),
-                StateMachineCode = new Option<long>(_stateMachineCode),
-                EventCode = 9,
-                MessageType = new Option<string>(messageType?.ToString()),
-                PublishTopic = isPrivate ? new Option<string>(_privateTopic) : null
-            };
-            var topic = _publicTopic;
-            var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
-                WebSocketCommand.Input,
-                inputHeader,
-                message,
-                _componentCode.ToString(),
-                topic);
+                var message = (string)callInfo.Args()[0];
+                var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(message);
+                if (webSocketMessage.Command == WebSocketCommand.Snapshot)
+                {
+                    var snapshotPacket = JsonConvert.DeserializeObject<WebSocketPacket>(webSocketMessage.Json);
+                    var snapshotMessage = JsonConvert.DeserializeObject<WebSocketSnapshotMessage>(snapshotPacket.JsonMessage);
+                    snapshotReplyTopic = snapshotMessage.ReplyTopic.Fields[0];
+                }
+            });
 
-            var publishRequest = isPrivate
-                ? "input input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager -824151934 {\"Header\":{\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},"
-                  +"\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]},\"EventCode\":9,\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":"
-                  +"[\"System.String\"]},\"PublishTopic\":{\"Case\":\"Some\",\"Fields\":[\"" + _privateTopic + "\"]}},\"JsonMessage\":\"\\\"Hello\\\"\"}" + Environment.NewLine
-                : "input input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager -824151934 {\"Header\":{\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},"
-                  +"\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]},\"EventCode\":9,\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":" 
-                  +"[\"System.String\"]}},\"JsonMessage\":\"\\\"Hello\\\"\"}" + Environment.NewLine;
-
-            Assert.AreEqual(webSocketRequest, publishRequest);
-        }
-
-        [TestCase(true)]
-        [TestCase(false)]
-        public void SendMessageWithStateMachineRefTest(bool isPrivate)
-        {
-            var message = "Hello";
-            var messageType = message?.GetType();
-            var stateMachineRef = new StateMachineRefHeader()
+            
+            
+            using (var webSocketPublisher = new WebSocketPublisher(componentName, webSocketClient, xcConfiguration, privateTopic))
+            using (var snapshotReceivedEvent = new AutoResetEvent(false))
             {
-                AgentId = 0,
-                StateMachineId = 0,
-                ComponentCode = _componentCode,
-                StateMachineCode = _stateMachineCode,
-                StateCode = 0,
-                EventCode = 9,
-                PublishTopic = isPrivate ? _privateTopic : null
-            };
-            var inputHeader = new WebSocketEngineHeader
-            {
-                AgentId = new Option<int>(stateMachineRef.AgentId),
-                StateMachineId = new Option<long>(stateMachineRef.StateMachineId),
-                ComponentCode = new Option<long>(stateMachineRef.ComponentCode),
-                StateMachineCode = new Option<long>(stateMachineRef.StateMachineCode),
-                StateCode = new Option<int>(stateMachineRef.StateCode),
-                EventCode = stateMachineRef.EventCode,
-                MessageType = new Option<string>(messageType?.ToString()),
-                PublishTopic = new Option<string>(stateMachineRef.PublishTopic)
-            };
-            var topic = _publicTopic;
-            var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
-                WebSocketCommand.Input,
-                inputHeader,
-                message,
-                _componentCode.ToString(),
-                topic);
+                var millisecondsTimeout = 10000;
+                var snapshotHandler = new Action<List<MessageEventArgs>>(args =>
+                {
+                    if (args.All(instance => instance.StateMachineRefHeader.ComponentCode == componentCode
+                                    && instance.StateMachineRefHeader.StateMachineCode == stateMachineCode))
+                    {
+                        snapshotReceivedEvent.Set();
+                    }
+                });
 
-            var publishRequest = isPrivate
-                ? "input input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager -824151934 {\"Header\":{\"StateMachineId\":{\"Case\":\"Some\",\"Fields\":[0]}," 
-                 +"\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]}," 
-                 +"\"StateCode\":{\"Case\":\"Some\",\"Fields\":[0]},\"EventCode\":9,\"IncomingType\":0,\"AgentId\":{\"Case\":\"Some\",\"Fields\":[0]}," 
-                 +"\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"System.String\"]},\"PublishTopic\":{\"Case\":\"Some\",\"Fields\":[\"" 
-                 +_privateTopic + "\"]}},\"JsonMessage\":\"\\\"Hello\\\"\"}" + Environment.NewLine
-                : "input input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager -824151934 {\"Header\":{\"StateMachineId\":{\"Case\":\"Some\",\"Fields\":[0]}," 
-                 +"\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]}," 
-                 +"\"StateCode\":{\"Case\":\"Some\",\"Fields\":[0]},\"EventCode\":9,\"IncomingType\":0,\"AgentId\":{\"Case\":\"Some\",\"Fields\":[0]}," 
-                 + "\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"System.String\"]},\"PublishTopic\":{\"Case\":\"Some\",\"Fields\":[null]}},\"JsonMessage\":\"\\\"Hello\\\"\"}" + Environment.NewLine;
+                webSocketPublisher.GetSnapshotAsync(stateMachineName, snapshotHandler);
 
-            Assert.AreEqual(webSocketRequest, publishRequest);
-        }
+                var data = "snapshot " + snapshotReplyTopic + " -69981087 {\"Header\":{\"EventCode\":0,\"Probes\":[],\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.Common.Processing.SnapshotResponse\"]}},\"JsonMessage\":\"{\\\"Items\\\":\\\"H4sIAAAAAAAEAIuuVgouSSxJ9U1MzsjMS/VMUbIyMdBBEXPOT0lVsjK0MDY3MLU0NDeEykKFdZSc83ML8vNS80ogIrpmlpYWhgYW5jpKAaVJOZnJvqm5SalFSlbVSiH5SlZKjnn5pYlFSjpKQanFQH3FQC1KHpkKUOFaHSXHdKBZIIcY1sYCAAstn/OfAAAA\\\"}\"}";
+                var rawData = Encoding.UTF8.GetBytes(data);
+                var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
+                webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
 
-
-        [TestCase(true)]
-        [TestCase(false)]
-        public void SendSnapshotRequest(bool isPrivate)
-        {
-            var inputHeader = new WebSocketEngineHeader();
-            var componentCode = _componentCode;
-            var topic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
-            var replyTopic = "replyTopic";
-            var stateMachineCode = _stateMachineCode;
-            var snapshotMessage = isPrivate? new WebSocketSnapshotMessage(stateMachineCode, componentCode, replyTopic, _privateTopic): new WebSocketSnapshotMessage(stateMachineCode, componentCode, replyTopic, null);
-            var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
-                    WebSocketCommand.Snapshot,
-                    inputHeader,
-                    snapshotMessage,
-                    componentCode.ToString(),
-                    topic);
-
-            var snaphsotRequest = isPrivate
-                ? "snapshot snapshot.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager -824151934 {\"Header\":{\"EventCode\":0,\"IncomingType\":0},"
-                  + "\"JsonMessage\":\"{\\\"StateMachineCode\\\":405360011,\\\"ComponentCode\\\":-824151934,\\\"ReplyTopic\\\":{\\\"Case\\\":\\\"Some\\\",\\\"Fields\\\":[\\\"replyTopic\\\"]},"
-                  + "\\\"PrivateTopic\\\":{\\\"Case\\\":\\\"Some\\\",\\\"Fields\\\":[[\\\"" + _privateTopic 
-                  +"\\\"]]}}\"}" + Environment.NewLine
-                : "snapshot snapshot.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager -824151934 {\"Header\":{\"EventCode\":0,\"IncomingType\":0},"
-                  + "\"JsonMessage\":\"{\\\"StateMachineCode\\\":405360011,\\\"ComponentCode\\\":-824151934,\\\"ReplyTopic\\\":{\\\"Case\\\":\\\"Some\\\",\\\"Fields\\\":[\\\"replyTopic\\\"]},"
-                  + "\\\"PrivateTopic\\\":{\\\"Case\\\":\\\"Some\\\",\\\"Fields\\\":[[null]]}}\"}" + Environment.NewLine;
-
-            Assert.AreEqual(webSocketRequest, snaphsotRequest);
+                var snapshotReceived = snapshotReceivedEvent.WaitOne(millisecondsTimeout);
+                Check.That(snapshotReceived).IsTrue();
+            }
         }
     }
 }

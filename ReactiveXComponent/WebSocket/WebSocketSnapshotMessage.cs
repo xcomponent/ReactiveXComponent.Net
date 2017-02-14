@@ -10,6 +10,8 @@ namespace ReactiveXComponent.WebSocket
         public Option<string> ReplyTopic { get; set; }
         public Option<string[]> PrivateTopic { get; set; }
 
+        public WebSocketSnapshotMessage() { }
+
         public WebSocketSnapshotMessage(long stateMachineCode, long componentCode, string replyTopic, string privateTopic)
         {
             StateMachineCode = stateMachineCode;

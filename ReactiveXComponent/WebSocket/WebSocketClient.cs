@@ -10,7 +10,7 @@ using WebSocketSharp;
 
 namespace ReactiveXComponent.WebSocket
 {
-    public class WebSocketClient : IWebSocketClient
+    internal class WebSocketClient : IWebSocketClient
     {
         private WebSocketSharp.WebSocket _webSocket;
         private readonly object _webSocketLock = new object();
@@ -23,7 +23,7 @@ namespace ReactiveXComponent.WebSocket
         public event EventHandler<EventArgs> ConnectionOpened;
         public event EventHandler<EventArgs> ConnectionClosed;
         public event EventHandler<System.IO.ErrorEventArgs> ConnectionError;
-        public event EventHandler<WebSocketSharp.MessageEventArgs> MessageReceived;
+        public event EventHandler<WebSocketMessageEventArgs> MessageReceived;
 
         private void OpenConnection()
         {
@@ -110,7 +110,7 @@ namespace ReactiveXComponent.WebSocket
 
         private void OnMessageReceived(object sender, WebSocketSharp.MessageEventArgs messageEventArgs)
         {
-            MessageReceived?.Invoke(sender, messageEventArgs);
+            MessageReceived?.Invoke(sender, new WebSocketMessageEventArgs(messageEventArgs.Data, messageEventArgs.RawData));
         }
 
         public bool IsOpen { get { return _webSocket != null && _webSocket.ReadyState == WebSocketState.Open; } }

@@ -19,7 +19,7 @@ namespace ReactiveXComponent.WebSocket
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
 
-        private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>> _subscriptionsDico;
+        private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>> _subscriptionsDico;
         private readonly ConcurrentDictionary<StreamSubscriptionKey, IDisposable> _streamSubscriptionsDico;
 
         private event EventHandler<MessageEventArgs> MessageReceived;
@@ -31,7 +31,7 @@ namespace ReactiveXComponent.WebSocket
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
 
-            _subscriptionsDico = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>>();
+            _subscriptionsDico = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<StreamSubscriptionKey, IDisposable>();
 
             StateMachineUpdatesStream = Observable.FromEvent<EventHandler<MessageEventArgs>, MessageEventArgs>(
@@ -115,7 +115,7 @@ namespace ReactiveXComponent.WebSocket
                     subscriptionHeader, 
                     webSocketSubscription);
 
-                var handler = new EventHandler<WebSocketSharp.MessageEventArgs>((sender, messageEventArgs) =>
+                var handler = new EventHandler<WebSocketMessageEventArgs>((sender, messageEventArgs) =>
                 {
                     var handlerTopic = routingKey;
                     string rawRequest = messageEventArgs.Data;
@@ -168,7 +168,7 @@ namespace ReactiveXComponent.WebSocket
                 var privateRoutingKey = _privateCommunicationIdentifier;
                 var privateSubscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, privateRoutingKey);
 
-                EventHandler<WebSocketSharp.MessageEventArgs> subscriptionHandler;
+                EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
                 if (_subscriptionsDico.TryRemove(privateSubscriptionKey, out subscriptionHandler))
                 {
                     _webSocketClient.MessageReceived -= subscriptionHandler;
@@ -178,7 +178,7 @@ namespace ReactiveXComponent.WebSocket
             var publicRoutingKey = _xcConfiguration.GetSubscriberTopic(_component, stateMachine);
             var publicSubscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, publicRoutingKey);
 
-            EventHandler<WebSocketSharp.MessageEventArgs> publicSubscriptionHandler;
+            EventHandler<WebSocketMessageEventArgs> publicSubscriptionHandler;
             if (_subscriptionsDico.TryRemove(publicSubscriptionKey, out publicSubscriptionHandler))
             {
                 _webSocketClient.MessageReceived -= publicSubscriptionHandler;

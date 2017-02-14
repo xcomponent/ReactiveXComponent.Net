@@ -16,7 +16,7 @@ namespace ReactiveXComponent.WebSocket
         private readonly string _privateCommunicationIdentifier;
         private readonly IWebSocketClient _webSocketClient;
         private readonly IXCConfiguration _xcConfiguration;
-        private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>> _subscriptions;
+        private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>> _subscriptions;
         private readonly ConcurrentDictionary<SubscriptionKey, IDisposable> _streamSubscriptionsDico;
 
         private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
@@ -29,7 +29,7 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient = webSocketClient;
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
-            _subscriptions = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketSharp.MessageEventArgs>>();
+            _subscriptions = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<SubscriptionKey, IDisposable>();
 
             _snapshotStream = Observable.FromEvent<EventHandler<List<MessageEventArgs>>, List<MessageEventArgs>>(
@@ -41,7 +41,7 @@ namespace ReactiveXComponent.WebSocket
         public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
         {
             var replyTopic = Guid.NewGuid().ToString();
-            EventHandler<WebSocketSharp.MessageEventArgs> subscriptionHandler;
+            EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
             SubscribeSnapshot(replyTopic, out subscriptionHandler);
 
             List <MessageEventArgs> result = null;
@@ -70,7 +70,7 @@ namespace ReactiveXComponent.WebSocket
             var componentCode = _xcConfiguration.GetComponentCode(_component);
             var stateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine);
             var subscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, replyTopic);
-            EventHandler<WebSocketSharp.MessageEventArgs> subscriptionHandler;
+            EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
 
             SubscribeSnapshot(replyTopic, out subscriptionHandler);
             var snapshotSubscription = _snapshotStream.Subscribe(onSnapshotReceived);
@@ -100,7 +100,7 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient.Send(webSocketRequest);
         }
 
-        private void SubscribeSnapshot(string replyTopic, out EventHandler<WebSocketSharp.MessageEventArgs> subscriptionHandler)
+        private void SubscribeSnapshot(string replyTopic, out EventHandler<WebSocketMessageEventArgs> subscriptionHandler)
         {
             var webSocketTopic = WebSocketTopic.Snapshot(replyTopic);
             var webSocketSubscription = new WebSocketSubscription(webSocketTopic);

@@ -32,7 +32,7 @@ using (IXCSession _xcSession = xcApi.CreateSession())
     var publisher = _xcSession.CreatePublisher(componentName);
 
     // Need to call subscribe for the state machine we are interested in..
-    subscriber.Subscribe(helloWorldManagerStateMachineName);
+    subscriber.Subscribe(helloWorldManagerStateMachineName, arg => {});
 
     // Subscribe to state machine updates via the IObservable collection..
     var eventReceived = new ManualResetEvent(false);

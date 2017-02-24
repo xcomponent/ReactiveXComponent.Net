@@ -5,6 +5,8 @@
 ReactiveXComponent.Net is a .Net client API that allows you to interact with microservices generated with XComponent software.
 
 ## Install
+[![ReactiveXComponent.Net Nuget](https://img.shields.io/badge/nuget-v0.1.0--rcv017-blue.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)
+
 Use Nuget to install the latest version of the API:
 ``` nuget install ReactiveXComponent.Net -Pre```
 

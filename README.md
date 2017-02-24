@@ -6,7 +6,7 @@ ReactiveXComponent.Net is a .Net client API that allows you to interact with mic
 
 ## Install
 Use Nuget to install the latest version of the API:
-``` nuget install ReactiveXComponent.Net ```
+``` nuget install ReactiveXComponent.Net -Pre```
 
 ## Usage
 
@@ -17,6 +17,7 @@ var xcApiStream = new FileStream("HelloWorld.xcApi", FileMode.Open);
 
 // Get a XComponentApi..
 IXComponentApi xcApi = XComponentApi.CreateFromXCApi(xcApiStream);
+
 // Create a session..
 using (IXCSession _xcSession = xcApi.CreateSession())
 {
@@ -29,6 +30,9 @@ using (IXCSession _xcSession = xcApi.CreateSession())
 
     // Create a publisher..
     var publisher = _xcSession.CreatePublisher(componentName);
+
+    // Need to call subscribe for the state machine we are interested in..
+    subscriber.Subscribe(helloWorldManagerStateMachineName);
 
     // Subscribe to state machine updates via the IObservable collection..
     var eventReceived = new ManualResetEvent(false);

@@ -80,7 +80,7 @@ namespace ReactiveXComponent.WebSocket
                 StateMachineCode = new Option<long>(_xcConfiguration.GetStateMachineCode(_component, stateMachine)),
                 EventCode = _xcConfiguration.GetPublisherEventCode(messageType?.ToString()),
                 MessageType = new Option<string>(messageType?.ToString()),
-                PublishTopic = visibility == Visibility.Private ? new Option<string>(_privateCommunicationIdentifier) : null
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? new Option<string>(_privateCommunicationIdentifier) : null
             };
 
             return webSocketEngineHeader;
@@ -98,7 +98,7 @@ namespace ReactiveXComponent.WebSocket
                 StateCode = new Option<int>(smRefHeader.StateCode),
                 EventCode = _xcConfiguration.GetPublisherEventCode(messageType?.ToString()),
                 MessageType = new Option<string>(messageType?.ToString()),
-                PublishTopic = visibility == Visibility.Private ? new Option<string>(_privateCommunicationIdentifier) : null
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? new Option<string>(_privateCommunicationIdentifier) : null
             };
 
             return webSocketEngineHeader;

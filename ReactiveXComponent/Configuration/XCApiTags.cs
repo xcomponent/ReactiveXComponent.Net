@@ -15,7 +15,7 @@
         public const string EventCode = "eventCode";
         public const string ComponentCode = "componentCode";
         public const string StateMachineCode = "stateMachineCode";
-        public const string Topic = "type";
+        public const string Topic = "topic";
         public const string Subscribe = "subscribe";
         public const string EventType = "eventType";
         public const string Update = "Update";

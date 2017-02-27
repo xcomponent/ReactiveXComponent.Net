@@ -1,47 +1,63 @@
-﻿using System.Xml;
+﻿using System.Collections.Generic;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace ReactiveXComponent.Parser
 {
     public class XCApiDescription
     {
-        private readonly XmlDocument _doc;
-        private readonly XmlNamespaceManager _xmlManager;
+        private readonly XDocument _doc;
+        private readonly XNamespace _xc;
 
-        public XCApiDescription(XmlDocument document)
+        public XCApiDescription(XmlReader xmlReader)
         {
-            _doc = document;
-            _xmlManager = new XmlNamespaceManager(_doc.NameTable);
-            _xmlManager.AddNamespace("xc", "http://xcomponent.com/DeploymentConfig.xsd");
+            _doc = XDocument.Load(xmlReader);
+            _xc = "http://xcomponent.com/DeploymentConfig.xsd";
         }
 
-        public XmlNodeList GetComponentsNode()
+        public IEnumerable<XElement> GetComponentsNode()
         {
-            return _doc.SelectNodes("//xc:component", _xmlManager);
+            return _doc.Descendants(_xc + "component");
         }
 
-        public XmlNodeList GetPublishersNode()
+        public IEnumerable<XElement> GetStateMachinesNode()
         {
-            return _doc.SelectNodes("//xc:publish", _xmlManager);
+            return _doc.Descendants(_xc + "stateMachine");
         }
 
-        public XmlNodeList GetConsumersNode()
+        public IEnumerable<XElement> GetPublishersNode()
         {
-            return _doc.SelectNodes("//xc:subscribe[@eventType='UPDATE']", _xmlManager);
+            return _doc.Descendants(_xc + "publish");
         }
 
-        public XmlNodeList GetCommunicationNode()
+        public IEnumerable<XElement> GetConsumersNode()
         {
-            return _doc.SelectNodes("//xc:communication", _xmlManager);
+            return _doc.Descendants(_xc + "subscribe");
         }
 
-        public XmlNodeList GetSerializationNode()
+        public IEnumerable<XElement> GetCommunicationNode()
         {
-            return _doc.SelectNodes("//xc:serialization", _xmlManager);
+            return _doc.Descendants(_xc + "communication");
         }
 
-        public XmlNodeList GetSnapshotsNode()
+        public IEnumerable<XElement> GetSerializationNode()
         {
-            return _doc.SelectNodes("//xc:snapshot", _xmlManager);
+            return _doc.Descendants(_xc + "serialization");
+        }
+
+        public IEnumerable<XElement> GetSnapshotsNode()
+        {
+            return _doc.Descendants(_xc + "snapshot");
+        }
+
+        public IEnumerable<XElement> GetBusNode()
+        {
+            return _doc.Descendants(_xc + "bus");
+        }
+
+        public IEnumerable<XElement> GetWebSocketNode()
+        {
+            return _doc.Descendants(_xc + "websocket");
         }
     }
 }

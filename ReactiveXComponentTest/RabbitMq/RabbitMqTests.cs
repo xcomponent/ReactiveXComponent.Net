@@ -34,6 +34,7 @@ namespace ReactiveXComponentTest.RabbitMq
         private const string ExchangeName = "101";
         private const string PublicRoutingKey = "202";
         private const string Serialization = XCApiTags.Binary;
+        private const string SnapshotSerialization = XCApiTags.Json;
         private readonly BusDetails _busDetails = new BusDetails(User, Password, Host, Port);
 
         [TestCase(true, false)]
@@ -74,7 +75,7 @@ namespace ReactiveXComponentTest.RabbitMq
             const int timeoutReceive = 10000;
             var stateMachineIdToSend = 1;
 
-            using (var publisher = new RabbitMqPublisher(ComponentNameA, configuration, connection, new BinarySerializer(), PrivateCommincationIdentifier))
+            using (var publisher = new RabbitMqPublisher(ComponentNameA, configuration, connection, GetSerializer(Serialization), PrivateCommincationIdentifier))
             using (var messageSentEvent = new AutoResetEvent(false))
             {
                 var publishAction = new Action<string, string, bool, IBasicProperties, byte[]>((exchange, routingkey, mandatory, properties, bytes) =>
@@ -177,7 +178,7 @@ namespace ReactiveXComponentTest.RabbitMq
             var receivedMessageType = string.Empty;
             var receivedMessage = string.Empty;
 
-            using (var subscriber = new RabbitMqSubscriber(ComponentNameA, configuration, connection, new BinarySerializer(), PrivateCommincationIdentifier))
+            using (var subscriber = new RabbitMqSubscriber(ComponentNameA, configuration, connection, GetSerializer(Serialization), PrivateCommincationIdentifier))
             using (var messageReceivedEvent = new AutoResetEvent(false))
             {
                 var messageReceptionHandler = new Action<MessageEventArgs>(args =>
@@ -212,7 +213,7 @@ namespace ReactiveXComponentTest.RabbitMq
                 };
 
                 var stream = new MemoryStream();
-                new BinarySerializer().Serialize(stream, TestMessage);
+                GetSerializer(Serialization).Serialize(stream, TestMessage);
                 var message = stream.ToArray();
                 consumer.HandleBasicDeliver(consumer.ConsumerTag, ulong.MaxValue, false, ExchangeName, routingKeyToUse, basicProperties, message);
 
@@ -233,7 +234,7 @@ namespace ReactiveXComponentTest.RabbitMq
 
             var configuration = Substitute.For<IXCConfiguration>();
             configuration.GetBusDetails().Returns(_busDetails);
-            configuration.GetSerializationType().ReturnsForAnyArgs(Serialization);
+            configuration.GetSerializationType().ReturnsForAnyArgs(XCApiTags.Json);
             configuration.GetStateMachineCode(ComponentNameA, StateMachineA).Returns(2);
             configuration.GetComponentCode(ComponentNameA).Returns(Convert.ToInt32(ExchangeName));
             configuration.GetSubscriberTopic(ComponentNameA, StateMachineA).Returns(PublicRoutingKey);
@@ -275,7 +276,7 @@ namespace ReactiveXComponentTest.RabbitMq
             long componentCode = 1;
             long stateMachineCode = 2;
 
-            using (var publisher = new RabbitMqPublisher(ComponentNameA, configuration, connection, new BinarySerializer(), PrivateCommincationIdentifier))
+            using (var publisher = new RabbitMqPublisher(ComponentNameA, configuration, connection, GetSerializer(SnapshotSerialization), PrivateCommincationIdentifier))
             using (var snapshotReceivedEvent = new AutoResetEvent(false))
             {
                 List<MessageEventArgs> snapshotInstances = null;
@@ -322,6 +323,21 @@ namespace ReactiveXComponentTest.RabbitMq
             }
         }
 
+
+        private ISerializer GetSerializer(string serializer)
+        {
+            switch (serializer)
+            {
+                    case XCApiTags.Binary:
+                        return new BinarySerializer();
+                    case XCApiTags.Json:
+                        return new ReactiveXComponent.Serializer.JsonSerializer();
+                    case XCApiTags.Bson:
+                        return new BsonSerializer();
+                default: 
+                    return new BinarySerializer();
+            }
+        }
         private byte[] SerializeSnapshotInstances(List<StateMachineInstance> instances)
         {
             var serializedInstances = JsonConvert.SerializeObject(instances);
@@ -350,7 +366,7 @@ namespace ReactiveXComponentTest.RabbitMq
 
             var serializedMessage = JsonConvert.SerializeObject(snapshotItems);
             var messageStream = new MemoryStream();
-            new BinarySerializer().Serialize(messageStream, serializedMessage);
+            GetSerializer(SnapshotSerialization).Serialize(messageStream, serializedMessage);
             messageStream.Flush();
             messageStream.Seek(0, SeekOrigin.Begin);
 

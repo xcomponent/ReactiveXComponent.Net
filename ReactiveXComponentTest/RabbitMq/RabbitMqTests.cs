@@ -328,12 +328,12 @@ namespace ReactiveXComponentTest.RabbitMq
         {
             switch (serializer)
             {
-                    case XCApiTags.Binary:
-                        return new BinarySerializer();
-                    case XCApiTags.Json:
-                        return new ReactiveXComponent.Serializer.JsonSerializer();
-                    case XCApiTags.Bson:
-                        return new BsonSerializer();
+                case XCApiTags.Binary:
+                    return new BinarySerializer();
+                case XCApiTags.Json:
+                    return new ReactiveXComponent.Serializer.JsonSerializer();
+                case XCApiTags.Bson:
+                    return new BsonSerializer();
                 default: 
                     return new BinarySerializer();
             }

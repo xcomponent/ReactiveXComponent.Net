@@ -131,12 +131,12 @@ namespace ReactiveXComponent.RabbitMq
 
                     EventHandler<BasicDeliverEventArgs> handler = (o, basicAckEventArgs) => 
                     {
-                        rabbitMqSubscriberInfos.Channel?.BasicAck(basicAckEventArgs.DeliveryTag, false);
-
                         var stateMachineRefHeader = RabbitMqHeaderConverter.ConvertStateMachineRefHeader(basicAckEventArgs.BasicProperties.Headers);
 
                         if (stateMachineRefHeader.StateMachineCode == stateMachineCode)
                         {
+                            rabbitMqSubscriberInfos.Channel?.BasicAck(basicAckEventArgs.DeliveryTag, false);
+
                             var obj = _serializer.Deserialize(new MemoryStream(basicAckEventArgs.Body));
 
                             var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, obj);
@@ -234,8 +234,12 @@ namespace ReactiveXComponent.RabbitMq
                 RabbitMqSubscriberInfos rabbitMqSubscriberInfos;
                 if (_subscribersDico.TryRemove(subscriptionKey, out rabbitMqSubscriberInfos))
                 {
-                    rabbitMqSubscriberInfos.Channel.ModelShutdown -= ChannelOnModelShutdown;
-                    rabbitMqSubscriberInfos.Channel.BasicCancel(rabbitMqSubscriberInfos.Subscriber.ConsumerTag);
+                    if (rabbitMqSubscriberInfos.Channel.IsOpen)
+                    {
+                        rabbitMqSubscriberInfos.Channel.ModelShutdown -= ChannelOnModelShutdown;
+                        rabbitMqSubscriberInfos.Channel.BasicCancel(rabbitMqSubscriberInfos.Subscriber.ConsumerTag);
+                    }
+                    
                     rabbitMqSubscriberInfos.Channel.Dispose();
 
                     foreach (var handler in rabbitMqSubscriberInfos.Handlers)
@@ -272,8 +276,12 @@ namespace ReactiveXComponent.RabbitMq
                     // clear managed resources
                     foreach (var subscriberInfo in _subscribersDico.Values)
                     {
-                        subscriberInfo.Channel.ModelShutdown -= ChannelOnModelShutdown;
-                        subscriberInfo.Channel.BasicCancel(subscriberInfo.Subscriber.ConsumerTag);
+                        if (subscriberInfo.Channel.IsOpen)
+                        {
+                            subscriberInfo.Channel.ModelShutdown -= ChannelOnModelShutdown;
+                            subscriberInfo.Channel.BasicCancel(subscriberInfo.Subscriber.ConsumerTag);
+                        }
+                            
                         subscriberInfo.Channel.Dispose();
 
                         foreach (var handler in subscriberInfo.Handlers)

@@ -162,6 +162,11 @@ namespace ReactiveXComponent.RabbitMq
 
         private void SubscribeSnapshot(string stateMachine, string replyTopic)
         {
+            if (_serializer is BinarySerializer)
+            {
+                throw new ReactiveXComponentException("Binary serialization is not supported");
+            }
+
             if (_xcConfiguration == null)
                 return;
 

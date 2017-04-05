@@ -238,5 +238,16 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 
+# Cake - C# Make
+tools/Addins
+tools/Cake
+tools/Cake.XComponent
+tools/NUnit.Runners
+tools/nuget.exe
+tools/packages.config.md5sum
+
 # Test Results
 TestResults.xml
+
+# Nuget package
+nuget/

@@ -1,11 +1,11 @@
-## .Net Reactive XComponent API
+# .Net Reactive XComponent API
 
 <img src="logo.png" width="64" height="64" />
 
 ReactiveXComponent.Net is a .Net client API that allows you to interact with microservices generated with XComponent software.
 
 ## Install
-[![ReactiveXComponent.Net Nuget](https://img.shields.io/badge/nuget-v0.1.0--rcv017-blue.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)
+[![ReactiveXComponent.Net Nuget](https://img.shields.io/badge/nuget-0.1.0--rcv018-blue.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)
 
 Use Nuget to install the latest version of the API:
 ``` nuget install ReactiveXComponent.Net -Pre```
@@ -61,30 +61,35 @@ using (IXCSession _xcSession = xcApi.CreateSession())
 ```
 
 ## Build from source
-Download the source code and execute the following command:
+Download the source code and execute the following command in a PowerShell:
 ``` 
-build.cmd <Task> config=<build_config>
+.\build.ps1 -Target <target_to_execute> -ScriptArgs '-buildConfiguration="<build_configuration>" -buildVersion="<build_version>"'
+```
+Here is an exmaple:
+```
+.\build.ps1 -Target Build -ScriptArgs '-buildConfiguration="Debug" -buildVersion="1.0.0.1"'
 ```
 
-**Task** can be one of these values:  
-*RestorePackages*  
+
+**Task** can be one of these values:   
 *Clean*  
-*Compile*  
-*RunTests*  
+*RestoreNugetPackages*  
+*Build*  
+*Test*  
 *CreatePackage*  
 *All*  
-*PublishPackage*  
+*PushPackage*  
 
-Default value: *All*
+Default value: *Build*
 
-**build_config** can be either *debug* or *release*.  
-Default value: *release* 
+**buildConfiguration** can be either *Debug* or *Release*.  
+Default value: *Release* 
 
 ## Contributing
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
 3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
+4. Push to the branch: `git push -u origin my-new-feature`
 5. Submit a pull request
 
 ## License

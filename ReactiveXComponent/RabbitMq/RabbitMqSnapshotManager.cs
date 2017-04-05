@@ -64,9 +64,6 @@ namespace ReactiveXComponent.RabbitMq
         public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
         {
             var guid = Guid.NewGuid();
-            SubscribeSnapshot(stateMachine, guid.ToString());
-            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
-
             List<MessageEventArgs> result = null;
             var lockEvent = new AutoResetEvent(false);
             var handler = new EventHandler<List<MessageEventArgs>>((sender, args) =>
@@ -75,6 +72,9 @@ namespace ReactiveXComponent.RabbitMq
                 lockEvent.Set();
             });
             SnapshotReceived += handler; 
+
+            SubscribeSnapshot(stateMachine, guid.ToString());
+            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
 
             lockEvent.WaitOne(timeout);
 
@@ -87,13 +87,12 @@ namespace ReactiveXComponent.RabbitMq
         public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
         {
             var guid = Guid.NewGuid();
-            SubscribeSnapshot(stateMachine, guid.ToString());
-            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
-
             if (onSnapshotReceived != null)
             {
                 _snapshotStream.Subscribe(onSnapshotReceived);
             }
+            SubscribeSnapshot(stateMachine, guid.ToString());
+            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
         }
 
         private void SendSnapshotRequest(string stateMachine, Guid guid, string privateCommunicationIdentifier = null)

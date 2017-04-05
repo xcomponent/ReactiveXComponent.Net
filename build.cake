@@ -7,6 +7,7 @@ var target = Argument("target", "Build");
 var buildConfiguration = Argument("buildConfiguration", "Release");
 var version = Argument("buildVersion", "1.0.0-build1");
 var apiKey = Argument("nugetKey", "");
+var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
 
 Task("Clean")
     .Does(() =>
@@ -33,7 +34,7 @@ Task("RestoreNugetPackages")
 Task("Build")
     .Does(() =>
     {
-        BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration);
+        BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration, setAssemblyVersion);
     });
 
 Task("Test")

@@ -55,23 +55,23 @@ var FormatAssemblyVersion = new Func<string, string>(currentVersion =>
     return result;
 });
 
-var FormatNugetVersion = new Func<string, string>(version =>
+var FormatNugetVersion = new Func<string, string>(currentVersion =>
 {
-    var result = version;
+    var result = currentVersion;
     var versionType = string.Empty;
 
-    if (version.Contains("build"))
+    if (currentVersion.Contains("build"))
     {
         versionType = "build";
     }
-    else if (version.Contains("rc"))
+    else if (currentVersion.Contains("rc"))
     {
         versionType = "rc";
     }
 
     if (!string.IsNullOrEmpty(versionType))
     {
-        var versionComponents = version.Split('-');
+        var versionComponents = currentVersion.Split('-');
         var majorVersion = versionComponents[0];
         var buildVersion = versionComponents[1];
         var buildNumberStr = buildVersion.Substring(
@@ -119,7 +119,7 @@ var CleanSolution = new Action<string, string>((solutionPath, configuration) =>
     }
 });
 
-var BuildSolution = new Action<string, string>((solutionPath, configuration) =>
+var BuildSolution = new Action<string, string, bool>((solutionPath, configuration, setAssemblyVersion) =>
 {
     var formattedAssemblyVersion = FormatAssemblyVersion(version);
 
@@ -128,6 +128,7 @@ var BuildSolution = new Action<string, string>((solutionPath, configuration) =>
         var xBuildSettings = new XBuildSettings() { Configuration = configuration };
         xBuildSettings.WithTarget("Rebuild");
         xBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
+        xBuildSettings.WithProperty("SetAssemblyVersion", setAssemblyVersion.ToString());
         
         XBuild(solutionPath, xBuildSettings);
     }
@@ -136,6 +137,7 @@ var BuildSolution = new Action<string, string>((solutionPath, configuration) =>
         var msBuildSettings = new MSBuildSettings() { Configuration = configuration };
         msBuildSettings.WithTarget("Rebuild");
         msBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
+        msBuildSettings.WithProperty("SetAssemblyVersion", setAssemblyVersion.ToString());
         
         MSBuild(solutionPath, msBuildSettings);
     }

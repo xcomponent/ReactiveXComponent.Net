@@ -63,7 +63,7 @@ using (IXCSession _xcSession = xcApi.CreateSession())
 ## Build from source
 Download the source code and execute the following command in a PowerShell:
 ``` 
-.\build.ps1 -Target <target_to_execute> -ScriptArgs '-buildConfiguration="<build_configuration>" -buildVersion="<build_version>"'
+.\build.ps1 -Target <target> -ScriptArgs '-buildConfiguration="<build_configuration>" -buildVersion="<build_version>"'
 ```
 Here is an exmaple:
 ```
@@ -71,19 +71,21 @@ Here is an exmaple:
 ```
 
 
-**Task** can be one of these values:   
+**target** can be one of these values:   
 *Clean*  
 *RestoreNugetPackages*  
 *Build*  
 *Test*  
 *CreatePackage*  
 *All*  
-*PushPackage*  
 
 Default value: *Build*
 
 **buildConfiguration** can be either *Debug* or *Release*.  
 Default value: *Release* 
+
+**buildVersion** is the build version to set for the assembly or Nuget package.  
+Default value: *1.0.0-build1*
 
 ## Contributing
 1. Fork it!

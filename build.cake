@@ -1,151 +1,12 @@
 #tool "nuget:?package=NUnit.Runners&version=2.6.4"
 #addin "Cake.FileHelpers"
 #addin "Cake.Incubator"
+#load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
 var buildConfiguration = Argument("buildConfiguration", "Release");
 var version = Argument("buildVersion", "1.0.0-build1");
 var apiKey = Argument("nugetKey", "");
-
-var formatAssemblyVersion = new Func<string, string>(version =>
-{
-    var result = string.Empty;
-    var versionType = string.Empty;
-
-    if (version.Contains("build"))
-    {
-        versionType = "build";
-    }
-    else if (version.Contains("rc"))
-    {
-        versionType = "rc";
-    }
-
-    if (!string.IsNullOrEmpty(versionType))
-    {
-        var versionComponents = version.Split('-');
-        var majorVersion = versionComponents[0];
-        var buildVersion = versionComponents[1];
-        var buildNumberStr = buildVersion.Substring(
-                                    versionType.Length,
-                                    buildVersion.Length - versionType.Length);
-
-        var buildNumber = int.Parse(buildNumberStr);
-        var buildNumberPrefix = string.Empty;
-        if (buildNumber < 10)
-        {
-            buildNumberPrefix = "000";
-        }
-        else if (buildNumber < 100)
-        {
-            buildNumberPrefix = "00";
-        }
-        else if (buildNumber < 1000)
-        {
-            buildNumberPrefix = "0";
-        }
-        else if (buildNumber > 60000)
-        {
-            buildNumberPrefix = "9";
-        }
-
-        var versionTypeNumber = (versionType == "build") ? "1" : "2";
-
-        result = majorVersion + "." + versionTypeNumber + buildNumberPrefix + buildNumberStr;
-    }
-    else
-    {
-        result = version + ".4";
-    }
-
-    return result;
-});
-
-var formatNugetVersion = new Func<string, string>(version =>
-{
-    var result = version;
-    var versionType = string.Empty;
-
-    if (version.Contains("build"))
-    {
-        versionType = "build";
-    }
-    else if (version.Contains("rc"))
-    {
-        versionType = "rc";
-    }
-
-    if (!string.IsNullOrEmpty(versionType))
-    {
-        var versionComponents = version.Split('-');
-        var majorVersion = versionComponents[0];
-        var buildVersion = versionComponents[1];
-        var buildNumberStr = buildVersion.Substring(
-                                    versionType.Length,
-                                    buildVersion.Length - versionType.Length);
-
-        var buildNumber = int.Parse(buildNumberStr);
-        var buildNumberPrefix = string.Empty;
-        if (buildNumber < 10)
-        {
-            buildNumberPrefix = "00";
-        }
-        else if (buildNumber < 100)
-        {
-            buildNumberPrefix = "0";
-        }
-        else if (buildNumber > 1000)
-        {
-            buildNumberPrefix = string.Empty;
-        }
-
-        result = majorVersion + "-" + versionType + "v" + buildNumberPrefix + buildNumberStr;
-    }
-
-    return result;
-});
-
-var cleanSolution = new Action<string, string>((solutionPath, configuration) =>
-{
-    if (IsRunningOnUnix())
-    {
-        var xBuildSettings = new XBuildSettings();
-        xBuildSettings.SetConfiguration(configuration)
-        .WithTarget("Clean");
-
-        XBuild(solutionPath, xBuildSettings);
-    }
-    else
-    {
-        var msBuildSettings = new MSBuildSettings();
-        msBuildSettings.SetConfiguration(configuration)
-        .WithTarget("Clean");
-
-        MSBuild(solutionPath, msBuildSettings);
-    }
-});
-
-var buildSolution = new Action<string, string>((solutionPath, configuration) =>
-{
-    var formattedAssemblyVersion = formatAssemblyVersion(version);
-
-    if (IsRunningOnUnix())
-    {
-        var xBuildSettings = new XBuildSettings() { Configuration = configuration };
-        xBuildSettings.WithTarget("Rebuild");
-        xBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        
-        XBuild(solutionPath, xBuildSettings);
-    }
-    else
-    {
-        var msBuildSettings = new MSBuildSettings() { Configuration = configuration };
-        msBuildSettings.WithTarget("Rebuild");
-        msBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        
-        MSBuild(solutionPath, msBuildSettings);
-    }
-});
 
 Task("Clean")
     .Does(() =>
@@ -160,7 +21,7 @@ Task("Clean")
             CleanDirectory("packages");
         }
 
-        cleanSolution("ReactiveXComponent.sln", buildConfiguration);
+        CleanSolution("ReactiveXComponent.sln", buildConfiguration);
     });
 
 Task("RestoreNugetPackages")
@@ -172,7 +33,7 @@ Task("RestoreNugetPackages")
 Task("Build")
     .Does(() =>
     {
-        buildSolution(@"./ReactiveXComponent.sln", buildConfiguration);
+        BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration);
     });
 
 Task("Test")
@@ -193,7 +54,7 @@ Task("CreatePackage")
     {
         EnsureDirectoryExists("nuget");
 
-        var formattedNugetVersion = formatNugetVersion(version);
+        var formattedNugetVersion = FormatNugetVersion(version);
 
         var filesToPackPatterns = new string[]
             {
@@ -229,7 +90,7 @@ Task("PushPackage")
     .IsDependentOn("All")
     .Does(() =>
     {
-        var formattedNugetVersion = formatNugetVersion(version);
+        var formattedNugetVersion = FormatNugetVersion(version);
         if (FileExists("./nuget/ReactiveXComponent.Net." + formattedNugetVersion + ".nupkg")
             && !string.IsNullOrEmpty(apiKey))
         {

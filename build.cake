@@ -105,6 +105,48 @@ var formatNugetVersion = new Func<string, string>(version =>
     return result;
 });
 
+var cleanSolution = new Action<string, string>((solutionPath, configuration) =>
+{
+    if (IsRunningOnUnix())
+    {
+        var xBuildSettings = new XBuildSettings();
+        xBuildSettings.SetConfiguration(configuration)
+        .WithTarget("Clean");
+
+        XBuild(solutionPath, xBuildSettings);
+    }
+    else
+    {
+        var msBuildSettings = new MSBuildSettings();
+        msBuildSettings.SetConfiguration(configuration)
+        .WithTarget("Clean");
+
+        MSBuild(solutionPath, msBuildSettings);
+    }
+});
+
+var buildSolution = new Action<string, string>((solutionPath, configuration) =>
+{
+    var formattedAssemblyVersion = formatAssemblyVersion(version);
+
+    if (IsRunningOnUnix())
+    {
+        var xBuildSettings = new XBuildSettings() { Configuration = configuration };
+        xBuildSettings.WithTarget("Rebuild");
+        xBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
+        
+        XBuild(solutionPath, xBuildSettings);
+    }
+    else
+    {
+        var msBuildSettings = new MSBuildSettings() { Configuration = configuration };
+        msBuildSettings.WithTarget("Rebuild");
+        msBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
+        
+        MSBuild(solutionPath, msBuildSettings);
+    }
+});
+
 Task("Clean")
     .Does(() =>
     {
@@ -118,11 +160,7 @@ Task("Clean")
             CleanDirectory("packages");
         }
 
-        var msBuildSettings = new MSBuildSettings();
-        msBuildSettings.SetConfiguration(buildConfiguration)
-        .WithTarget("Clean");
-
-        MSBuild("ReactiveXComponent.sln", msBuildSettings);
+        cleanSolution("ReactiveXComponent.sln", buildConfiguration);
     });
 
 Task("RestoreNugetPackages")
@@ -134,16 +172,12 @@ Task("RestoreNugetPackages")
 Task("Build")
     .Does(() =>
     {
-        var formattedAssemblyVersion = formatAssemblyVersion(version);
-        var msBuildSettings = new MSBuildSettings() { Configuration = buildConfiguration };
-        msBuildSettings.WithTarget("Rebuild");
-        msBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        
-        MSBuild(@"./ReactiveXComponent.sln", msBuildSettings);
+        buildSolution(@"./ReactiveXComponent.sln", buildConfiguration);
     });
 
 Task("Test")
-    .Does(() =>{
+    .Does(() =>
+    {
         var testAssembliesPatterns = new string[]
         {
             "./ReactiveXComponentTest/bin/" + buildConfiguration + "/ReactiveXComponentTest.dll"
@@ -155,41 +189,41 @@ Task("Test")
     });
 
 Task("CreatePackage")
-.Does(() =>
-{
-    EnsureDirectoryExists("nuget");
+    .Does(() =>
+    {
+        EnsureDirectoryExists("nuget");
 
-    var formattedNugetVersion = formatNugetVersion(version);
+        var formattedNugetVersion = formatNugetVersion(version);
 
-    var filesToPackPatterns = new string[]
+        var filesToPackPatterns = new string[]
+            {
+                "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.dll",
+                "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.pdb",
+                "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.xml"
+            };
+
+        var filesToPack = GetFiles(filesToPackPatterns);
+
+        var nuSpecContents = new List<NuSpecContent>();
+
+        foreach (var file in filesToPack)
         {
-            "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.dll",
-            "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.pdb",
-            "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.xml"
+            if (!file.FullPath.Contains("CodeAnalysisLog.xml"))
+            {
+                nuSpecContents.Add(new NuSpecContent {Source = file.FullPath, Target = @"lib\net451"});
+            }
+        }
+
+        var nugetPackSettings = new NuGetPackSettings()
+        { 
+            OutputDirectory = @"./nuget",
+            Files = nuSpecContents,
+            Version = formattedNugetVersion,
+            IncludeReferencedProjects = true
         };
 
-    var filesToPack = GetFiles(filesToPackPatterns);
-
-    var nuSpecContents = new List<NuSpecContent>();
-
-    foreach (var file in filesToPack)
-    {
-        if (!file.FullPath.Contains("CodeAnalysisLog.xml"))
-        {
-            nuSpecContents.Add(new NuSpecContent {Source = file.FullPath, Target = @"lib\net451"});
-        }
-    }
-
-    var nugetPackSettings = new NuGetPackSettings()
-    { 
-        OutputDirectory = @"./nuget",
-        Files = nuSpecContents,
-        Version = formattedNugetVersion,
-        IncludeReferencedProjects = true
-    };
-
-    NuGetPack("ReactiveXComponent.Net.nuspec", nugetPackSettings);
-});
+        NuGetPack("ReactiveXComponent.Net.nuspec", nugetPackSettings);
+    });
 
 Task("PushPackage")
     .IsDependentOn("All")

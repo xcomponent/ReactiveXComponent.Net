@@ -34,7 +34,7 @@ Task("RestoreNugetPackages")
 Task("Build")
     .Does(() =>
     {
-        BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration, setAssemblyVersion);
+        BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration, setAssemblyVersion, version);
     });
 
 Task("Test")

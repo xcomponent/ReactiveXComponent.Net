@@ -119,16 +119,16 @@ var CleanSolution = new Action<string, string>((solutionPath, configuration) =>
     }
 });
 
-var BuildSolution = new Action<string, string, bool>((solutionPath, configuration, setAssemblyVersion) =>
+var BuildSolution = new Action<string, string, bool, string>((solutionPath, configuration, hasSetAssemblyVersion, targetVersion) =>
 {
-    var formattedAssemblyVersion = FormatAssemblyVersion(version);
+    var formattedAssemblyVersion = FormatAssemblyVersion(targetVersion);
 
     if (IsRunningOnUnix())
     {
         var xBuildSettings = new XBuildSettings() { Configuration = configuration };
         xBuildSettings.WithTarget("Rebuild");
         xBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        xBuildSettings.WithProperty("SetAssemblyVersion", setAssemblyVersion.ToString());
+        xBuildSettings.WithProperty("SetAssemblyVersion", hasSetAssemblyVersion.ToString());
         
         XBuild(solutionPath, xBuildSettings);
     }
@@ -137,7 +137,7 @@ var BuildSolution = new Action<string, string, bool>((solutionPath, configuratio
         var msBuildSettings = new MSBuildSettings() { Configuration = configuration };
         msBuildSettings.WithTarget("Rebuild");
         msBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        msBuildSettings.WithProperty("SetAssemblyVersion", setAssemblyVersion.ToString());
+        msBuildSettings.WithProperty("SetAssemblyVersion", hasSetAssemblyVersion.ToString());
         
         MSBuild(solutionPath, msBuildSettings);
     }

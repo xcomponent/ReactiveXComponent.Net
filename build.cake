@@ -1,6 +1,6 @@
 #tool "nuget:?package=NUnit.Runners&version=2.6.4"
 #addin "Cake.FileHelpers"
-#addin "Cake.Incubator"
+#addin "Cake.Incubator&version=1.0.56"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");

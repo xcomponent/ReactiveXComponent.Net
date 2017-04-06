@@ -1,6 +1,3 @@
-#addin "Cake.FileHelpers"
-#addin "Cake.Incubator"
-
 var FormatAssemblyVersion = new Func<string, string>(currentVersion =>
 {
     var result = string.Empty;

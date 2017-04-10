@@ -243,6 +243,7 @@ tools/Addins
 tools/Cake
 tools/Cake.XComponent
 tools/NUnit.Runners
+tools/XComponent.MSBuild.Tasks
 tools/nuget.exe
 tools/packages.config.md5sum
 

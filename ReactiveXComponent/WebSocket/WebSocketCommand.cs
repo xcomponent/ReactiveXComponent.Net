@@ -14,5 +14,7 @@ namespace ReactiveXComponent.WebSocket
         public const string Snapshot = "snapshot";
         public const string Subscribe = "subscribe";
         public const string Unsubscribe = "unsubscribe";
+        public const string GetXCApi = "getXcApi";
+        public const string GetXCApiList = "getXcApiList";
     }
 }

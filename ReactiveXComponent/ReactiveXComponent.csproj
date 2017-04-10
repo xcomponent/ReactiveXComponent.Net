@@ -131,6 +131,7 @@
     <Compile Include="WebSocket\WebSocketClient.cs" />
     <Compile Include="WebSocket\WebSocketCommand.cs" />
     <Compile Include="WebSocket\WebSocketConnection.cs" />
+    <Compile Include="WebSocket\WebSocketGetXcApiResponse.cs" />
     <Compile Include="WebSocket\WebSocketMessage.cs" />
     <Compile Include="WebSocket\WebSocketMessageHelper.cs" />
     <Compile Include="WebSocket\WebSocketPacket.cs" />
@@ -142,6 +143,8 @@
     <Compile Include="WebSocket\WebSocketSubscription.cs" />
     <Compile Include="WebSocket\WebSocketTopic.cs" />
     <Compile Include="WebSocket\WebSocketTopicKind.cs" />
+    <Compile Include="WebSocket\WebSocketXCApiManager.cs" />
+    <Compile Include="WebSocket\WebSocketGetXcApiListResponse.cs" />
     <Compile Include="XComponentApi.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -150,7 +153,7 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\BuildCommon.targets" Condition="'$(SetAssemblyVersion)'=='true'"/>
+  <Import Project="$(SolutionDir)\BuildCommon.targets" Condition="'$(SetAssemblyVersion)'=='true'" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

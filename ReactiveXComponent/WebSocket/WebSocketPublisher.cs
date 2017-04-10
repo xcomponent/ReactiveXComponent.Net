@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
@@ -13,6 +14,7 @@ namespace ReactiveXComponent.WebSocket
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
         private readonly WebSocketSnapshotManager _webSocketSnapshotManager;
+        private readonly WebSocketXCApiManager _webSocketXCApiManager;
 
         public WebSocketPublisher(string component, IWebSocketClient webSocketClient, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier = null)
         {
@@ -21,6 +23,7 @@ namespace ReactiveXComponent.WebSocket
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _webSocketSnapshotManager = new WebSocketSnapshotManager(component, webSocketClient, xcConfiguration, privateCommunicationIdentifier);
+            _webSocketXCApiManager = new WebSocketXCApiManager(webSocketClient);
         }
 
         #region IXCPublisher implementation
@@ -69,6 +72,15 @@ namespace ReactiveXComponent.WebSocket
             _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
         }
 
+        public List<string> GetXCApiNames(int timeout = 10000)
+        {
+            return _webSocketXCApiManager.GetXCApiNames(timeout);
+        }
+
+        public Stream GetXCApi(string apiFullName, int timeout = 10000)
+        {
+            return _webSocketXCApiManager.GetXCApi(apiFullName, timeout);
+        }
         #endregion
 
         private WebSocketEngineHeader CreateWebSocketHeader(string stateMachine, object message, Visibility visibility = Visibility.Public)

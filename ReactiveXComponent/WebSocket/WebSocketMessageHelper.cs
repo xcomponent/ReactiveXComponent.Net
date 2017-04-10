@@ -64,6 +64,25 @@ namespace ReactiveXComponent.WebSocket
             return $"{beforeJson} {jsonContent}{Environment.NewLine}";
         }
 
+        public static string SerializeXCApiRequest(object message, string data = null)
+        {
+            if (message == null)
+                return $"{string.Empty}{Environment.NewLine}";
+
+            var jsonMessage = new StringBuilder().Append(message);
+
+            if (string.IsNullOrEmpty(data))
+            {
+                jsonMessage.Append(" {}");
+            }
+            else
+            {
+                jsonMessage.Append(" {\"Name\": \"").Append(data).Append("\"}");
+            }
+
+            return $"{jsonMessage}{Environment.NewLine}";
+        }
+
         public static string SerializeBeforeJsonPart(string requestKey, string componentCode, string topic)
         {
             StringBuilder beforeJson = new StringBuilder(requestKey);
@@ -203,6 +222,35 @@ namespace ReactiveXComponent.WebSocket
             }
 
             return message;
+        }
+
+        public static string DeserializeXCApi(string receivedMessage)
+        {
+            byte[] compressedMessage = Convert.FromBase64String(receivedMessage);
+            string message;
+            var compressedStream = new MemoryStream(compressedMessage);
+
+            using (var decompressedMessage = new MemoryStream())
+            {
+                using (var unzippedMessage = new GZipStream(compressedStream, CompressionMode.Decompress))
+                {
+                    unzippedMessage.CopyTo(decompressedMessage);
+                }
+
+                message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
+            }
+
+            return message;
+        }
+
+        public static Stream ToStream(string s)
+        {
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(s);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
         }
     }
 }

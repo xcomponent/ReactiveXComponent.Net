@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
@@ -9,17 +8,15 @@ using ReactiveXComponent.Common;
 
 namespace ReactiveXComponent.WebSocket
 {
-    public class WebSocketXCApiManager : IDisposable
+    public class WebSocketXCApiManager
     {
         private readonly IWebSocketClient _webSocketClient;
 
-        private Stream _xcApiFileStream;
-
         private event EventHandler<List<string>> XCApiNamesReceived;
-        private event EventHandler<Stream> XCApiReceived;
+        private event EventHandler<string> XCApiReceived;
 
         private readonly IObservable<List<string>> _xcApiNamesStream;
-        private readonly IObservable<Stream> _xcApiStream;
+        private readonly IObservable<string> _xcApiStream;
 
         public WebSocketXCApiManager(IWebSocketClient webSocketClient)
         {
@@ -30,7 +27,7 @@ namespace ReactiveXComponent.WebSocket
                 h => XCApiNamesReceived += h,
                 h => XCApiNamesReceived -= h);
 
-            _xcApiStream = Observable.FromEvent<EventHandler<Stream>, Stream>(
+            _xcApiStream = Observable.FromEvent<EventHandler<string>, string>(
                 handler => (sender, e) => handler(e),
                 h => XCApiReceived += h,
                 h => XCApiReceived -= h);
@@ -59,11 +56,11 @@ namespace ReactiveXComponent.WebSocket
         }
 
 
-        public Stream GetXCApi(string apiFullName, int timeout = 10000)
+        public string GetXCApi(string apiFullName, int timeout = 10000)
         {
-            Stream result = null;
+            var result = string.Empty;
             var lockEvent = new AutoResetEvent(false);
-            var observer = Observer.Create<Stream>(message =>
+            var observer = Observer.Create<string>(message =>
             {
                 result = message;
                 lockEvent.Set();
@@ -112,14 +109,13 @@ namespace ReactiveXComponent.WebSocket
                 {
                     string rawRequest = args.Data;
                     var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(rawRequest);
-                    _xcApiFileStream = null;
+                    string xcApiContent = string.Empty;
                     if (webSocketMessage.Command == WebSocketCommand.GetXCApi.ToString())
                     {
                         var response = JsonConvert.DeserializeObject<WebSocketGetXcApiResponse>(webSocketMessage.Json);
-                        var xcApiContent = WebSocketMessageHelper.DeserializeXCApi(response.Content);
-                        _xcApiFileStream = WebSocketMessageHelper.ToStream(xcApiContent);
+                        xcApiContent = WebSocketMessageHelper.DeserializeXCApi(response.Content);
                     }
-                    XCApiReceived?.Invoke(this, _xcApiFileStream);
+                    XCApiReceived?.Invoke(this, xcApiContent);
                 };
 
                 _webSocketClient.MessageReceived += subscriptionHandler;
@@ -131,36 +127,5 @@ namespace ReactiveXComponent.WebSocket
                 subscriptionHandler = null;
             }  
         }
-
-        #region IDisposable implementation
-
-        private bool _disposed;
-
-        private void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    _xcApiFileStream.Dispose();
-                }
-
-                // clear unmanaged resources
-                _disposed = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~WebSocketXCApiManager()
-        {
-            Dispose(false);
-        }
-
-        #endregion
     }
 }

@@ -73,11 +73,11 @@ namespace ReactiveXComponent.WebSocket
 
             if (string.IsNullOrEmpty(data))
             {
-                jsonMessage.Append(" {}");
+                jsonMessage.Append($" {SerializeToString(new XCApiProperties())}");
             }
             else
             {
-                jsonMessage.Append(" {\"Name\": \"").Append(data).Append("\"}");
+                jsonMessage.Append($" {SerializeToString(new XCApiProperties {Name = data})}");
             }
 
             return $"{jsonMessage}{Environment.NewLine}";
@@ -241,16 +241,6 @@ namespace ReactiveXComponent.WebSocket
             }
 
             return message;
-        }
-
-        public static Stream ToStream(string s)
-        {
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(s);
-            writer.Flush();
-            stream.Position = 0;
-            return stream;
         }
     }
 }

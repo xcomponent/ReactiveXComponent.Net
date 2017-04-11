@@ -72,17 +72,6 @@ namespace ReactiveXComponent.RabbitMq
         {
             _rabbitMqSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
         }
-
-        public List<string> GetXCApiNames(int timeout = 10000)
-        {
-            throw new NotImplementedException("Method not available for RabbitMq implementation");
-        }
-
-        public Stream GetXCApi(string apiFullName, int timeout = 10000)
-        {
-            throw new NotImplementedException("Method not available for RabbitMq implementation");
-        }
-
         #endregion
 
         private void CreatePublisherChannel(IConnection connection)

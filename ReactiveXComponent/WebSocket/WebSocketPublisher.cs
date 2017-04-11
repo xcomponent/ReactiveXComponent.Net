@@ -14,7 +14,6 @@ namespace ReactiveXComponent.WebSocket
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
         private readonly WebSocketSnapshotManager _webSocketSnapshotManager;
-        private readonly WebSocketXCApiManager _webSocketXCApiManager;
 
         public WebSocketPublisher(string component, IWebSocketClient webSocketClient, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier = null)
         {
@@ -23,7 +22,6 @@ namespace ReactiveXComponent.WebSocket
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _webSocketSnapshotManager = new WebSocketSnapshotManager(component, webSocketClient, xcConfiguration, privateCommunicationIdentifier);
-            _webSocketXCApiManager = new WebSocketXCApiManager(webSocketClient);
         }
 
         #region IXCPublisher implementation
@@ -70,16 +68,6 @@ namespace ReactiveXComponent.WebSocket
         public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
         {
             _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
-        }
-
-        public List<string> GetXCApiNames(int timeout = 10000)
-        {
-            return _webSocketXCApiManager.GetXCApiNames(timeout);
-        }
-
-        public Stream GetXCApi(string apiFullName, int timeout = 10000)
-        {
-            return _webSocketXCApiManager.GetXCApi(apiFullName, timeout);
         }
         #endregion
 

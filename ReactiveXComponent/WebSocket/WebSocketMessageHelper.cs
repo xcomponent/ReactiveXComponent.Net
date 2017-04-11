@@ -69,18 +69,13 @@ namespace ReactiveXComponent.WebSocket
             if (message == null)
                 return $"{string.Empty}{Environment.NewLine}";
 
-            var jsonMessage = new StringBuilder().Append(message);
+            var jsonMessage = message;
 
-            if (string.IsNullOrEmpty(data))
-            {
-                jsonMessage.Append($" {SerializeToString(new XCApiProperties())}");
-            }
-            else
-            {
-                jsonMessage.Append($" {SerializeToString(new XCApiProperties {Name = data})}");
-            }
+            var xcApiProperties = string.IsNullOrEmpty(data)
+                ? new XCApiProperties()
+                : new XCApiProperties {Name = data};
 
-            return $"{jsonMessage}{Environment.NewLine}";
+            return $"{jsonMessage} {SerializeToString(xcApiProperties)}{Environment.NewLine}";
         }
 
         public static string SerializeBeforeJsonPart(string requestKey, string componentCode, string topic)

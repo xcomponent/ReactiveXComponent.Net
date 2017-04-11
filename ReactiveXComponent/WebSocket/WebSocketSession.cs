@@ -45,7 +45,7 @@ namespace ReactiveXComponent.WebSocket
 
         public List<string> GetXCApiList(int timeout = 10000)
         {
-            return _webSocketXCApiManager.GetXCApiNames(timeout);
+            return _webSocketXCApiManager.GetXCApiList(timeout);
         }
 
         public string GetXCApi(string apiFullName, int timeout = 10000)

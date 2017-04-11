@@ -12,20 +12,20 @@ namespace ReactiveXComponent.WebSocket
     {
         private readonly IWebSocketClient _webSocketClient;
 
-        private event EventHandler<List<string>> XCApiNamesReceived;
+        private event EventHandler<List<string>> XCApiListReceived;
         private event EventHandler<string> XCApiReceived;
 
-        private readonly IObservable<List<string>> _xcApiNamesStream;
+        private readonly IObservable<List<string>> _xcApiListStream;
         private readonly IObservable<string> _xcApiStream;
 
         public WebSocketXCApiManager(IWebSocketClient webSocketClient)
         {
             _webSocketClient = webSocketClient;
 
-            _xcApiNamesStream = Observable.FromEvent<EventHandler<List<string>>, List<string>>(
+            _xcApiListStream = Observable.FromEvent<EventHandler<List<string>>, List<string>>(
                 handler => (sender, e) => handler(e),
-                h => XCApiNamesReceived += h,
-                h => XCApiNamesReceived -= h);
+                h => XCApiListReceived += h,
+                h => XCApiListReceived -= h);
 
             _xcApiStream = Observable.FromEvent<EventHandler<string>, string>(
                 handler => (sender, e) => handler(e),
@@ -33,7 +33,7 @@ namespace ReactiveXComponent.WebSocket
                 h => XCApiReceived -= h);
         }
 
-        public List<string> GetXCApiNames(int timeout = 10000)
+        public List<string> GetXCApiList(int timeout = 10000)
         {
             List<string> result = null;
             var lockEvent = new AutoResetEvent(false);
@@ -42,15 +42,14 @@ namespace ReactiveXComponent.WebSocket
                 result = new List<string>(message);
                 lockEvent.Set();
             });
-            var xcApiSubscription = _xcApiNamesStream.Subscribe(observer);
+            var xcApiSubscription = _xcApiListStream.Subscribe(observer);
 
-            EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
-            
-            SubscribeXCApiNames(out subscriptionHandler);
+            _webSocketClient.MessageReceived += ProcessResponse;
+            SendRequest(WebSocketCommand.GetXCApiList);
             lockEvent.WaitOne(timeout);
             
             xcApiSubscription.Dispose();
-            _webSocketClient.MessageReceived -= subscriptionHandler;
+            _webSocketClient.MessageReceived -= ProcessResponse;
 
             return result;
         }
@@ -67,65 +66,42 @@ namespace ReactiveXComponent.WebSocket
             });
             var xcApiSubscription = _xcApiStream.Subscribe(observer);
 
-            EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
-
-            SubscribeXCApi(apiFullName, out subscriptionHandler);
+            _webSocketClient.MessageReceived += ProcessResponse;
+            SendRequest(WebSocketCommand.GetXCApi, apiFullName);
             lockEvent.WaitOne(timeout);
 
             xcApiSubscription.Dispose();
-            _webSocketClient.MessageReceived -= subscriptionHandler;
+            _webSocketClient.MessageReceived -= ProcessResponse;
 
             return result;
         }
 
-        private void SubscribeXCApiNames(out EventHandler<WebSocketMessageEventArgs> subscriptionHandler)
+        private void SendRequest(string requestCommand, string apiFullName = null)
         {
-            var webSocketRequest = WebSocketMessageHelper.SerializeXCApiRequest(WebSocketCommand.GetXCApiList);
-            subscriptionHandler = (sender, args) =>
-            {
-                string rawRequest = args.Data;
-                var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(rawRequest);
-                var xcApiNames = new List<string>();
-                if (webSocketMessage.Command == WebSocketCommand.GetXCApiList.ToString())
-                {
-                    var response = JsonConvert.DeserializeObject<WebSocketGetXcApiListResponse>(webSocketMessage.Json);
-                    xcApiNames.AddRange(response.Apis);
-                } 
-                XCApiNamesReceived?.Invoke(this, xcApiNames); 
-            };
-
-            _webSocketClient.MessageReceived += subscriptionHandler;
-
+            var webSocketRequest = WebSocketMessageHelper.SerializeXCApiRequest(requestCommand, apiFullName);
             _webSocketClient.Send(webSocketRequest);
         }
 
-        private void SubscribeXCApi(string apiFullName, out EventHandler<WebSocketMessageEventArgs> subscriptionHandler)
+        private void ProcessResponse(object sender, WebSocketMessageEventArgs args)
         {
-            var apiNames = GetXCApiNames();
-            if (apiNames.Contains(apiFullName))
+            var rawRequest = args.Data;
+            var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(rawRequest);
+
+            if (webSocketMessage.Command == WebSocketCommand.GetXCApiList)
             {
-                var webSocketRequest = WebSocketMessageHelper.SerializeXCApiRequest(WebSocketCommand.GetXCApi, apiFullName);
-                subscriptionHandler = (sender, args) =>
-                {
-                    string rawRequest = args.Data;
-                    var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(rawRequest);
-                    string xcApiContent = string.Empty;
-                    if (webSocketMessage.Command == WebSocketCommand.GetXCApi.ToString())
-                    {
-                        var response = JsonConvert.DeserializeObject<WebSocketGetXcApiResponse>(webSocketMessage.Json);
-                        xcApiContent = WebSocketMessageHelper.DeserializeXCApi(response.Content);
-                    }
-                    XCApiReceived?.Invoke(this, xcApiContent);
-                };
-
-                _webSocketClient.MessageReceived += subscriptionHandler;
-
-                _webSocketClient.Send(webSocketRequest);
+                var response = JsonConvert.DeserializeObject<WebSocketGetXcApiListResponse>(webSocketMessage.Json);
+                var xcApiNames = new List<string>(response.Apis);
+                XCApiListReceived?.Invoke(this, xcApiNames);
             }
-            else
+            else if (webSocketMessage.Command == WebSocketCommand.GetXCApi)
             {
-                subscriptionHandler = null;
-            }  
+                var response = JsonConvert.DeserializeObject<WebSocketGetXcApiResponse>(webSocketMessage.Json);
+                if (response.ApiFound)
+                {
+                    var xcApiContent = WebSocketMessageHelper.DeserializeXCApi(response.Content);
+                    XCApiReceived?.Invoke(this, xcApiContent);
+                }
+            }
         }
     }
 }

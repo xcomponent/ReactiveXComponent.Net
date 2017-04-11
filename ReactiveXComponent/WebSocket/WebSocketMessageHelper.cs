@@ -66,16 +66,11 @@ namespace ReactiveXComponent.WebSocket
 
         public static string SerializeXCApiRequest(object message, string data = null)
         {
-            if (message == null)
-                return $"{string.Empty}{Environment.NewLine}";
-
-            var jsonMessage = message;
-
             var xcApiProperties = string.IsNullOrEmpty(data)
                 ? new XCApiProperties()
                 : new XCApiProperties {Name = data};
 
-            return $"{jsonMessage} {SerializeToString(xcApiProperties)}{Environment.NewLine}";
+            return $"{message} {SerializeToString(xcApiProperties)}{Environment.NewLine}";
         }
 
         public static string SerializeBeforeJsonPart(string requestKey, string componentCode, string topic)

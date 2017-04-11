@@ -33,7 +33,7 @@ namespace ReactiveXComponent.WebSocket
                 h => XCApiReceived -= h);
         }
 
-        public List<string> GetXCApiList(int timeout = 10000)
+        public List<string> GetXCApiList(TimeSpan? timeout = null)
         {
             List<string> result = null;
             var lockEvent = new AutoResetEvent(false);
@@ -46,7 +46,8 @@ namespace ReactiveXComponent.WebSocket
 
             _webSocketClient.MessageReceived += ProcessResponse;
             SendRequest(WebSocketCommand.GetXCApiList);
-            lockEvent.WaitOne(timeout);
+            var delay = timeout ?? TimeSpan.FromSeconds(10);
+            lockEvent.WaitOne(delay);
             
             xcApiSubscription.Dispose();
             _webSocketClient.MessageReceived -= ProcessResponse;
@@ -55,7 +56,7 @@ namespace ReactiveXComponent.WebSocket
         }
 
 
-        public string GetXCApi(string apiFullName, int timeout = 10000)
+        public string GetXCApi(string apiFullName, TimeSpan? timeout = null)
         {
             var result = string.Empty;
             var lockEvent = new AutoResetEvent(false);
@@ -68,7 +69,8 @@ namespace ReactiveXComponent.WebSocket
 
             _webSocketClient.MessageReceived += ProcessResponse;
             SendRequest(WebSocketCommand.GetXCApi, apiFullName);
-            lockEvent.WaitOne(timeout);
+            var delay = timeout ?? TimeSpan.FromSeconds(10);
+            lockEvent.WaitOne(delay);
 
             xcApiSubscription.Dispose();
             _webSocketClient.MessageReceived -= ProcessResponse;

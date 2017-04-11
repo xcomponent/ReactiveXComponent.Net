@@ -9,7 +9,7 @@ namespace ReactiveXComponent.Connection
         event EventHandler SessionClosed;
         IXCPublisher CreatePublisher(string component);
         IXCSubscriber CreateSubscriber(string component);
-        List<string> GetXCApiList(int timeout = 10000);
-        string GetXCApi(string apiFullName, int timeout = 10000);
+        List<string> GetXCApiList(TimeSpan? timeout = null);
+        string GetXCApi(string apiFullName, TimeSpan? timeout = null);
     }
 }

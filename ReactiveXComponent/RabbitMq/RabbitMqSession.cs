@@ -83,12 +83,12 @@ namespace ReactiveXComponent.RabbitMq
             return new RabbitMqSubscriber(component, _xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
         }
 
-        public List<string> GetXCApiList(int timeout = 10000)
+        public List<string> GetXCApiList(TimeSpan? timeout = null)
         {
             throw new NotImplementedException("Method not supported for Rabbit MQ");
         }
 
-        public string GetXCApi(string apiFullName, int timeout = 10000)
+        public string GetXCApi(string apiFullName, TimeSpan? timeout = null)
         {
             throw new NotImplementedException("Method not supported for Rabbit MQ");
         }

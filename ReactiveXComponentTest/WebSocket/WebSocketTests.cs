@@ -249,5 +249,67 @@ namespace ReactiveXComponentTest.WebSocket
                 Check.That(snapshotReceived).IsTrue();
             }
         }
+
+        [Test]
+        public void GetXCApiTest()
+        {
+            var expectedRequestProperty = string.Empty;
+            var requestSentEvent = new AutoResetEvent(false);
+            var webSocketClient = Substitute.For<IWebSocketClient>();
+            webSocketClient.IsOpen.Returns(true);
+            webSocketClient.When(x => x.Open()).DoNotCallBase();
+            webSocketClient.When(x => x.Close()).DoNotCallBase();
+            webSocketClient.When(x => x.Dispose()).DoNotCallBase();
+            webSocketClient.WhenForAnyArgs(x => x.Send("")).Do(callInfo =>
+            {
+                var message = (string)callInfo.Args()[0];
+                var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(message);
+                if (webSocketMessage.Command == WebSocketCommand.GetXCApi)
+                {
+                    var xcApiProperties = JsonConvert.DeserializeObject<XCApiProperties>(webSocketMessage.Json);
+                    expectedRequestProperty = xcApiProperties.Name;
+                    requestSentEvent.Set();
+                }
+            });
+
+            var xcApiManager = new WebSocketXCApiManager(webSocketClient);
+            xcApiManager.GetXCApi("HelloWorld.api");
+            var requestWasSent = requestSentEvent.WaitOne(TimeSpan.FromSeconds(5));
+
+            Check.That(requestWasSent).IsTrue();
+            Check.That(expectedRequestProperty.Equals("HelloWorld.api")).IsTrue();
+        }
+
+        [Test]
+        public void GetXCApiListTest()
+        {
+            List<string> ExpectedXCApiList = null;
+            var requestSentEvent = new AutoResetEvent(false);
+            var webSocketClient = Substitute.For<IWebSocketClient>();
+            webSocketClient.IsOpen.Returns(true);
+            webSocketClient.When(x => x.Open()).DoNotCallBase();
+            webSocketClient.When(x => x.Close()).DoNotCallBase();
+            webSocketClient.When(x => x.Dispose()).DoNotCallBase();
+            webSocketClient.WhenForAnyArgs(x => x.Send("")).Do(callInfo =>
+            {
+                var message = (string)callInfo.Args()[0];
+                var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(message);
+                if (webSocketMessage.Command == WebSocketCommand.GetXCApiList)
+                {
+                    var response = JsonConvert.DeserializeObject<WebSocketGetXcApiListResponse>(webSocketMessage.Json);
+                    ExpectedXCApiList = response?.Apis != null ? new List<string>(response.Apis) : new List<string> {"Empty"};
+                    requestSentEvent.Set();
+                }
+            });
+
+            var xcApiManager = new WebSocketXCApiManager(webSocketClient);
+            xcApiManager.GetXCApiList();
+            var requestWasSent = requestSentEvent.WaitOne(TimeSpan.FromSeconds(5));
+
+            Check.That(requestWasSent).IsTrue();
+            Check.That(ExpectedXCApiList != null).IsTrue();
+            Check.That(ExpectedXCApiList.Count == 1).IsTrue();
+            Check.That(ExpectedXCApiList.Contains("Empty")).IsTrue();
+        }
     }
 }

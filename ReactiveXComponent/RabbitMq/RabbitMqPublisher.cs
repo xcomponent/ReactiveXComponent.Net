@@ -72,6 +72,7 @@ namespace ReactiveXComponent.RabbitMq
         {
             _rabbitMqSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
         }
+
         #endregion
 
         private void CreatePublisherChannel(IConnection connection)

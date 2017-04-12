@@ -68,6 +68,7 @@ namespace ReactiveXComponent.WebSocket
         {
             _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
         }
+
         #endregion
 
         private WebSocketEngineHeader CreateWebSocketHeader(string stateMachine, object message, Visibility visibility = Visibility.Public)

@@ -92,7 +92,11 @@ namespace ReactiveXComponent.WebSocket
             if (webSocketMessage.Command == WebSocketCommand.GetXCApiList)
             {
                 var response = JsonConvert.DeserializeObject<WebSocketGetXcApiListResponse>(webSocketMessage.Json);
-                var xcApiList = new List<string>(response.Apis);
+                var xcApiList = new List<string>();
+                if (response?.Apis != null)
+                {
+                    xcApiList = new List<string>(response.Apis);
+                }
                 XCApiListReceived?.Invoke(this, xcApiList);
             }
             else if (webSocketMessage.Command == WebSocketCommand.GetXCApi)

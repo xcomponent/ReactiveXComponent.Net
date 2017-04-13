@@ -43,16 +43,16 @@ namespace ReactiveXComponent.WebSocket
             return new WebSocketSubscriber(component, _webSocketClient, _xcConfiguration, _privateCommunicationIdentifier);
         }
 
-        public List<string> GetXCApiList(TimeSpan? timeout = null)
+        public List<string> GetXCApiList(string requestId = null, TimeSpan ? timeout = null)
         {
             var delay = timeout ?? TimeSpan.FromSeconds(10);
-            return _webSocketXCApiManager.GetXCApiList(delay);
+            return _webSocketXCApiManager.GetXCApiList(requestId,delay);
         }
 
-        public string GetXCApi(string apiFullName, TimeSpan? timeout = null)
+        public string GetXCApi(string apiFullName, string requestId = null, TimeSpan? timeout = null)
         {
             var delay = timeout ?? TimeSpan.FromSeconds(10);
-            return _webSocketXCApiManager.GetXCApi(apiFullName, delay);
+            return _webSocketXCApiManager.GetXCApi(apiFullName, requestId, delay);
         }
 
         #region IDisposable implementation

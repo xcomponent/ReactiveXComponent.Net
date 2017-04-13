@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reflection;
-using System.Resources;
 using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
@@ -289,6 +286,7 @@ namespace ReactiveXComponentTest.WebSocket
                 + "0HHfs / otzJtdp4V9QVZmu86mnbiiWTJ7O / PuKsv0fKwC1Kesup1sJtD0fC2ii0Jgl5hkhFyt26nKb6og790gj / psRwa7ktEXBktkUpVAGsTpG9X48q8NrAW / RZht / DCiR / fgWpI7MrG / eBJx"
                 + "EnoeFmEdBSrVuo3Zd6uFAsVNi6TbigMK9Aeg09OH6 + JO0ssL46FJ++VP5UyqOPDzc5mGiynCUIEXKrFzF7OG5GwUyGaSc6lWc / sbDiZoCqXYp6aI + FRPrtxF3T2MMa + zDmsbRlWoWe / fBXStOHV1c"
                 + "9Syq + 7v7e7CHyCDiwAr2SWxX1D6VfDtmJMvq0S1NGtMxSBmVxMvE72e78E5dI7wHR / FJkvcnCr3TyJtn3qMPWmxsOOjETWP3l7r9HzBAksy7CwAA\"";
+            var requestId = Guid.NewGuid().ToString();
             var expectedRequestProperty = string.Empty;
             var requestSentEvent = new AutoResetEvent(false);
             var webSocketClient = Substitute.For<IWebSocketClient>();
@@ -302,11 +300,14 @@ namespace ReactiveXComponentTest.WebSocket
                 var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(message);
                 if (webSocketMessage.Command == WebSocketCommand.GetXCApi)
                 {
-                    var xcApiProperties = JsonConvert.DeserializeObject<XCApiProperties>(webSocketMessage.Json);
-                    expectedRequestProperty = xcApiProperties.Name;
-                    requestSentEvent.Set();
+                    var xcApiProperties = JsonConvert.DeserializeObject<WebSocketXCApiRequest>(webSocketMessage.Json);
+                    if(xcApiProperties.RequestId == requestId)
+                    {
+                        expectedRequestProperty = xcApiProperties.Name;
+                        requestSentEvent.Set();
+                    }
 
-                    var data = "getXcApi { \"ApiFound\":true,\"ApiName\":\"HelloWorld.api\",\"Content\":" + compressedXCApi +"}";
+                    var data = "getXcApi {\"RequestId\": \""+requestId+"\",\"ApiFound\":true,\"ApiName\":\"HelloWorld.api\",\"Content\":" + compressedXCApi +"}";
                     var rawData = Encoding.UTF8.GetBytes(data);
                     var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
                     webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
@@ -314,7 +315,7 @@ namespace ReactiveXComponentTest.WebSocket
             });
 
             var xcApiManager = new WebSocketXCApiManager(webSocketClient);
-            var answer = xcApiManager.GetXCApi("HelloWorld.api");
+            var answer = xcApiManager.GetXCApi("HelloWorld.api", requestId);
             var requestWasSent = requestSentEvent.WaitOne(TimeSpan.FromSeconds(5));
 
             Check.That(requestWasSent).IsTrue();
@@ -326,6 +327,7 @@ namespace ReactiveXComponentTest.WebSocket
         public void GetXCApiListTest()
         {
             var expectedAnswer = new List<string> {"helloWorld.api"};
+            var requestId = Guid.NewGuid().ToString();
             var requestSentEvent = new AutoResetEvent(false);
             var webSocketClient = Substitute.For<IWebSocketClient>();
             webSocketClient.IsOpen.Returns(true);
@@ -340,7 +342,7 @@ namespace ReactiveXComponentTest.WebSocket
                 {
                     requestSentEvent.Set();
 
-                    var data = "getXcApiList { \"Apis\":[\"helloWorld.api\"]}";
+                    var data = "getXcApiList {\"RequestId\": \""+requestId+"\",\"Apis\":[\"helloWorld.api\"]}";
                     var rawData = Encoding.UTF8.GetBytes(data);
                     var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
                     webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
@@ -348,7 +350,7 @@ namespace ReactiveXComponentTest.WebSocket
             });
 
             var xcApiManager = new WebSocketXCApiManager(webSocketClient);
-            var answer = xcApiManager.GetXCApiList();
+            var answer = xcApiManager.GetXCApiList(requestId);
             var requestWasSent = requestSentEvent.WaitOne(TimeSpan.FromSeconds(5));
 
             Check.That(requestWasSent).IsTrue();

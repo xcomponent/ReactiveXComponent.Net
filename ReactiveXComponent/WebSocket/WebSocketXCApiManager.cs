@@ -12,42 +12,50 @@ namespace ReactiveXComponent.WebSocket
     {
         private readonly IWebSocketClient _webSocketClient;
 
-        private event EventHandler<List<string>> XCApiListReceived;
-        private event EventHandler<string> XCApiReceived;
+        private event EventHandler<WebSocketGetXcApiListResponse> XCApiListReceived;
+        private event EventHandler<WebSocketGetXcApiResponse> XCApiReceived;
 
-        private readonly IObservable<List<string>> _xcApiListStream;
-        private readonly IObservable<string> _xcApiStream;
+        private readonly IObservable<WebSocketGetXcApiListResponse> _xcApiListStream;
+        private readonly IObservable<WebSocketGetXcApiResponse> _xcApiStream;
 
         public WebSocketXCApiManager(IWebSocketClient webSocketClient)
         {
             _webSocketClient = webSocketClient;
 
-            _xcApiListStream = Observable.FromEvent<EventHandler<List<string>>, List<string>>(
+            _xcApiListStream = Observable.FromEvent<EventHandler<WebSocketGetXcApiListResponse>, WebSocketGetXcApiListResponse>(
                 handler => (sender, e) => handler(e),
                 h => XCApiListReceived += h,
                 h => XCApiListReceived -= h);
 
-            _xcApiStream = Observable.FromEvent<EventHandler<string>, string>(
+            _xcApiStream = Observable.FromEvent<EventHandler<WebSocketGetXcApiResponse>, WebSocketGetXcApiResponse>(
                 handler => (sender, e) => handler(e),
                 h => XCApiReceived += h,
                 h => XCApiReceived -= h);
         }
 
-        public List<string> GetXCApiList(TimeSpan? timeout = null)
+        public List<string> GetXCApiList(string requestId = null, TimeSpan ? timeout = null)
         {
             var delay = timeout ?? TimeSpan.FromSeconds(10);
             List<string> result = null;
             var lockEvent = new AutoResetEvent(false);
-            var observer = Observer.Create<List<string>>(message =>
+            var observer = Observer.Create<WebSocketGetXcApiListResponse>(response =>
             {
-                result = new List<string>(message);
-                lockEvent.Set();
+                if (response.RequestId == requestId)
+                {
+                    result = new List<string>(response.Apis);
+                    lockEvent.Set();
+                }
             });
+            var request = new WebSocketXCApiCommand
+            {
+                Command = WebSocketCommand.GetXCApiList,
+                Id = requestId
+            };
 
             using (_xcApiListStream.Subscribe(observer))
             {
                 _webSocketClient.MessageReceived += ProcessResponse;
-                SendRequest(WebSocketCommand.GetXCApiList);
+                SendRequest(request);
                 lockEvent.WaitOne(delay);
                 _webSocketClient.MessageReceived -= ProcessResponse;
             }
@@ -56,21 +64,29 @@ namespace ReactiveXComponent.WebSocket
         }
 
 
-        public string GetXCApi(string apiFullName, TimeSpan? timeout = null)
+        public string GetXCApi(string apiFullName, string requestId = null, TimeSpan ? timeout = null)
         {
             var delay = timeout ?? TimeSpan.FromSeconds(10);
             var result = string.Empty;
             var lockEvent = new AutoResetEvent(false);
-            var observer = Observer.Create<string>(message =>
+            var observer = Observer.Create<WebSocketGetXcApiResponse>(response =>
             {
-                result = message;
-                lockEvent.Set();
+                if (response.RequestId == requestId && response.ApiFound)
+                {
+                    result = response.ApiName;
+                    lockEvent.Set();
+                }
             });
+            var request = new WebSocketXCApiCommand
+            {
+                Command = WebSocketCommand.GetXCApi,
+                Id = requestId
+            };
 
             using (_xcApiStream.Subscribe(observer))
             {
                 _webSocketClient.MessageReceived += ProcessResponse;
-                SendRequest(WebSocketCommand.GetXCApi, apiFullName);
+                SendRequest(request, apiFullName);
                 lockEvent.WaitOne(delay);
                 _webSocketClient.MessageReceived -= ProcessResponse;
             }
@@ -78,9 +94,9 @@ namespace ReactiveXComponent.WebSocket
             return result;
         }
 
-        private void SendRequest(string requestCommand, string apiFullName = null)
+        private void SendRequest(WebSocketXCApiCommand command, string apiFullName = null)
         {
-            var webSocketRequest = WebSocketMessageHelper.SerializeXCApiRequest(requestCommand, apiFullName);
+            var webSocketRequest = WebSocketMessageHelper.SerializeXCApiRequest(command, apiFullName);
             _webSocketClient.Send(webSocketRequest);
         }
 
@@ -92,21 +108,12 @@ namespace ReactiveXComponent.WebSocket
             if (webSocketMessage.Command == WebSocketCommand.GetXCApiList)
             {
                 var response = JsonConvert.DeserializeObject<WebSocketGetXcApiListResponse>(webSocketMessage.Json);
-                var xcApiList = new List<string>();
-                if (response?.Apis != null)
-                {
-                    xcApiList = new List<string>(response.Apis);
-                }
-                XCApiListReceived?.Invoke(this, xcApiList);
+                XCApiListReceived?.Invoke(this, response);
             }
             else if (webSocketMessage.Command == WebSocketCommand.GetXCApi)
             {
                 var response = JsonConvert.DeserializeObject<WebSocketGetXcApiResponse>(webSocketMessage.Json);
-                if (response.ApiFound)
-                {
-                    var xcApiContent = WebSocketMessageHelper.DeserializeXCApi(response.Content);
-                    XCApiReceived?.Invoke(this, xcApiContent);
-                }
+                XCApiReceived?.Invoke(this, response);
             }
         }
     }

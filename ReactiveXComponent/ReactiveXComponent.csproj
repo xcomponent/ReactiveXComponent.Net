@@ -145,7 +145,8 @@
     <Compile Include="WebSocket\WebSocketTopicKind.cs" />
     <Compile Include="WebSocket\WebSocketXCApiManager.cs" />
     <Compile Include="WebSocket\WebSocketGetXcApiListResponse.cs" />
-    <Compile Include="WebSocket\XCApiProperties.cs" />
+    <Compile Include="WebSocket\WebSocketXCApiRequest.cs" />
+    <Compile Include="WebSocket\WebsocketXCApiCommand.cs" />
     <Compile Include="XComponentApi.cs" />
   </ItemGroup>
   <ItemGroup>

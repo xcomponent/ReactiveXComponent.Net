@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reflection;
+using System.Resources;
 using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
@@ -253,6 +256,39 @@ namespace ReactiveXComponentTest.WebSocket
         [Test]
         public void GetXCApiTest()
         {
+            var expectedAnswer =
+                "\r\n<deployment environment=\"Dev\" xcProjectName=\"helloworld\" deploymentTargetCode=\"1656928013\" deploymentTargetName=\"helloworldApi\" version=\"1.0\" "
+                + "frameworkType=\"Framework45\" xmlns=\"http://xcomponent.com/DeploymentConfig.xsd\">\r\n  <threading />\r\n  <serialization>Json</serialization>\r\n  "
+                + "<communication>\r\n    <bus name=\"rabbitmq\" host=\"127.0.0.1\" port=\"5672\" user=\"guest\" password=\"guest\" type=\"RABBIT_MQ\" />\r\n  "
+                + "</communication>\r\n  <clientAPICommunication>\r\n    <publish componentCode=\"-69981087\" stateMachineCode=\"-829536631\" eventType=\"UPDATE\" "
+                + "topicType=\"output\" communicationType=\"BUS\" stateCode=\"0\" eventCode=\"9\" event=\"XComponent.HelloWorld.UserObject.SayHello\" communication=\""
+                + "rabbitmq\">\r\n      <topic type=\"STATIC\">input.1_0.microservice1.HelloWorld.HelloWorldManager</topic>\r\n    </publish>\r\n    <subscribe "
+                + "componentCode=\"-69981087\" eventType=\"ERROR\" topicType=\"input\" communicationType=\"BUS\" communication=\"rabbitmq\">\r\n      <topic type=\"STATIC\">" 
+                + "error.1_0.microservice1.HelloWorld</topic>\r\n    </subscribe>\r\n    <subscribe componentCode=\"-69981087\" stateMachineCode=\"1837059171\" eventType=\""
+                + "UPDATE\" topicType=\"input\" communicationType=\"BUS\" stateCode=\"0\" event=\"XComponent.HelloWorld.UserObject.HelloResponse\" communication=\"rabbitmq\" "
+                + "communicationThreadingType=\"INHERITFROMPARENT\">\r\n      <topic type=\"STATIC\">output.1_0.microservice1.HelloWorld.HelloResponse</topic>\r\n    "
+                + "</subscribe>\r\n    <snapshot componentCode=\"-69981087\">\r\n      <topic type=\"STATIC\">snapshot.1_0.microservice1.HelloWorld</topic>\r\n    "
+                + "</snapshot>\r\n  </clientAPICommunication>\r\n  <codesConverter>\r\n    <components>\r\n      <component name=\"HelloWorld\" id=\"-69981087\">\r\n        "
+                + "<events>\r\n          <event name=\"XComponent.Common.Event.ApiProxy.ApiInitError\" id=\"0\" />\r\n          "
+                + "<event name=\"XComponent.Common.Event.ApiProxy.ApiInitSuccessful\" id=\"1\" />\r\n          <event name=\"XComponent.Common.Event.ApiProxy.CancelApiInit\" " 
+                + "id=\"2\" />\r\n          <event name=\"XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription\" id=\"3\" />\r\n          "
+                + "<event name=\"XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription\" id=\"4\" />\r\n          "
+                + "<event name=\"XComponent.Common.Event.ApiProxy.SnapshotOptions\" id=\"5\" />\r\n          <event name=\"XComponent.Common.Event.DefaultEvent\" id=\"6\" />\r\n"
+                + "          <event name=\"XComponent.Common.Event.ExceptionEvent\" id=\"7\" />\r\n          <event name=\"XComponent.HelloWorld.UserObject.HelloResponse\" id=\"8\" />\r\n"
+                + "          <event name=\"XComponent.HelloWorld.UserObject.SayHello\" id=\"9\" />\r\n        </events>\r\n        <stateMachines>\r\n          "
+                + "<stateMachine name=\"HelloWorldManager\" id=\"-829536631\">\r\n            <states>\r\n              <State name=\"EntryPoint\" id=\"0\" />\r\n            "
+                + "</states>\r\n          </stateMachine>\r\n          <stateMachine name=\"HelloResponse\" id=\"1837059171\">\r\n            <states>\r\n              "
+                + "<State name=\"Done\" id=\"0\" />\r\n            </states>\r\n          </stateMachine>\r\n        </stateMachines>\r\n      </component>\r\n    "
+                + "</components>\r\n  </codesConverter>\r\n</deployment>";
+            var compressedXCApi =
+                "\"H4sIAAAAAAAEAK2WbW / aMBDH31fqd4j8fnmA8jQBEgWqMonCQtD2rgqJAW / BzmyHwT79LokTApRCoeJNfLZ / 97 / z + cz9XdPHYcC2K0ylhumacEbj7xbq4TXSNt6Ys1 / Yky / uCrfQEgcB"
+                + "+ 8t44CNtt89x + QLLLvNhhVWtVBulummVj1ccMjohQdoac0EYhZ26ibQ5hzUw + dvZhrD2KRs + VEDLKqAC9ksZfjWMjcdWIaMA1 + HL6OW + uozOyULfCB + 17 + 80rSmXHLs + oQvNSA0Cc "
+                + "+ IG5J8rwXH7m2C0aezbkmWAXUWUeDsTGGeR0GgSB3dnMyJXf5C2ZALyZZVqugk / C2kh42CoVGslpEVAbqFFhIWECVcICMfPDTIJ0 + 48Pg6c1 + F3lEk0jp03vYBAeJ3xoPuWsDCaBUQstTwt6Xl8qT"
+                + "Yadcus15AmpCvx0PWWhGI1WS81KuVqtQya8To + p0TOdNzrOH0Qx0LipSYWyTACvXuy0qnH6USxU6ipWOmooUYt9LObH9hzXAI / 4hLQp5Ce0SyuMH3ibpOJAy + FTKtY4zONpansTZyOM + iiNqEgUb"
+                + "deTX1FPM4AvCYetoredp9Dl7oLzJtGQsqSaKgsZmMRzYTHyQy / k9ZC4vq2PbL38pZoOp226wLFnDP + bqCHYeVxfCSw43qx6uWaWWlYtbP1cibuN8rlggJJrDYWsEjg08k78Jrd / tT94OW5bw + cJ3s"
+                + "0HHfs / otzJtdp4V9QVZmu86mnbiiWTJ7O / PuKsv0fKwC1Kesup1sJtD0fC2ii0Jgl5hkhFyt26nKb6og790gj / psRwa7ktEXBktkUpVAGsTpG9X48q8NrAW / RZht / DCiR / fgWpI7MrG / eBJx"
+                + "EnoeFmEdBSrVuo3Zd6uFAsVNi6TbigMK9Aeg09OH6 + JO0ssL46FJ++VP5UyqOPDzc5mGiynCUIEXKrFzF7OG5GwUyGaSc6lWc / sbDiZoCqXYp6aI + FRPrtxF3T2MMa + zDmsbRlWoWe / fBXStOHV1c"
+                + "9Syq + 7v7e7CHyCDiwAr2SWxX1D6VfDtmJMvq0S1NGtMxSBmVxMvE72e78E5dI7wHR / FJkvcnCr3TyJtn3qMPWmxsOOjETWP3l7r9HzBAksy7CwAA\"";
             var expectedRequestProperty = string.Empty;
             var requestSentEvent = new AutoResetEvent(false);
             var webSocketClient = Substitute.For<IWebSocketClient>();
@@ -262,28 +298,34 @@ namespace ReactiveXComponentTest.WebSocket
             webSocketClient.When(x => x.Dispose()).DoNotCallBase();
             webSocketClient.WhenForAnyArgs(x => x.Send("")).Do(callInfo =>
             {
-                var message = (string)callInfo.Args()[0];
+                var message = (string) callInfo.Args()[0];
                 var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(message);
                 if (webSocketMessage.Command == WebSocketCommand.GetXCApi)
                 {
                     var xcApiProperties = JsonConvert.DeserializeObject<XCApiProperties>(webSocketMessage.Json);
                     expectedRequestProperty = xcApiProperties.Name;
                     requestSentEvent.Set();
+
+                    var data = "getXcApi { \"ApiFound\":true,\"ApiName\":\"HelloWorld.api\",\"Content\":" + compressedXCApi +"}";
+                    var rawData = Encoding.UTF8.GetBytes(data);
+                    var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
+                    webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
                 }
             });
 
             var xcApiManager = new WebSocketXCApiManager(webSocketClient);
-            xcApiManager.GetXCApi("HelloWorld.api");
+            var answer = xcApiManager.GetXCApi("HelloWorld.api");
             var requestWasSent = requestSentEvent.WaitOne(TimeSpan.FromSeconds(5));
 
             Check.That(requestWasSent).IsTrue();
             Check.That(expectedRequestProperty.Equals("HelloWorld.api")).IsTrue();
+            Check.That(answer.Equals(expectedAnswer));
         }
 
         [Test]
         public void GetXCApiListTest()
         {
-            List<string> ExpectedXCApiList = null;
+            var expectedAnswer = new List<string> {"helloWorld.api"};
             var requestSentEvent = new AutoResetEvent(false);
             var webSocketClient = Substitute.For<IWebSocketClient>();
             webSocketClient.IsOpen.Returns(true);
@@ -292,24 +334,26 @@ namespace ReactiveXComponentTest.WebSocket
             webSocketClient.When(x => x.Dispose()).DoNotCallBase();
             webSocketClient.WhenForAnyArgs(x => x.Send("")).Do(callInfo =>
             {
-                var message = (string)callInfo.Args()[0];
+                var message = (string) callInfo.Args()[0];
                 var webSocketMessage = WebSocketMessageHelper.DeserializeRequest(message);
                 if (webSocketMessage.Command == WebSocketCommand.GetXCApiList)
                 {
-                    var response = JsonConvert.DeserializeObject<WebSocketGetXcApiListResponse>(webSocketMessage.Json);
-                    ExpectedXCApiList = response?.Apis != null ? new List<string>(response.Apis) : new List<string> {"Empty"};
                     requestSentEvent.Set();
+
+                    var data = "getXcApiList { \"Apis\":[\"helloWorld.api\"]}";
+                    var rawData = Encoding.UTF8.GetBytes(data);
+                    var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
+                    webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
                 }
             });
 
             var xcApiManager = new WebSocketXCApiManager(webSocketClient);
-            xcApiManager.GetXCApiList();
+            var answer = xcApiManager.GetXCApiList();
             var requestWasSent = requestSentEvent.WaitOne(TimeSpan.FromSeconds(5));
 
             Check.That(requestWasSent).IsTrue();
-            Check.That(ExpectedXCApiList != null).IsTrue();
-            Check.That(ExpectedXCApiList.Count == 1).IsTrue();
-            Check.That(ExpectedXCApiList.Contains("Empty")).IsTrue();
+            Check.That(answer.Count == expectedAnswer.Count);
+            Check.That(answer.FirstOrDefault().Equals(expectedAnswer.FirstOrDefault()));
         }
     }
 }

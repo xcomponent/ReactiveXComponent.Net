@@ -36,7 +36,7 @@ namespace ReactiveXComponent.WebSocket
         public List<string> GetXCApiList(string requestId = null, TimeSpan ? timeout = null)
         {
             var delay = timeout ?? TimeSpan.FromSeconds(10);
-            List<string> result = null;
+            List<string> result = new List<string>();
             var lockEvent = new AutoResetEvent(false);
             var observer = Observer.Create<WebSocketGetXcApiListResponse>(response =>
             {

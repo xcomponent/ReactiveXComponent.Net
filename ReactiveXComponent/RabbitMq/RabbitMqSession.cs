@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using ReactiveXComponent.Common;
@@ -80,6 +81,16 @@ namespace ReactiveXComponent.RabbitMq
         public IXCSubscriber CreateSubscriber(string component)
         {
             return new RabbitMqSubscriber(component, _xcConfiguration, _connection, _serializer, _privateCommunicationIdentifier);
+        }
+
+        public List<string> GetXCApiList(string requestId = null, TimeSpan? timeout = null)
+        {
+            throw new NotImplementedException("Method not supported for Rabbit MQ");
+        }
+
+        public string GetXCApi(string apiFullName, string requestId = null, TimeSpan? timeout = null)
+        {
+            throw new NotImplementedException("Method not supported for Rabbit MQ");
         }
 
         private void CloseConnection()

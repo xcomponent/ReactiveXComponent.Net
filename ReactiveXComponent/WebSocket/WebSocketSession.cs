@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
@@ -10,6 +11,7 @@ namespace ReactiveXComponent.WebSocket
         private readonly IWebSocketClient _webSocketClient;
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
+        private readonly WebSocketXCApiManager _webSocketXCApiManager;
 
         public WebSocketSession(WebSocketEndpoint endpoint, int timeout, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier)
         {
@@ -19,6 +21,7 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient.ConnectionClosed += WebSocketClientOnConnectionClosed;
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
+            _webSocketXCApiManager = new WebSocketXCApiManager(_webSocketClient);
         }
 
         private void WebSocketClientOnConnectionClosed(object sender, EventArgs eventArgs)
@@ -38,6 +41,18 @@ namespace ReactiveXComponent.WebSocket
         public IXCSubscriber CreateSubscriber(string component)
         {
             return new WebSocketSubscriber(component, _webSocketClient, _xcConfiguration, _privateCommunicationIdentifier);
+        }
+
+        public List<string> GetXCApiList(string requestId = null, TimeSpan ? timeout = null)
+        {
+            var delay = timeout ?? TimeSpan.FromSeconds(10);
+            return _webSocketXCApiManager.GetXCApiList(requestId,delay);
+        }
+
+        public string GetXCApi(string apiFullName, string requestId = null, TimeSpan? timeout = null)
+        {
+            var delay = timeout ?? TimeSpan.FromSeconds(10);
+            return _webSocketXCApiManager.GetXCApi(apiFullName, requestId, delay);
         }
 
         #region IDisposable implementation

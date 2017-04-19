@@ -64,6 +64,15 @@ namespace ReactiveXComponent.WebSocket
             return $"{beforeJson} {jsonContent}{Environment.NewLine}";
         }
 
+        public static string SerializeXCApiRequest(WebSocketXCApiCommand webSocketXCApiCommand, string data = null)
+        {
+            var webSocketXCApiRequest = string.IsNullOrEmpty(data)
+                ? new WebSocketXCApiRequest {RequestId = webSocketXCApiCommand.Id}
+                : new WebSocketXCApiRequest {Name = data, RequestId = webSocketXCApiCommand.Id};
+
+            return $"{webSocketXCApiCommand.Command} {SerializeToString(webSocketXCApiRequest)}{Environment.NewLine}";
+        }
+
         public static string SerializeBeforeJsonPart(string requestKey, string componentCode, string topic)
         {
             StringBuilder beforeJson = new StringBuilder(requestKey);
@@ -113,10 +122,10 @@ namespace ReactiveXComponent.WebSocket
             var beforeJson = request.Substring(0, firstCurlyBrace).TrimEnd();
             string[] tokensBeforeJson = beforeJson.Split();
 
-            // the request is of one of the types 
-            //      command {json}, e.g. subscribe {json} (this is a request from the client)
+            // the webSocketXCApiCommand is of one of the types 
+            //      webSocketXCApiCommand {json}, e.g. subscribe {json} (this is a webSocketXCApiCommand from the client)
             //      topic componentCode {json} (this is an input event)
-            //      requestKey topic componentCode {json} (this is a response to a snapshot request, an output or an error)
+            //      requestKey topic componentCode {json} (this is a response to a snapshot webSocketXCApiCommand, an output or an error)
 
             string key;
             string topic;
@@ -189,6 +198,25 @@ namespace ReactiveXComponent.WebSocket
             var snapshotHeader = JsonConvert.DeserializeObject<WebSocketPacket>(receivedMessage);
             var zipedMessage = JsonConvert.DeserializeObject<SnapshotItems>(snapshotHeader.JsonMessage);
             byte[] compressedMessage = Convert.FromBase64String(zipedMessage.Items);
+            string message;
+            var compressedStream = new MemoryStream(compressedMessage);
+
+            using (var decompressedMessage = new MemoryStream())
+            {
+                using (var unzippedMessage = new GZipStream(compressedStream, CompressionMode.Decompress))
+                {
+                    unzippedMessage.CopyTo(decompressedMessage);
+                }
+
+                message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
+            }
+
+            return message;
+        }
+
+        public static string DeserializeXCApi(string receivedMessage)
+        {
+            byte[] compressedMessage = Convert.FromBase64String(receivedMessage);
             string message;
             var compressedStream = new MemoryStream(compressedMessage);
 

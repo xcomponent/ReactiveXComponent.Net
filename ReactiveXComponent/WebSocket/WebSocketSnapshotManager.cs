@@ -51,7 +51,8 @@ namespace ReactiveXComponent.WebSocket
             });
 
             EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
-            SubscribeSnapshot(replyTopic, out subscriptionHandler);
+            CreateSnapshotReplyHandler(replyTopic, out subscriptionHandler);
+            _webSocketClient.MessageReceived += subscriptionHandler;
 
             using (_snapshotStream.Subscribe(observer))
             {
@@ -74,7 +75,8 @@ namespace ReactiveXComponent.WebSocket
             var subscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, replyTopic);
             EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
 
-            SubscribeSnapshot(replyTopic, out subscriptionHandler);
+            CreateSnapshotReplyHandler(replyTopic, out subscriptionHandler);
+            _webSocketClient.MessageReceived += subscriptionHandler;
             var snapshotSubscription = _snapshotStream.Subscribe(onSnapshotReceived);
 
             SendWebSocketSnapshotSubscriptionResquest(replyTopic);
@@ -103,7 +105,7 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient.Send(webSocketRequest);
         }
 
-        private void SubscribeSnapshot(string replyTopic, out EventHandler<WebSocketMessageEventArgs> subscriptionHandler)
+        private void CreateSnapshotReplyHandler(string replyTopic, out EventHandler<WebSocketMessageEventArgs> subscriptionHandler)
         {
             subscriptionHandler = (sender, args) =>
             {
@@ -135,8 +137,6 @@ namespace ReactiveXComponent.WebSocket
                     SnapshotReceived?.Invoke(this, stateMachineInstances);
                 }
             };
-
-            _webSocketClient.MessageReceived += subscriptionHandler;
         }
 
 

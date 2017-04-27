@@ -221,9 +221,12 @@ namespace ReactiveXComponentTest.WebSocket
                     var snapshotMessage = JsonConvert.DeserializeObject<WebSocketSnapshotMessage>(snapshotPacket.JsonMessage);
                     snapshotReplyTopic = snapshotMessage.ReplyTopic.Fields[0];
                 }
-            });
 
-            
+                var data = "snapshot " + snapshotReplyTopic + " -69981087 {\"Header\":{\"EventCode\":0,\"Probes\":[],\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.Common.Processing.SnapshotResponse\"]}},\"JsonMessage\":\"{\\\"Items\\\":\\\"H4sIAAAAAAAEAIuuVgouSSxJ9U1MzsjMS/VMUbIyMdBBEXPOT0lVsjK0MDY3MLU0NDeEykKFdZSc83ML8vNS80ogIrpmlpYWhgYW5jpKAaVJOZnJvqm5SalFSlbVSiH5SlZKjnn5pYlFSjpKQanFQH3FQC1KHpkKUOFaHSXHdKBZIIcY1sYCAAstn/OfAAAA\\\"}\"}";
+                var rawData = Encoding.UTF8.GetBytes(data);
+                var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
+                webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
+            });
             
             using (var webSocketPublisher = new WebSocketPublisher(componentName, webSocketClient, xcConfiguration, privateTopic))
             using (var snapshotReceivedEvent = new AutoResetEvent(false))
@@ -240,13 +243,11 @@ namespace ReactiveXComponentTest.WebSocket
 
                 webSocketPublisher.GetSnapshotAsync(stateMachineName, snapshotHandler);
 
-                var data = "snapshot " + snapshotReplyTopic + " -69981087 {\"Header\":{\"EventCode\":0,\"Probes\":[],\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.Common.Processing.SnapshotResponse\"]}},\"JsonMessage\":\"{\\\"Items\\\":\\\"H4sIAAAAAAAEAIuuVgouSSxJ9U1MzsjMS/VMUbIyMdBBEXPOT0lVsjK0MDY3MLU0NDeEykKFdZSc83ML8vNS80ogIrpmlpYWhgYW5jpKAaVJOZnJvqm5SalFSlbVSiH5SlZKjnn5pYlFSjpKQanFQH3FQC1KHpkKUOFaHSXHdKBZIIcY1sYCAAstn/OfAAAA\\\"}\"}";
-                var rawData = Encoding.UTF8.GetBytes(data);
-                var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
-                webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
-
                 var snapshotReceived = snapshotReceivedEvent.WaitOne(millisecondsTimeout);
                 Check.That(snapshotReceived).IsTrue();
+
+                var snapshot = webSocketPublisher.GetSnapshot(stateMachineName);
+                Check.That(snapshot.Count == 1);
             }
         }
 

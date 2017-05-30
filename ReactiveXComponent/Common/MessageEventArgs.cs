@@ -1,4 +1,6 @@
-﻿using ReactiveXComponent.Common;
+﻿using Newtonsoft.Json.Linq;
+using ReactiveXComponent.Common;
+using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponent.Common
 {
@@ -15,5 +17,22 @@ namespace ReactiveXComponent.Common
         public  StateMachineRefHeader StateMachineRefHeader { get; }
 
         public object MessageReceived { get; }
+
+        public T GetMessage<T>(SerializationType serializationType) where T : class
+        {
+            if (serializationType == SerializationType.Binary)
+            {
+                return MessageReceived as T;
+            }
+
+            if (serializationType == SerializationType.Json
+                     || serializationType == SerializationType.Bson)
+            {
+                var jResult = MessageReceived as JObject;
+                return jResult?.ToObject<T>();
+            }
+
+            return null;
+        }
     }
 }

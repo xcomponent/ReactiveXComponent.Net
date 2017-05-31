@@ -80,6 +80,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\MessageEventArgsCastTests.cs" />
+    <Compile Include="Common\TestObject.cs" />
     <Compile Include="Configuration\ConfigurationTests.cs" />
     <Compile Include="Connection\ConnectionTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />

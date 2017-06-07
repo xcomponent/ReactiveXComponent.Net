@@ -246,9 +246,13 @@ tools/NUnit.Runners
 tools/XComponent.MSBuild.Tasks
 tools/nuget.exe
 tools/packages.config.md5sum
+tools/ILRepack
 
 # Test Results
 TestResults.xml
 
 # Nuget package
 nuget/
+
+# Merging assemblies
+packaging/

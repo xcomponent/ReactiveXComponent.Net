@@ -1,4 +1,5 @@
 #tool "nuget:?package=NUnit.Runners&version=2.6.4"
+#tool "nuget:?package=ILRepack"
 #addin "Cake.FileHelpers"
 #addin "Cake.Incubator&version=1.0.56"
 #load "cake.scripts/utilities.cake"
@@ -50,7 +51,28 @@ Task("Test")
         NUnit(testAssemblies, nunitSettings);
     });
 
+Task("Merge")
+    .Does(() =>
+    {
+        EnsureDirectoryExists("packaging");
+
+        var filesToMerge = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/*.dll");
+
+        var ilRepackSettings = new ILRepackSettings { Parallel = true, Internalize = true };
+
+        ILRepack(
+            "./packaging/ReactiveXComponent.dll",
+            "./ReactiveXComponent/bin/"+ buildConfiguration + "/ReactiveXComponent.dll",
+            filesToMerge,
+            ilRepackSettings
+		);
+
+        var pdbFiles = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/ReactiveXComponent.pdb");
+        CopyFiles(pdbFiles, "./packaging");
+    });
+
 Task("CreatePackage")
+    .IsDependentOn("Merge")
     .Does(() =>
     {
         EnsureDirectoryExists("nuget");
@@ -59,22 +81,13 @@ Task("CreatePackage")
 
         var filesToPackPatterns = new string[]
             {
-                "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.dll",
-                "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.pdb",
-                "./ReactiveXComponent/bin/"+ buildConfiguration + "/*.xml"
+                "./packaging/*.dll",
+                "./packaging/*.pdb"
             };
 
         var filesToPack = GetFiles(filesToPackPatterns);
 
-        var nuSpecContents = new List<NuSpecContent>();
-
-        foreach (var file in filesToPack)
-        {
-            if (!file.FullPath.Contains("CodeAnalysisLog.xml"))
-            {
-                nuSpecContents.Add(new NuSpecContent {Source = file.FullPath, Target = @"lib\net451"});
-            }
-        }
+        var nuSpecContents = filesToPack.Select(file => new NuSpecContent {Source = file.FullPath, Target = @"lib\net451"}).ToList();
 
         var nugetPackSettings = new NuGetPackSettings()
         { 

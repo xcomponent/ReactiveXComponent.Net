@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using ReactiveXComponent.Common;
-using WebSocketSharp;
+using SuperSocket.ClientEngine;
+using WebSocket4Net;
 
 namespace ReactiveXComponent.WebSocket
 {
-    internal class WebSocketClient : IWebSocketClient
+    public class WebSocketClient : IWebSocketClient
     {
-        private WebSocketSharp.WebSocket _webSocket;
+        private WebSocket4Net.WebSocket _webSocket;
         private readonly object _webSocketLock = new object();
         private AutoResetEvent _socketOpenEvent;
         private AutoResetEvent _socketCloseEvent;
@@ -30,23 +27,22 @@ namespace ReactiveXComponent.WebSocket
             _socketOpenEvent = new AutoResetEvent(false);
             _socketCloseEvent = new AutoResetEvent(false);
             var serverUri = GetServerUri();
-            _webSocket = new WebSocketSharp.WebSocket(serverUri);
+            _webSocket = new WebSocket4Net.WebSocket(serverUri);
 
-            _webSocket.Compression = CompressionMethod.Deflate;
-            _webSocket.SslConfiguration.ServerCertificateValidationCallback =
-                (sender, certificate, chain, sslPolicyErrors) => true;
+            _webSocket.Security.AllowUnstrustedCertificate = true;
+            _webSocket.Security.AllowNameMismatchCertificate = true;
 
-            _webSocket.OnOpen += OnWebSocketOpened;
-            _webSocket.OnClose += OnWebSocketClosed;
-            _webSocket.OnError += OnWebSocketError;
-            _webSocket.Connect();
+            _webSocket.Opened += WebSocketOnOpened;
+            _webSocket.Closed += WebSocketOnClosed;
+            _webSocket.Error += WebSocketOnError;
+            _webSocket.Open();
 
             if (!_socketOpenEvent.WaitOne(_timeout))
             {
                 throw new ReactiveXComponentException($"Could not connect to the web socket server {serverUri} after {_timeout} ms");
             }
 
-            _webSocket.OnMessage += OnMessageReceived;
+            _webSocket.MessageReceived += WebSocketOnMessageReceived;
         }
 
         private void CloseConnection()
@@ -89,31 +85,31 @@ namespace ReactiveXComponent.WebSocket
             return uriBuilder.ToString();
         }
 
-        private void OnWebSocketOpened(object sender, EventArgs eventArgs)
+        private void WebSocketOnOpened(object sender, EventArgs eventArgs)
         {
             _socketOpenEvent.Set();
 
             ConnectionOpened?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnWebSocketClosed(object sender, EventArgs eventArgs)
+        private void WebSocketOnClosed(object sender, EventArgs eventArgs)
         {
             _socketCloseEvent.Set();
 
             ConnectionClosed?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnWebSocketError(object sender, ErrorEventArgs errorEventArgs)
+        private void WebSocketOnError(object sender, ErrorEventArgs errorEventArgs)
         {
             ConnectionError?.Invoke(this, new System.IO.ErrorEventArgs(errorEventArgs.Exception));
         }
 
-        private void OnMessageReceived(object sender, WebSocketSharp.MessageEventArgs messageEventArgs)
+        private void WebSocketOnMessageReceived(object sender, MessageReceivedEventArgs messageReceivedEventArgs)
         {
-            MessageReceived?.Invoke(sender, new WebSocketMessageEventArgs(messageEventArgs.Data, messageEventArgs.RawData));
+            MessageReceived?.Invoke(sender, new WebSocketMessageEventArgs(messageReceivedEventArgs.Message, null));
         }
 
-        public bool IsOpen { get { return _webSocket != null && _webSocket.ReadyState == WebSocketState.Open; } }
+        public bool IsOpen { get { return _webSocket != null && _webSocket.State == WebSocketState.Open; } }
 
         public void Init(WebSocketEndpoint endpoint, int timeout)
         {
@@ -148,10 +144,10 @@ namespace ReactiveXComponent.WebSocket
                 {
                     CloseConnection();
 
-                    _webSocket.OnOpen -= OnWebSocketOpened;
-                    _webSocket.OnClose -= OnWebSocketClosed;
-                    _webSocket.OnError -= OnWebSocketError;
-                    _webSocket.OnMessage -= OnMessageReceived;
+                    _webSocket.Opened -= WebSocketOnOpened;
+                    _webSocket.Closed -= WebSocketOnClosed;
+                    _webSocket.Error -= WebSocketOnError;
+                    _webSocket.MessageReceived -= WebSocketOnMessageReceived;
 
                     _socketOpenEvent.Dispose();
                     _socketCloseEvent.Dispose();

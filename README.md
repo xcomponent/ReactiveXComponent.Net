@@ -1,3 +1,6 @@
+
+[![](http://slack.xcomponent.com/badge.svg)](http://slack.xcomponent.com/)
+
 # .Net Reactive XComponent API
 
 <img src="logo.png" width="64" height="64" />

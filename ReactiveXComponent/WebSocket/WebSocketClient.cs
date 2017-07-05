@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Timers;
 using ReactiveXComponent.Common;
 using SuperSocket.ClientEngine;
 using WebSocket4Net;
 
 namespace ReactiveXComponent.WebSocket
 {
-    public class WebSocketClient : IWebSocketClient
+    internal class WebSocketClient : IWebSocketClient
     {
         private WebSocket4Net.WebSocket _webSocket;
         private readonly object _webSocketLock = new object();
@@ -15,7 +16,14 @@ namespace ReactiveXComponent.WebSocket
         private AutoResetEvent _socketCloseEvent;
 
         private WebSocketEndpoint _endpoint;
-        private int _timeout;
+        private TimeSpan _timeout;
+
+        private System.Timers.Timer _reconnectionTimer;
+        private int _maxRetries;
+        private int _currentRetryCount;
+        private TimeSpan _retryInterval;
+        private bool _isClosing;
+        private bool _isReconnecting;
 
         public event EventHandler<EventArgs> ConnectionOpened;
         public event EventHandler<EventArgs> ConnectionClosed;
@@ -27,22 +35,8 @@ namespace ReactiveXComponent.WebSocket
             _socketOpenEvent = new AutoResetEvent(false);
             _socketCloseEvent = new AutoResetEvent(false);
             var serverUri = GetServerUri();
-            _webSocket = new WebSocket4Net.WebSocket(serverUri);
-
-            _webSocket.Security.AllowUnstrustedCertificate = true;
-            _webSocket.Security.AllowNameMismatchCertificate = true;
-
-            _webSocket.Opened += WebSocketOnOpened;
-            _webSocket.Closed += WebSocketOnClosed;
-            _webSocket.Error += WebSocketOnError;
+            InitWebSocket(serverUri);
             _webSocket.Open();
-
-            if (!_socketOpenEvent.WaitOne(_timeout))
-            {
-                throw new ReactiveXComponentException($"Could not connect to the web socket server {serverUri} after {_timeout} ms");
-            }
-
-            _webSocket.MessageReceived += WebSocketOnMessageReceived;
         }
 
         private void CloseConnection()
@@ -53,6 +47,7 @@ namespace ReactiveXComponent.WebSocket
                 {
                     if (CanClose())
                     {
+                        _isClosing = true;
                         _webSocket.Close();
                         _socketCloseEvent.WaitOne(_timeout);
                     }
@@ -96,7 +91,15 @@ namespace ReactiveXComponent.WebSocket
         {
             _socketCloseEvent.Set();
 
-            ConnectionClosed?.Invoke(this, EventArgs.Empty);
+            if (!_isClosing)
+            {
+                TryReconnect();
+            }
+
+            if (!_isReconnecting)
+            {
+                ConnectionClosed?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void WebSocketOnError(object sender, ErrorEventArgs errorEventArgs)
@@ -111,10 +114,50 @@ namespace ReactiveXComponent.WebSocket
 
         public bool IsOpen { get { return _webSocket != null && _webSocket.State == WebSocketState.Open; } }
 
-        public void Init(WebSocketEndpoint endpoint, int timeout)
+        public void Init(WebSocketEndpoint endpoint, TimeSpan timeout, TimeSpan? retryInterval, int maxRetries)
         {
             _endpoint = endpoint;
             _timeout = timeout;
+
+            _maxRetries = maxRetries;
+            _retryInterval = (retryInterval != null) ? retryInterval.Value : TimeSpan.FromSeconds(5);
+            _currentRetryCount = 0;
+
+            _reconnectionTimer = new System.Timers.Timer(_retryInterval.TotalMilliseconds);
+
+            _reconnectionTimer.Elapsed += (sender, args) =>
+            {
+                lock (_webSocketLock)
+                {
+                    if (!IsOpen && !_isClosing && _currentRetryCount < _maxRetries)
+                    {
+                        _isReconnecting = true;
+                        DisposeWebSocket();
+
+                        var serverUri = GetServerUri();
+                         InitWebSocket(serverUri);
+
+                        _webSocket.Open();
+
+                        if (_socketOpenEvent.WaitOne(_timeout))
+                        {
+                            _isReconnecting = false;
+                            _currentRetryCount = 0;
+                            _reconnectionTimer.Stop();
+                        }
+                        else
+                        {
+                            _currentRetryCount++;
+
+                            if (_currentRetryCount >= _maxRetries)
+                            {
+                                var errorEvent = new System.IO.ErrorEventArgs(new ReactiveXComponentException($"Could not connect to the web socket server {serverUri} after {_timeout} ms"));
+                                ConnectionError?.Invoke(this, errorEvent);
+                            }
+                        }
+                    }
+                }
+            };
         }
 
         public void Open()
@@ -132,6 +175,33 @@ namespace ReactiveXComponent.WebSocket
             _webSocket?.Send(data);
         }
 
+        private void InitWebSocket(string serverUri)
+        {
+            _webSocket = new WebSocket4Net.WebSocket(serverUri);
+
+            _webSocket.Security.AllowUnstrustedCertificate = true;
+            _webSocket.Security.AllowNameMismatchCertificate = true;
+
+            _webSocket.Opened += WebSocketOnOpened;
+            _webSocket.Closed += WebSocketOnClosed;
+            _webSocket.Error += WebSocketOnError;
+            _webSocket.MessageReceived += WebSocketOnMessageReceived;
+        }
+
+        private void DisposeWebSocket()
+        {
+            _webSocket.Opened -= WebSocketOnOpened;
+            _webSocket.Closed -= WebSocketOnClosed;
+            _webSocket.Error -= WebSocketOnError;
+            _webSocket.MessageReceived -= WebSocketOnMessageReceived;
+            _webSocket.Dispose();
+        }
+
+        private void TryReconnect()
+        {
+            _reconnectionTimer.Start();
+        }
+
         #region IDisposable implementation
 
         private bool _disposed;
@@ -144,13 +214,13 @@ namespace ReactiveXComponent.WebSocket
                 {
                     CloseConnection();
 
-                    _webSocket.Opened -= WebSocketOnOpened;
-                    _webSocket.Closed -= WebSocketOnClosed;
-                    _webSocket.Error -= WebSocketOnError;
-                    _webSocket.MessageReceived -= WebSocketOnMessageReceived;
+                    DisposeWebSocket();
 
                     _socketOpenEvent.Dispose();
                     _socketCloseEvent.Dispose();
+
+                    _isClosing = false;
+                    _reconnectionTimer.Dispose();
                 }
 
                 // clear unmanaged resources

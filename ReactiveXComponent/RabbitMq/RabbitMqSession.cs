@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
@@ -16,12 +18,14 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
         private ConnectionFactory _factory;
+        private readonly TimeSpan? _retryInterval;
 
-        public RabbitMqSession(IXCConfiguration xcConfiguration, BusDetails busDetails , string privateCommunicationIdentifier = null)
+        public RabbitMqSession(IXCConfiguration xcConfiguration, BusDetails busDetails , string privateCommunicationIdentifier = null, TimeSpan? retryInterval = null)
         {
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _serializer = SelectSerializer();
+            _retryInterval = retryInterval;
             InitConnection(busDetails);
         }
 
@@ -36,12 +40,17 @@ namespace ReactiveXComponent.RabbitMq
                     VirtualHost = ConnectionFactory.DefaultVHost,
                     HostName = busDetails.Host,
                     Port = busDetails.Port,
-                    Protocol = Protocols.DefaultProtocol
+                    Protocol = Protocols.DefaultProtocol,
+                    AutomaticRecoveryEnabled = true,
+                    TopologyRecoveryEnabled = false,
+                    NetworkRecoveryInterval = (_retryInterval != null) ? _retryInterval.Value : TimeSpan.FromSeconds(5)
                 };
 
                 _connection = _factory?.CreateConnection();
-
+                SessionOpened?.Invoke(this, EventArgs.Empty);
+                _connection.ConnectionUnblocked += ConnectionOnConnectionUnblocked;
                 _connection.ConnectionShutdown += ConnectionOnConnectionShutdown;
+                _connection.ConnectionBlocked += ConnectionOnConnectionBlocked;
             }
             catch (BrokerUnreachableException e)
             {
@@ -49,9 +58,19 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
+        private void ConnectionOnConnectionUnblocked(object sender, EventArgs eventArgs)
+        {
+            SessionOpened?.Invoke(this, EventArgs.Empty);
+        }
+
         private void ConnectionOnConnectionShutdown(object sender, ShutdownEventArgs shutdownEventArgs)
         {
             SessionClosed?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void ConnectionOnConnectionBlocked(object sender, ConnectionBlockedEventArgs connectionBlockedEventArgs)
+        {
+            ConnectionError?.Invoke(this, new ErrorEventArgs(new Exception(connectionBlockedEventArgs.Reason)));
         }
 
         private ISerializer SelectSerializer()
@@ -71,7 +90,11 @@ namespace ReactiveXComponent.RabbitMq
 
         public bool IsOpen => _connection.IsOpen;
 
+        public event EventHandler SessionOpened;
+
         public event EventHandler SessionClosed;
+
+        public event EventHandler<System.IO.ErrorEventArgs> ConnectionError;
 
         public IXCPublisher CreatePublisher(string component)
         {
@@ -97,7 +120,9 @@ namespace ReactiveXComponent.RabbitMq
         {
             if (_connection == null) return;
 
+            _connection.ConnectionUnblocked -= ConnectionOnConnectionUnblocked;
             _connection.ConnectionShutdown -= ConnectionOnConnectionShutdown;
+            _connection.ConnectionBlocked -= ConnectionOnConnectionBlocked;
             _connection.Dispose();
         }
 

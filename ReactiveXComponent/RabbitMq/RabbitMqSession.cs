@@ -18,13 +18,15 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
         private ConnectionFactory _factory;
+        private readonly TimeSpan? _timeout;
         private readonly TimeSpan? _retryInterval;
 
-        public RabbitMqSession(IXCConfiguration xcConfiguration, BusDetails busDetails , string privateCommunicationIdentifier = null, TimeSpan? retryInterval = null)
+        public RabbitMqSession(IXCConfiguration xcConfiguration, BusDetails busDetails , string privateCommunicationIdentifier = null, TimeSpan? timeout = null, TimeSpan? retryInterval = null)
         {
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _serializer = SelectSerializer();
+            _timeout = timeout;
             _retryInterval = retryInterval;
             InitConnection(busDetails);
         }
@@ -43,7 +45,8 @@ namespace ReactiveXComponent.RabbitMq
                     Protocol = Protocols.DefaultProtocol,
                     AutomaticRecoveryEnabled = true,
                     TopologyRecoveryEnabled = false,
-                    NetworkRecoveryInterval = (_retryInterval != null) ? _retryInterval.Value : TimeSpan.FromSeconds(5)
+                    NetworkRecoveryInterval = (_retryInterval != null) ? _retryInterval.Value : TimeSpan.FromSeconds(5),
+                    RequestedConnectionTimeout = (_timeout != null) ? (int)_timeout.Value.TotalMilliseconds : 10000
                 };
 
                 _connection = _factory?.CreateConnection();

@@ -13,15 +13,17 @@ namespace ReactiveXComponent.WebSocket
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
         private readonly WebSocketXCApiManager _webSocketXCApiManager;
+        private readonly TimeSpan _timeout;
         private readonly TimeSpan _retryInterval;
         private readonly int _maxRetries;
 
-        public WebSocketSession(WebSocketEndpoint endpoint, int timeout, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier, TimeSpan? retryInterval = null, int maxRetries = 5)
+        public WebSocketSession(WebSocketEndpoint endpoint, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier, TimeSpan? timeout, TimeSpan? retryInterval = null, int maxRetries = 5)
         {
-            _retryInterval = (retryInterval != null) ? retryInterval.Value : TimeSpan.FromSeconds(5);
+            _timeout = timeout ?? TimeSpan.FromSeconds(10);
+            _retryInterval = retryInterval ?? TimeSpan.FromSeconds(5);
             _maxRetries = maxRetries;
             _webSocketClient = new WebSocketClient();
-            _webSocketClient.Init(endpoint, TimeSpan.FromMilliseconds(timeout), _retryInterval, _maxRetries);
+            _webSocketClient.Init(endpoint, _timeout, _retryInterval, _maxRetries);
             _webSocketClient.ConnectionOpened += WebSocketClientOnConnectionOpened;
             _webSocketClient.ConnectionClosed += WebSocketClientOnConnectionClosed;
             _webSocketClient.ConnectionError += WebSocketClientOnConnectionError;

@@ -25,9 +25,9 @@ namespace ReactiveXComponent
             return new XComponentApi(xcApiStream, privateCommunicationIdentifier);
         }
 
-        public IXCSession CreateSession()
+        public IXCSession CreateSession(TimeSpan? timeout = null, TimeSpan? retryInterval = null, int maxRetries = 5)
         {
-            return _xcConnection.CreateSession();
+            return _xcConnection.CreateSession(timeout, retryInterval, maxRetries);
         }
     }
 }

@@ -114,10 +114,10 @@ namespace ReactiveXComponent.WebSocket
 
         public bool IsOpen { get { return _webSocket != null && _webSocket.State == WebSocketState.Open; } }
 
-        public void Init(WebSocketEndpoint endpoint, TimeSpan timeout, TimeSpan? retryInterval, int maxRetries)
+        public void Init(WebSocketEndpoint endpoint, TimeSpan? timeout, TimeSpan? retryInterval, int maxRetries)
         {
             _endpoint = endpoint;
-            _timeout = timeout;
+            _timeout = timeout != null ? timeout.Value : TimeSpan.FromSeconds(10);
 
             _maxRetries = maxRetries;
             _retryInterval = (retryInterval != null) ? retryInterval.Value : TimeSpan.FromSeconds(5);

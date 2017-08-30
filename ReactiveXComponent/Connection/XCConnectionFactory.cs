@@ -24,7 +24,7 @@ namespace ReactiveXComponent.Connection
                     return new RabbitMqConnection(_xcConfiguration, _privateCommunicationIdentifier);
                 case ConnectionType.WebSocket:
                     var webSocketEndpoint = _xcConfiguration.GetWebSocketEndpoint();
-                    return new WebSocketConnection(_xcConfiguration, webSocketEndpoint, connectionTimeout, _privateCommunicationIdentifier);
+                    return new WebSocketConnection(_xcConfiguration, webSocketEndpoint, _privateCommunicationIdentifier);
                 default:
                     throw new ReactiveXComponentException($"Unsupported connection type: {connectionType}");
             }

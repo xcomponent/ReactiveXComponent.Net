@@ -9,19 +9,17 @@ namespace ReactiveXComponent.RabbitMq
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
         private readonly BusDetails _busDetails;
-        private readonly TimeSpan? _retryInterval;
 
-        public RabbitMqConnection(IXCConfiguration configuration, string privateCommunicationIdentifier = null, TimeSpan? retryInterval = null)
+        public RabbitMqConnection(IXCConfiguration configuration, string privateCommunicationIdentifier = null)
         {
             _xcConfiguration = configuration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _busDetails = configuration?.GetBusDetails();
-            _retryInterval = retryInterval;
         }
 
-        public IXCSession CreateSession()
+        public IXCSession CreateSession(TimeSpan? timeout = null, TimeSpan? retryInterval = null, int maxRetries = 5)
         {
-            return new RabbitMqSession(_xcConfiguration, _busDetails, _privateCommunicationIdentifier, _retryInterval);
+            return new RabbitMqSession(_xcConfiguration, _busDetails, _privateCommunicationIdentifier, timeout, retryInterval);
         }
     }
 }

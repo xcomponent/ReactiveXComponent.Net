@@ -8,25 +8,19 @@ namespace ReactiveXComponent.WebSocket
     public class WebSocketConnection : IXCConnection
     {
         private readonly WebSocketEndpoint _endpoint;
-        private readonly int _timeout;
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
-        private readonly TimeSpan? _retryInterval;
-        private readonly int _maxRetries;
 
-        public WebSocketConnection(IXCConfiguration xcConfiguration, WebSocketEndpoint endpoint, int timeout, string privateCommunicationIdentifier = null, TimeSpan? retryInterval = null, int maxRetries = 5)
+        public WebSocketConnection(IXCConfiguration xcConfiguration, WebSocketEndpoint endpoint, string privateCommunicationIdentifier = null)
         {
             _endpoint = endpoint;
-            _timeout = timeout;
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
-            _retryInterval = retryInterval;
-            _maxRetries = maxRetries;
         }
 
-        public IXCSession CreateSession()
+        public IXCSession CreateSession(TimeSpan? timeout = null, TimeSpan? retryInterval = null, int maxRetries = 5)
         {
-            return new WebSocketSession(_endpoint, _timeout, _xcConfiguration, _privateCommunicationIdentifier, _retryInterval, _maxRetries);
+            return new WebSocketSession(_endpoint, _xcConfiguration, _privateCommunicationIdentifier, timeout, retryInterval, maxRetries);
         }
     }
 }

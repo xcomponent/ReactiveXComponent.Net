@@ -329,5 +329,38 @@ namespace ReactiveXComponentTest.WebSocket
             Check.That(answer.Count == expectedAnswer.Count);
             Check.That(answer.FirstOrDefault().Equals(expectedAnswer.FirstOrDefault()));
         }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(3)]
+        public void ConnectionRetryTest(int maxRetries)
+        {
+            
+            var websocketEndpoint = new WebSocketEndpoint("websocket", "localhost", "443", WebSocketType.Secure);
+            var connectionFailedEvent = new AutoResetEvent(false);
+            var xcConfiguration = Substitute.For<IXCConfiguration>();
+            var connectionAttemptTimeout = TimeSpan.FromSeconds(3);
+            var reconnectionAttemptInterval = TimeSpan.FromSeconds(5);
+            var totalConnectionAttemptTimeInMs = (int)(connectionAttemptTimeout.TotalMilliseconds + maxRetries*(connectionAttemptTimeout.TotalMilliseconds + reconnectionAttemptInterval.TotalMilliseconds));
+            var epsilonMs = 10;
+            var totalWaitTimeMs = totalConnectionAttemptTimeInMs + epsilonMs;
+
+            var webSocketSession = new WebSocketSession(
+                websocketEndpoint, 
+                xcConfiguration, 
+                "",
+                connectionAttemptTimeout,
+                reconnectionAttemptInterval,
+                maxRetries);
+
+            webSocketSession.ConnectionError += (sender, args) =>
+            {
+                connectionFailedEvent.Set();
+            };
+
+            var connectionAttemptsFinished = connectionFailedEvent.WaitOne(totalWaitTimeMs);
+
+            Check.That(connectionAttemptsFinished).IsTrue();
+        }
     }
 }

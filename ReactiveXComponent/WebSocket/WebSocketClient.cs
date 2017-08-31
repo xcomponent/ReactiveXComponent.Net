@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Timers;
 using ReactiveXComponent.Common;
 using SuperSocket.ClientEngine;
 using WebSocket4Net;
@@ -104,7 +103,14 @@ namespace ReactiveXComponent.WebSocket
 
         private void WebSocketOnError(object sender, ErrorEventArgs errorEventArgs)
         {
-            ConnectionError?.Invoke(this, new System.IO.ErrorEventArgs(errorEventArgs.Exception));
+            if (!_isClosing && _maxRetries > 0)
+            {
+                TryReconnect();
+            }
+            else
+            {
+                ConnectionError?.Invoke(this, new System.IO.ErrorEventArgs(errorEventArgs.Exception));
+            }
         }
 
         private void WebSocketOnMessageReceived(object sender, MessageReceivedEventArgs messageReceivedEventArgs)
@@ -129,13 +135,14 @@ namespace ReactiveXComponent.WebSocket
             {
                 lock (_webSocketLock)
                 {
+                    var serverUri = GetServerUri();
+
                     if (!IsOpen && !_isClosing && _currentRetryCount < _maxRetries)
                     {
                         _isReconnecting = true;
                         DisposeWebSocket();
 
-                        var serverUri = GetServerUri();
-                         InitWebSocket(serverUri);
+                        InitWebSocket(serverUri);
 
                         _webSocket.Open();
 
@@ -151,13 +158,24 @@ namespace ReactiveXComponent.WebSocket
 
                             if (_currentRetryCount >= _maxRetries)
                             {
-                                var errorEvent = new System.IO.ErrorEventArgs(new ReactiveXComponentException($"Could not connect to the web socket server {serverUri} after {_timeout} ms"));
-                                ConnectionError?.Invoke(this, errorEvent);
+                                _reconnectionTimer.Stop();
+                                RaiseConnectionError($"Could not connect to the web socket server {serverUri} after {_timeout} ms");
                             }
                         }
                     }
+                    else if (_maxRetries <= 0)
+                    {
+                        _reconnectionTimer.Stop();
+                        RaiseConnectionError($"Could not connect to the web socket server {serverUri} after {_timeout} ms");
+                    }
                 }
             };
+        }
+
+        private void RaiseConnectionError(string message)
+        {
+            var errorEvent = new System.IO.ErrorEventArgs(new ReactiveXComponentException(message));
+            ConnectionError?.Invoke(this, errorEvent);
         }
 
         public void Open()

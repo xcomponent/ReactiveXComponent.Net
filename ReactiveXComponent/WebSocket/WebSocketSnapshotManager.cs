@@ -90,10 +90,14 @@ namespace ReactiveXComponent.WebSocket
         {
             if (!_webSocketClient.IsOpen) return;
 
-            var inputHeader = new WebSocketEngineHeader();
+            
             var componentCode = _xcConfiguration.GetComponentCode(_component);
             var topic = _xcConfiguration.GetSnapshotTopic(_component);
             var stateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine);
+            var inputHeader = new WebSocketEngineHeader() {
+                ComponentCode = componentCode,
+                StateMachineCode = stateMachineCode
+            };
             var snapshotMessage = new WebSocketSnapshotMessage(stateMachineCode, componentCode, replyTopic, _privateCommunicationIdentifier);
             var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
                     WebSocketCommand.Snapshot,
@@ -123,7 +127,6 @@ namespace ReactiveXComponent.WebSocket
                     {
                         var stateMachineRefHeader = new StateMachineRefHeader()
                         {
-                            AgentId = element.AgentId,
                             StateMachineId = element.StateMachineId,
                             ComponentCode = element.ComponentCode,
                             StateMachineCode = element.StateMachineCode,

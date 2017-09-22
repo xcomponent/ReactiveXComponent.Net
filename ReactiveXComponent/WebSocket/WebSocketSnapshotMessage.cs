@@ -7,17 +7,20 @@ namespace ReactiveXComponent.WebSocket
     {
         public long StateMachineCode { get; set; }
         public long ComponentCode { get; set; }
-        public Option<string> ReplyTopic { get; set; }
-        public Option<string[]> PrivateTopic { get; set; }
+        public string ReplyTopic { get; set; }
+        public string[] CallerPrivateTopic { get; set; }
 
         public WebSocketSnapshotMessage() { }
 
-        public WebSocketSnapshotMessage(long stateMachineCode, long componentCode, string replyTopic, string privateTopic)
+        public WebSocketSnapshotMessage(long stateMachineCode, long componentCode, string replyTopic, string callerPrivateTopic)
         {
             StateMachineCode = stateMachineCode;
             ComponentCode = componentCode;
-            ReplyTopic = new Option<string>(replyTopic);
-            PrivateTopic = new Option<string[]>(new[] {privateTopic});
+            ReplyTopic = replyTopic;
+            if (!string.IsNullOrEmpty(callerPrivateTopic))
+            {
+                CallerPrivateTopic = new []{ callerPrivateTopic };
+            }
         }
     }
 }

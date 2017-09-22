@@ -86,7 +86,7 @@ namespace ReactiveXComponentTest.RabbitMq
                     componentCode = stateMachineRefHeader.ComponentCode;
                     stateMachineCode = stateMachineRefHeader.StateMachineCode;
                     stateMachineId = stateMachineRefHeader.StateMachineId;
-                    topic = stateMachineRefHeader.PublishTopic;
+                    topic = stateMachineRefHeader.PrivateTopic;
 
                     messageSentEvent.Set();
                 });
@@ -104,7 +104,7 @@ namespace ReactiveXComponentTest.RabbitMq
                         ComponentCode = configuration.GetComponentCode(ComponentNameA),
                         StateMachineCode = configuration.GetStateMachineCode(ComponentNameA, StateMachineA),
                         StateMachineId = stateMachineIdToSend,
-                        PublishTopic = topicToUse
+                        PrivateTopic = topicToUse
                     };
 
                     publisher.SendEvent(stateMachineRef, TestMessage, isPrivate ? Visibility.Private : Visibility.Public);
@@ -172,8 +172,9 @@ namespace ReactiveXComponentTest.RabbitMq
 
             const int receptionTimeout = 10000;
             const string messageType = "System.String";
-            long componentCode = 1;
-            long stateMachineCode = 2;
+            int componentCode = 1;
+            int stateMachineCode = 2;
+            int eventCode = 1;
             
             var receivedMessageType = string.Empty;
             var receivedMessage = string.Empty;
@@ -204,12 +205,12 @@ namespace ReactiveXComponentTest.RabbitMq
                     ComponentCode = componentCode,
                     StateMachineCode = stateMachineCode,
                     MessageType = messageType,
-                    PublishTopic = topicToUse
+                    PrivateTopic = topicToUse
                 };
 
                 var basicProperties = new BasicProperties()
                 {
-                    Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRef, IncomingEventType.Transition) 
+                    Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRef, IncomingEventType.Transition, eventCode) 
                 };
 
                 var stream = new MemoryStream();
@@ -273,8 +274,9 @@ namespace ReactiveXComponentTest.RabbitMq
             channel.WhenForAnyArgs(x => x.BasicPublish(null, null, false, null, null)).DoNotCallBase();
 
             const int receptionTimeout = 10000;
-            long componentCode = 1;
-            long stateMachineCode = 2;
+            int componentCode = 1;
+            int stateMachineCode = 2;
+            int eventCode = 1;
 
             using (var publisher = new RabbitMqPublisher(ComponentNameA, configuration, connection, GetSerializer(SnapshotSerialization), PrivateCommincationIdentifier))
             using (var snapshotReceivedEvent = new AutoResetEvent(false))
@@ -292,7 +294,7 @@ namespace ReactiveXComponentTest.RabbitMq
                 var stateMachineRef = new StateMachineRefHeader() {
                     ComponentCode = componentCode,
                     StateMachineCode = stateMachineCode,
-                    PublishTopic = PublicRoutingKey
+                    PrivateTopic = PublicRoutingKey
                 };
 
                 var stateMachineInstances = new List<StateMachineInstance>()
@@ -309,7 +311,7 @@ namespace ReactiveXComponentTest.RabbitMq
 
                 var basicProperties = new BasicProperties() 
                 {
-                    Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRef, IncomingEventType.Snapshot)
+                    Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRef, IncomingEventType.Snapshot, eventCode)
                 };
 
                 consumer.HandleBasicDeliver(consumer.ConsumerTag, ulong.MaxValue, false, ExchangeName, snapshotReplyTopic, basicProperties, message);

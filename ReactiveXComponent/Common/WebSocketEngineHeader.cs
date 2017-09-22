@@ -13,30 +13,26 @@ namespace ReactiveXComponent.Common
     /// </summary>
     public class WebSocketEngineHeader
     {
-        public Option<long> StateMachineId { get; set; }
+        public long? StateMachineId { get; set; }
 
-        public Option<long> StateMachineCode { get; set; }
+        public int? StateMachineCode { get; set; }
 
-        public Option<long> ComponentCode { get; set; }
+        public int ComponentCode { get; set; }
 
-        public Option<int> StateCode { get; set; }
+        public int? StateCode { get; set; }
 
-        public Option<int> EngineCode { get; set; }
+        public int? EngineCode { get; set; }
 
         public int EventCode { get; set; }
 
-        public long[] Probes { get; set; }
+        public int IncomingEventType { get; set; }
 
-        public int IncomingType { get; set; }
+        public long? SessionId { get; set; }
 
-        public Option<int> AgentId { get; set; }
+        public string SessionData { get; set; }
 
-        public Option<long> SessionId { get; set; }
+        public string MessageType { get; set; }
 
-        public Option<string> SessionData { get; set; }
-
-        public Option<string> MessageType { get; set; }
-
-        public Option<string> PublishTopic { get; set; }
+        public string PublishTopic { get; set; }
     }
 }

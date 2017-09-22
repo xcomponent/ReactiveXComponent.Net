@@ -48,12 +48,12 @@ namespace ReactiveXComponent.Configuration
             return _parser.GetSerializationType();
         }
 
-        public long GetStateMachineCode(string component, string stateMachine)
+        public int GetStateMachineCode(string component, string stateMachine)
         {
             return _parser.GetStateMachineCode(component, stateMachine);
         }
 
-        public long GetComponentCode(string component)
+        public int GetComponentCode(string component)
         {
             return _parser.GetComponentCode(component);
         }

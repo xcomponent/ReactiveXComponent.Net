@@ -13,8 +13,8 @@ namespace ReactiveXComponent.Parser
     {
         private XCApiDescription _xcApiDescription;
 
-        private Dictionary<string, long> _componentCodeByComponent;
-        private Dictionary<string, long> _stateMachineCodeByStateMachine;
+        private Dictionary<string, int> _componentCodeByComponent;
+        private Dictionary<string, int> _stateMachineCodeByStateMachine;
         private Dictionary<string, int> _eventCodeByEvent;
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
         private Dictionary<TopicIdentifier, string> _subscriberTopicByIdentifier;
@@ -36,9 +36,9 @@ namespace ReactiveXComponent.Parser
             _snapshotTopicByComponent = CreateSnapshotTopicByComponentRepository(_xcApiDescription.GetSnapshotsNode()); ;
         }
 
-        private Dictionary<string, long> CreateComponentCodeByNameRepository(IEnumerable<XElement> components)
+        private Dictionary<string, int> CreateComponentCodeByNameRepository(IEnumerable<XElement> components)
         {
-            Dictionary<string, long> componentCodeByNameRepo = new Dictionary<string, long>();
+            Dictionary<string, int> componentCodeByNameRepo = new Dictionary<string, int>();
 
             foreach (XElement component in components)
             {
@@ -47,17 +47,17 @@ namespace ReactiveXComponent.Parser
             return componentCodeByNameRepo;
         }
 
-        private void AddComponentToRepository(Dictionary<string, long> repository, XElement component)
+        private void AddComponentToRepository(Dictionary<string, int> repository, XElement component)
         {
-            repository.Add(component.Attribute(XCApiTags.Name).Value, Convert.ToInt64(component.Attribute(XCApiTags.Id).Value));
+            repository.Add(component.Attribute(XCApiTags.Name).Value, Convert.ToInt32(component.Attribute(XCApiTags.Id).Value));
         }
 
-        private Dictionary<string, long> CreateStateMachineCodeByNameRepository(IEnumerable<XElement> stateMachines)
+        private Dictionary<string, int> CreateStateMachineCodeByNameRepository(IEnumerable<XElement> stateMachines)
         {
-            Dictionary<string, long> stateMachineCodeRepo = new Dictionary<string, long>();
+            Dictionary<string, int> stateMachineCodeRepo = new Dictionary<string, int>();
             foreach (XElement stateMachine in stateMachines)
             {
-                stateMachineCodeRepo.Add(stateMachine.Attribute(XCApiTags.Name).Value, Convert.ToInt64(stateMachine.Attribute(XCApiTags.Id).Value));
+                stateMachineCodeRepo.Add(stateMachine.Attribute(XCApiTags.Name).Value, Convert.ToInt32(stateMachine.Attribute(XCApiTags.Id).Value));
             }
             return stateMachineCodeRepo;
         }
@@ -194,16 +194,16 @@ namespace ReactiveXComponent.Parser
             return webSocketEndpoint;
         }
 
-        public long GetComponentCode(string component)
+        public int GetComponentCode(string component)
         {
-            long componentCode;
+            int componentCode;
             _componentCodeByComponent.TryGetValue(component, out componentCode);
             return componentCode;
         }
 
-        public long GetStateMachineCode(string component, string stateMachine)
+        public int GetStateMachineCode(string component, string stateMachine)
         {
-            long stateMachineCode = 0;
+            int stateMachineCode = 0;
             _stateMachineCodeByStateMachine?.TryGetValue(stateMachine, out stateMachineCode);
             return stateMachineCode;
         }

@@ -18,6 +18,7 @@ namespace ReactiveXComponent.RabbitMq
 {
     public class RabbitMqSnapshotManager : IDisposable
     {
+        private const string SnapshotMessageType = "XComponent.Common.Processing.SnapshotIncomingEvent";
         private readonly IConnection _connection;
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
@@ -102,8 +103,10 @@ namespace ReactiveXComponent.RabbitMq
 
             var snapshotheader = new Header
             {
-                MessageType = "XComponent.Common.Processing.SnapshotIncomingEvent",
-                IncomingEventType = (int)IncomingEventType.Snapshot
+                MessageType = SnapshotMessageType,
+                IncomingEventType = (int)IncomingEventType.Snapshot,
+                StateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine),
+                ComponentCode = _xcConfiguration.GetComponentCode(_component)
             };
 
             var routingKey = _xcConfiguration.GetSnapshotTopic(_component);
@@ -112,26 +115,11 @@ namespace ReactiveXComponent.RabbitMq
 
             var snapshotMessage = new SnapshotMessage()
             {
-                StateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine),
-                ComponentCode = _xcConfiguration.GetComponentCode(_component),
-                 
-                ReplyTopic = new ReplyTopic()
-                {
-                    Case = "Some",
-                    Fields = new[] {guid.ToString()}
-                },
-                PrivateTopic = new PrivateTopic()
-                {
-                    Case = "Some",
-                    Fields = new[,] 
-                    {
-                        {
-                            !string.IsNullOrEmpty(privateCommunicationIdentifier)
-                            ? privateCommunicationIdentifier
-                            : string.Empty
-                        }
-                    }
-                }
+                Timeout = TimeSpan.FromSeconds(10),
+                ReplyTopic = guid.ToString(),
+                CallerPrivateTopic = !string.IsNullOrEmpty(privateCommunicationIdentifier)
+                            ? new List<string>{ privateCommunicationIdentifier}
+                            : null,
             };
 
             Send(snapshotMessage, routingKey, prop);
@@ -272,7 +260,6 @@ namespace ReactiveXComponent.RabbitMq
             {
                 var stateMachineRefHeader = new StateMachineRefHeader()
                 {
-                    AgentId = element.AgentId,
                     StateMachineId = element.StateMachineId,
                     ComponentCode = element.ComponentCode,
                     StateMachineCode = element.StateMachineCode,

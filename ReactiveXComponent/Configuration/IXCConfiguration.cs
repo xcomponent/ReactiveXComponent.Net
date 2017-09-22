@@ -10,8 +10,8 @@ namespace ReactiveXComponent.Configuration
         // TODO: replace these two methods with a GetCommunicationInfo() method
         BusDetails GetBusDetails();
         WebSocketEndpoint GetWebSocketEndpoint();
-        long GetStateMachineCode(string component, string stateMachine);
-        long GetComponentCode(string component);
+        int GetStateMachineCode(string component, string stateMachine);
+        int GetComponentCode(string component);
         int GetPublisherEventCode(string evnt);
         string GetPublisherTopic(string component, string stateMachine);
         string GetPublisherTopic(long componentCode, long stateMachineCode);

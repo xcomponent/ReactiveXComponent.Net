@@ -86,15 +86,12 @@
     <Compile Include="Common\HeaderElement.cs" />
     <Compile Include="Common\IncomingEventType.cs" />
     <Compile Include="Common\MessageEventArgs.cs" />
-    <Compile Include="Common\Option.cs" />
     <Compile Include="Common\SnapshotItems.cs" />
     <Compile Include="Common\SnapshotMessage.cs" />
     <Compile Include="Common\StateMachineInstance.cs" />
     <Compile Include="Common\StateMachineRefHeader.cs" />
     <Compile Include="Common\StreamSubscriptionKey.cs" />
     <Compile Include="Common\SubscriptionKey.cs" />
-    <Compile Include="Common\PrivateTopic.cs" />
-    <Compile Include="Common\ReplyTopic.cs" />
     <Compile Include="Common\Visibility.cs" />
     <Compile Include="Common\WebSocketEndpoint.cs" />
     <Compile Include="Common\WebSocketEngineHeader.cs" />

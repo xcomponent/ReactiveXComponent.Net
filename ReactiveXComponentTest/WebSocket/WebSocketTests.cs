@@ -69,7 +69,7 @@ namespace ReactiveXComponentTest.WebSocket
                 var subscription = webSocketSubscriber.StateMachineUpdatesStream.Subscribe(updatesObserver);
 
                 var data =
-                    "update " + subscriberPublicTopic + " -824151934 {\"Header\":{\"StateCode\":{\"Case\":\"Some\",\"Fields\":[0]},\"StateMachineId\":{\"Case\":\"Some\",\"Fields\":[81]},\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},\"ComponentCode\":{\"Case\":\"Some\",\"Fields\":[-824151934]},\"EventCode\":0,\"Probes\":[],\"IncomingType\":9,\"AgentId\":{\"Case\":\"Some\",\"Fields\":[0]},\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.GoodByeWorld.UserObject.Result\"]}},\"JsonMessage\":\"{\\\"Value\\\":\\\"GoodBye\\\"}\"}";
+                    "update " + subscriberPublicTopic + " -824151934 {\"Header\":{\"StateCode\":0,\"StateMachineId\":81,\"StateMachineCode\":405360011,\"ComponentCode\":-824151934,\"EventCode\":0,\"IncomingEventType\":9,\"MessageType\":\"XComponent.GoodByeWorld.UserObject.Result\"},\"JsonMessage\":\"{\\\"Value\\\":\\\"GoodBye\\\"}\"}";
                 var rawData = Encoding.UTF8.GetBytes(data);
                 var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
                 webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
@@ -106,13 +106,11 @@ namespace ReactiveXComponentTest.WebSocket
             var publisherTopic = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
 
             var stateMachineRef = new StateMachineRefHeader() {
-                AgentId = 0,
                 StateMachineId = 0,
                 ComponentCode = componentCode,
                 StateMachineCode = stateMachineCode,
                 StateCode = 0,
-                EventCode = 9,
-                PublishTopic = isPrivate ? PrivateTopic : null
+                PrivateTopic = isPrivate ? PrivateTopic : null
             };
 
             var messageToSend = "Hello";
@@ -167,7 +165,7 @@ namespace ReactiveXComponentTest.WebSocket
 
                 if (isPrivate)
                 {
-                    Check.That(webSocketPacket.Header.PublishTopic.Fields[0]).IsEqualTo(PrivateTopic);
+                    Check.That(webSocketPacket.Header.PublishTopic).IsEqualTo(PrivateTopic);
                 }
                 else
                 {
@@ -176,9 +174,8 @@ namespace ReactiveXComponentTest.WebSocket
 
                 if (withStateMachineRef)
                 {
-                    Check.That(webSocketPacket.Header.ComponentCode.Fields[0]).IsEqualTo(stateMachineRef.ComponentCode);
-                    Check.That(webSocketPacket.Header.StateMachineCode.Fields[0]).IsEqualTo(stateMachineRef.StateMachineCode);
-                    Check.That(webSocketPacket.Header.EventCode).IsEqualTo(stateMachineRef.EventCode);
+                    Check.That(webSocketPacket.Header.ComponentCode).IsEqualTo(stateMachineRef.ComponentCode);
+                    Check.That(webSocketPacket.Header.StateMachineCode).IsEqualTo(stateMachineRef.StateMachineCode);
                 }
 
                 var sentMessage = (string)JsonConvert.DeserializeObject(webSocketPacket.JsonMessage);
@@ -219,10 +216,10 @@ namespace ReactiveXComponentTest.WebSocket
                 {
                     var snapshotPacket = JsonConvert.DeserializeObject<WebSocketPacket>(webSocketMessage.Json);
                     var snapshotMessage = JsonConvert.DeserializeObject<WebSocketSnapshotMessage>(snapshotPacket.JsonMessage);
-                    snapshotReplyTopic = snapshotMessage.ReplyTopic.Fields[0];
+                    snapshotReplyTopic = snapshotMessage.ReplyTopic;
                 }
 
-                var data = "snapshot " + snapshotReplyTopic + " -69981087 {\"Header\":{\"EventCode\":0,\"Probes\":[],\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.Common.Processing.SnapshotResponse\"]}},\"JsonMessage\":\"{\\\"Items\\\":\\\"H4sIAAAAAAAEAIuuVgouSSxJ9U1MzsjMS/VMUbIyMdBBEXPOT0lVsjK0MDY3MLU0NDeEykKFdZSc83ML8vNS80ogIrpmlpYWhgYW5jpKAaVJOZnJvqm5SalFSlbVSiH5SlZKjnn5pYlFSjpKQanFQH3FQC1KHpkKUOFaHSXHdKBZIIcY1sYCAAstn/OfAAAA\\\"}\"}";
+                var data = "snapshot " + snapshotReplyTopic + " -69981087 {\"Header\":{\"EventCode\":0,\"IncomingEventType\":0,\"MessageType\":\"XComponent.Common.Processing.SnapshotResponse\"},\"JsonMessage\":\"{\\\"Items\\\":\\\"H4sIAAAAAAAEAIuuVgouSSxJ9U1MzsjMS/VMUbIyMdBBEXPOT0lVsjK0MDY3MLU0NDeEykKFdZSc83ML8vNS80ogIrpmlpYWhgYW5jpKAaVJOZnJvqm5SalFSlbVSiH5SlZKjnn5pYlFSjpKQanFQH3FQC1KHpkKUOFaHSXHdKBZIIcY1sYCAAstn/OfAAAA\\\"}\"}";
                 var rawData = Encoding.UTF8.GetBytes(data);
                 var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
                 webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);

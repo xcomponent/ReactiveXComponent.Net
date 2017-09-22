@@ -54,7 +54,7 @@ namespace ReactiveXComponentTest.Serializer
         [Test]
         public void BinarySerializerTest()
         {
-            var replyTopic = new ReplyTopic(){ Case = "some value" };
+            var replyTopic = "some value";
             var serializer = SerializerFactory.CreateSerializer(SerializationType.Binary);
 
             using (var stream = new MemoryStream())
@@ -62,16 +62,16 @@ namespace ReactiveXComponentTest.Serializer
                 serializer.Serialize(stream, replyTopic);
                 stream.Position = 0;
 
-                var deserializedReplyTopic = serializer.Deserialize(stream) as ReplyTopic;
+                var deserializedReplyTopic = serializer.Deserialize(stream) as string;
                 Check.That(deserializedReplyTopic).IsNotNull();
-                Check.That(deserializedReplyTopic?.Case == replyTopic.Case);
+                Check.That(deserializedReplyTopic == replyTopic);
             }
         }
 
         [Test]
         public void JsonSerializerTest()
         {
-            var header = new WebSocketEngineHeader(){StateMachineCode = new Option<long>(405360011) };
+            var header = new WebSocketEngineHeader(){StateMachineCode = 405360011 };
             var serializer = SerializerFactory.CreateSerializer(SerializationType.Json);
 
             using (var stream = new MemoryStream())
@@ -83,7 +83,7 @@ namespace ReactiveXComponentTest.Serializer
                     var serializedMessage = streamReader.ReadToEnd();
                     Check.That(serializedMessage).IsNotNull();
                     Check.That(serializedMessage).IsNotEmpty();
-                    Check.That(serializedMessage).IsEqualTo("{\"StateMachineCode\":{\"Case\":\"Some\",\"Fields\":[405360011]},\"EventCode\":0,\"IncomingType\":0}");
+                    Check.That(serializedMessage).IsEqualTo("{\"StateMachineCode\":405360011,\"ComponentCode\":0,\"EventCode\":0,\"IncomingEventType\":0}");
 
                     using (var deserializationStream = new MemoryStream(Encoding.UTF8.GetBytes(serializedMessage)))
                     {
@@ -99,18 +99,23 @@ namespace ReactiveXComponentTest.Serializer
         [Test]
         public void BsonSerializerTest()
         {
-            var replyTopic = new ReplyTopic() { Case = "some value" };
+            var header = new Header()
+            {
+                ComponentCode = 1,
+                StateMachineCode = 2
+            };
             var serializer = SerializerFactory.CreateSerializer(SerializationType.Bson);
 
             using (var stream = new MemoryStream())
             {
-                serializer.Serialize(stream, replyTopic);
+                serializer.Serialize(stream, header);
                 stream.Position = 0;
 
                 var jObject = serializer.Deserialize(stream) as JObject;
-                var deserializedReplyTopic = jObject?.ToObject<ReplyTopic>();
-                Check.That(deserializedReplyTopic).IsNotNull();
-                Check.That(deserializedReplyTopic?.Case == replyTopic.Case);
+                var deserializedHeader = jObject?.ToObject<Header>();
+                Check.That(deserializedHeader).IsNotNull();
+                Check.That(deserializedHeader.ComponentCode == header.ComponentCode);
+                Check.That(deserializedHeader.StateMachineCode == header.StateMachineCode);
             }
         }
     }

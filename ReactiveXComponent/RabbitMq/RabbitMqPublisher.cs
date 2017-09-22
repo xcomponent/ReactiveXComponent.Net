@@ -57,7 +57,8 @@ namespace ReactiveXComponent.RabbitMq
             string routingKey = _configuration.GetPublisherTopic(componentCode, stateMachineRefHeader.StateMachineCode);
 
             var prop = _publisherChannel.CreateBasicProperties();
-            prop.Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRefNewHeader, IncomingEventType.Transition);
+            var eventCode = _configuration.GetPublisherEventCode(stateMachineRefNewHeader.MessageType);
+            prop.Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRefNewHeader, IncomingEventType.Transition, eventCode);
             message = message ?? 0;
 
             Send(message, routingKey, prop);
@@ -122,13 +123,12 @@ namespace ReactiveXComponent.RabbitMq
             var stateMachineRefheader = new StateMachineRefHeader()
             {
                 StateMachineId = stateMachineRefHeader.StateMachineId,
-                AgentId = stateMachineRefHeader.AgentId,
+                SessionData = stateMachineRefHeader.SessionData,
                 StateCode = stateMachineRefHeader.StateCode,
                 StateMachineCode = stateMachineRefHeader.StateMachineCode,
                 ComponentCode = stateMachineRefHeader.ComponentCode,
                 MessageType = messageType,
-                EventCode = _configuration.GetPublisherEventCode(messageType),
-                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _privateCommunicationIdentifier : string.Empty
+                PrivateTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _privateCommunicationIdentifier : string.Empty
             };
 
             return stateMachineRefheader;

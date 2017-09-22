@@ -11,9 +11,9 @@ namespace ReactiveXComponent.Common
 
         public int StateCode { get; set; }
 
-        public long StateMachineCode { get; set; }
+        public int StateMachineCode { get; set; }
 
-        public long ComponentCode { get; set; }
+        public int ComponentCode { get; set; }
 
         public object PublicMember { get; set; }
      }

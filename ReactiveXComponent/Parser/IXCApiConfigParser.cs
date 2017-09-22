@@ -10,8 +10,8 @@ namespace ReactiveXComponent.Parser
         string GetConnectionType();
         BusDetails GetBusDetails();
         WebSocketEndpoint GetWebSocketEndpoint();
-        long GetComponentCode(string component);
-        long GetStateMachineCode(string component, string stateMachine);
+        int GetComponentCode(string component);
+        int GetStateMachineCode(string component, string stateMachine);
         int GetPublisherEventCode(string eventName);
         string GetPublisherTopic(string component, string stateMachine);
         string GetPublisherTopic(long componentCode, long stateMachineCode);

@@ -76,11 +76,11 @@ namespace ReactiveXComponent.WebSocket
             var messageType = message?.GetType();
             var webSocketEngineHeader = new WebSocketEngineHeader
             {
-                ComponentCode = new Option<long>(_xcConfiguration.GetComponentCode(_component)),
-                StateMachineCode = new Option<long>(_xcConfiguration.GetStateMachineCode(_component, stateMachine)),
+                ComponentCode = _xcConfiguration.GetComponentCode(_component),
+                StateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine),
                 EventCode = _xcConfiguration.GetPublisherEventCode(messageType?.ToString()),
-                MessageType = new Option<string>(messageType?.ToString()),
-                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? new Option<string>(_privateCommunicationIdentifier) : null
+                MessageType = messageType?.ToString(),
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : null
             };
 
             return webSocketEngineHeader;
@@ -91,14 +91,13 @@ namespace ReactiveXComponent.WebSocket
             var messageType = message?.GetType();
             var webSocketEngineHeader = new WebSocketEngineHeader
             {
-                AgentId = new Option<int>(smRefHeader.AgentId),
-                StateMachineId = new Option<long>(smRefHeader.StateMachineId),
-                ComponentCode = new Option<long>(smRefHeader.ComponentCode),
-                StateMachineCode = new Option<long>(smRefHeader.StateMachineCode),
-                StateCode = new Option<int>(smRefHeader.StateCode),
+                StateMachineId = smRefHeader.StateMachineId,
+                ComponentCode = smRefHeader.ComponentCode,
+                StateMachineCode = smRefHeader.StateMachineCode,
+                StateCode = smRefHeader.StateCode,
                 EventCode = _xcConfiguration.GetPublisherEventCode(messageType?.ToString()),
-                MessageType = new Option<string>(messageType?.ToString()),
-                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? new Option<string>(_privateCommunicationIdentifier) : null
+                MessageType = messageType?.ToString(),
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : null
             };
 
             return webSocketEngineHeader;

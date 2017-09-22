@@ -109,7 +109,11 @@ namespace ReactiveXComponent.WebSocket
             {
                 var webSocketTopic = isPrivate ? WebSocketTopic.Private(routingKey) : WebSocketTopic.Public(routingKey);
                 var webSocketSubscription = new WebSocketSubscription(webSocketTopic);
-                var subscriptionHeader = new WebSocketEngineHeader();
+                var subscriptionHeader = new WebSocketEngineHeader()
+                {
+                    ComponentCode = componentCode,
+                    StateMachineCode = stateMachineCode
+                };
                 var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
                     WebSocketCommand.Subscribe,
                     subscriptionHeader, 
@@ -126,13 +130,12 @@ namespace ReactiveXComponent.WebSocket
                         var receivedPacket = WebSocketMessageHelper.DeserializePacket(webSocketMessage);
 
                         var stateMachineRefHeader = new StateMachineRefHeader() {
-                            ComponentCode = GetOptionalValue(receivedPacket.Header.ComponentCode),
-                            EventCode = receivedPacket.Header.EventCode,
-                            MessageType = GetOptionalValue(receivedPacket.Header.MessageType),
+                            ComponentCode = receivedPacket.Header.ComponentCode,
+                            MessageType = receivedPacket.Header.MessageType,
                             StateMachineCode = GetOptionalValue(receivedPacket.Header.StateMachineCode),
                             StateCode = GetOptionalValue(receivedPacket.Header.StateCode),
                             StateMachineId = GetOptionalValue(receivedPacket.Header.StateMachineId),
-                            PublishTopic = GetOptionalValue(receivedPacket.Header.PublishTopic)
+                            PrivateTopic = receivedPacket.Header.PublishTopic
                         };
 
                         if (stateMachineRefHeader.StateMachineCode == stateMachineCode)
@@ -235,9 +238,9 @@ namespace ReactiveXComponent.WebSocket
             _streamSubscriptionsDico.Clear();
         }
 
-        private T GetOptionalValue<T>(Option<T> optionalValue)
+        private T GetOptionalValue<T>(T? optionalValue) where T : struct
         {
-            return optionalValue != null ? optionalValue.Fields[0] : default(T);
+            return optionalValue ?? default(T);
         }
 
         #region IDisposable implementation

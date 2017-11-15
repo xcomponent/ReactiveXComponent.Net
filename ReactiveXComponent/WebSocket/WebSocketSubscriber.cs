@@ -135,7 +135,8 @@ namespace ReactiveXComponent.WebSocket
                             StateMachineCode = GetOptionalValue(receivedPacket.Header.StateMachineCode),
                             StateCode = GetOptionalValue(receivedPacket.Header.StateCode),
                             StateMachineId = GetOptionalValue(receivedPacket.Header.StateMachineId),
-                            PrivateTopic = receivedPacket.Header.PublishTopic
+                            PrivateTopic = receivedPacket.Header.PublishTopic,
+                            ErrorMessage = receivedPacket.Header.ErrorMessage
                         };
 
                         if (stateMachineRefHeader.StateMachineCode == stateMachineCode)

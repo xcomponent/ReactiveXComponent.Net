@@ -5,7 +5,7 @@ namespace ReactiveXComponent.Common
     {
         protected bool Equals(StateMachineRefHeader other)
         {
-            return StateMachineId == other.StateMachineId && StateCode == other.StateCode && StateMachineCode == other.StateMachineCode && ComponentCode == other.ComponentCode && string.Equals(MessageType, other.MessageType) && string.Equals(PrivateTopic, other.PrivateTopic) && string.Equals(SessionData, other.SessionData);
+            return StateMachineId == other.StateMachineId && StateCode == other.StateCode && StateMachineCode == other.StateMachineCode && ComponentCode == other.ComponentCode && string.Equals(MessageType, other.MessageType) && string.Equals(PrivateTopic, other.PrivateTopic) && string.Equals(SessionData, other.SessionData) && string.Equals(ErrorMessage, other.ErrorMessage);
         }
 
         public override bool Equals(object obj)
@@ -27,6 +27,7 @@ namespace ReactiveXComponent.Common
                 hashCode = (hashCode * 397) ^ (MessageType != null ? MessageType.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (PrivateTopic != null ? PrivateTopic.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (SessionData != null ? SessionData.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (ErrorMessage != null ? ErrorMessage.GetHashCode() : 0);
                 return hashCode;
             }
         }
@@ -44,5 +45,7 @@ namespace ReactiveXComponent.Common
         public string PrivateTopic { get; set; }
 
         public string SessionData { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 }

@@ -18,17 +18,18 @@ namespace ReactiveXComponentTest.WebSocket
     public class WebSocketTests
     {
         private const string PrivateTopic = "d5c59d2b-58c9-4a1d-b305-150accfe6cd6";
+        private readonly int _timeoutInMs = 10000;
+        private readonly TimeSpan _timeout = TimeSpan.FromMilliseconds(10000);
 
         [Test]
         public void SubscriberTest()
         {
-            var millisecondsTimeout = 10000;
-            var componentName = "GoodByeWorld";
-            var componentCode = -824151934;
-            var stateMachineName = "Result";
-            var stateMachineCode = 405360011;
-            var subscriberPublicTopic = "output.1_0.HelloWorldMicroservice.GoodByeWorld.Result";
-            var snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
+            const string componentName = "GoodByeWorld";
+            const int componentCode = -824151934;
+            const string stateMachineName = "Result";
+            const int stateMachineCode = 405360011;
+            const string subscriberPublicTopic = "output.1_0.HelloWorldMicroservice.GoodByeWorld.Result";
+            const string snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
 
             var xcConfiguration = Substitute.For<IXCConfiguration>();
             xcConfiguration.GetComponentCode(componentName).Returns(x => componentCode);
@@ -74,8 +75,8 @@ namespace ReactiveXComponentTest.WebSocket
                 var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
                 webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
 
-                var messageReceived = messageReceivedEvent.WaitOne(millisecondsTimeout);
-                var messageReceivedInStream = messageReceivedInStreamEvent.WaitOne(millisecondsTimeout);
+                var messageReceived = messageReceivedEvent.WaitOne(_timeout);
+                var messageReceivedInStream = messageReceivedInStreamEvent.WaitOne(_timeout);
 
                 // Make sure that subscription works
                 Check.That(messageReceived).IsTrue();
@@ -86,10 +87,78 @@ namespace ReactiveXComponentTest.WebSocket
                 webSocketSubscriber.Unsubscribe(stateMachineName, handler);
                 webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
 
-                messageReceived = messageReceivedEvent.WaitOne(millisecondsTimeout / 2);
+                messageReceived = messageReceivedEvent.WaitOne(_timeoutInMs / 2);
 
                 // Make sure that we are unsubscribed
                 Check.That(messageReceived).IsFalse();
+            }
+        }
+
+        [Test]
+        public void SubscriberHeaderFieldsTest()
+        {
+            const string componentName = "GoodByeWorld";
+            const int componentCodeSent = -824151934;
+            const int stateMachineCodeSent = 405360011;
+            const long stateMachineIdSent = 81;
+            const int stateCodeSent = -2147483648;
+            const string stateMachineName = "Result";
+            const string subscriberPublicTopic = "output.1_0.HelloWorldMicroservice.GoodByeWorld.Result";
+            const string snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
+            const string errorMessageSent = "Some error message";
+
+            var componentCodeReceived = 0;
+            var stateMachineCodeReceived = 0;
+            var stateMachineIdReceived = 0L;
+            var stateCodeReceived = 0;
+            var errorMessageReceived = string.Empty;
+
+            var xcConfiguration = Substitute.For<IXCConfiguration>();
+            xcConfiguration.GetComponentCode(componentName).Returns(x => componentCodeSent);
+            xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCodeSent);
+            xcConfiguration.GetSubscriberTopic(componentName, stateMachineName).Returns(x => subscriberPublicTopic);
+            xcConfiguration.GetSnapshotTopic(componentName).Returns(x => snapshotTopic);
+
+            var webSocketClient = Substitute.For<IWebSocketClient>();
+            webSocketClient.IsOpen.Returns(true);
+            webSocketClient.When(x => x.Open()).DoNotCallBase();
+            webSocketClient.When(x => x.Close()).DoNotCallBase();
+            webSocketClient.When(x => x.Dispose()).DoNotCallBase();
+            webSocketClient.WhenForAnyArgs(x => x.Send("")).DoNotCallBase();
+
+            using (var webSocketSubscriber = new WebSocketSubscriber(componentName, webSocketClient, xcConfiguration, PrivateTopic))
+            using (var messageReceivedEvent = new AutoResetEvent(false))
+            {
+                var handler = new Action<MessageEventArgs>(args => 
+                {
+                    if (args.StateMachineRefHeader.ComponentCode == componentCodeSent
+                        && args.StateMachineRefHeader.StateMachineCode == stateMachineCodeSent)
+                    {
+                        componentCodeReceived = args.StateMachineRefHeader.ComponentCode;
+                        stateMachineCodeReceived = args.StateMachineRefHeader.StateMachineCode;
+                        stateMachineIdReceived = args.StateMachineRefHeader.StateMachineId;
+                        stateCodeReceived = args.StateMachineRefHeader.StateCode;
+                        errorMessageReceived = args.StateMachineRefHeader.ErrorMessage;
+                        messageReceivedEvent.Set();
+                    }
+                });
+                
+                webSocketSubscriber.Subscribe(stateMachineName, handler);
+
+                var data =
+                    "update " + subscriberPublicTopic + " " + componentCodeSent + " {\"Header\":{\"StateCode\":" + stateCodeSent + ",\"StateMachineId\":" + stateMachineIdSent + ",\"StateMachineCode\":" + stateMachineCodeSent + ",\"ComponentCode\":" + componentCodeSent + ",\"EventCode\":0,\"IncomingEventType\":9,\"MessageType\":\"XComponent.GoodByeWorld.UserObject.Result\",\"ErrorMessage\":\"" + errorMessageSent + "\"},\"JsonMessage\":\"{}\"}";
+                var rawData = Encoding.UTF8.GetBytes(data);
+                var messageEventArgs = new WebSocketMessageEventArgs(data, rawData);
+                webSocketClient.MessageReceived += Raise.EventWith(messageEventArgs);
+
+                var messageReceived = messageReceivedEvent.WaitOne(_timeout);
+                
+                Check.That(messageReceived).IsTrue();
+                Check.That(componentCodeReceived).IsEqualTo(componentCodeSent);
+                Check.That(stateMachineCodeReceived).IsEqualTo(stateMachineCodeSent);
+                Check.That(stateMachineIdReceived).IsEqualTo(stateMachineIdSent);
+                Check.That(stateCodeReceived).IsEqualTo(stateCodeSent);
+                Check.That(errorMessageReceived).IsEqualTo(errorMessageSent);
             }
         }
 
@@ -99,11 +168,11 @@ namespace ReactiveXComponentTest.WebSocket
         [TestCase(false, true)]
         public void PublisherSendMessageTest(bool isPrivate, bool withStateMachineRef)
         {
-            var componentName = "HelloWorld";
-            var componentCode = -824151934;
-            var stateMachineName = "HelloWorldManager";
-            var stateMachineCode = 405360011;
-            var publisherTopic = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
+            const string componentName = "HelloWorld";
+            const int componentCode = -824151934;
+            const string stateMachineName = "HelloWorldManager";
+            const int stateMachineCode = 405360011;
+            const string publisherTopic = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
 
             var stateMachineRef = new StateMachineRefHeader() {
                 StateMachineId = 0,
@@ -188,13 +257,13 @@ namespace ReactiveXComponentTest.WebSocket
         [Test]
         public void SnapshotTest()
         {
-            var componentName = "HelloWorld";
-            var componentCode = -69981087;
-            var stateMachineName = "HelloResponse";
-            var stateMachineCode = 1837059171;
-            var publisherTopic = "input.1_0.MyHelloWorldService.HelloWorld.HelloResponse";
-            var privateTopic = "d5c59d2b-58c9-4a1d-b305-150accfe6cd6";
-            var snapshotTopic = "snapshot.1_0.MyHelloWorldService.HelloWorld";
+            const string componentName = "HelloWorld";
+            const int componentCode = -69981087;
+            const string stateMachineName = "HelloResponse";
+            const int stateMachineCode = 1837059171;
+            const string publisherTopic = "input.1_0.MyHelloWorldService.HelloWorld.HelloResponse";
+            const string privateTopic = "d5c59d2b-58c9-4a1d-b305-150accfe6cd6";
+            const string snapshotTopic = "snapshot.1_0.MyHelloWorldService.HelloWorld";
 
             var xcConfiguration = Substitute.For<IXCConfiguration>();
             xcConfiguration.GetComponentCode(componentName).Returns(x => componentCode);
@@ -228,7 +297,6 @@ namespace ReactiveXComponentTest.WebSocket
             using (var webSocketPublisher = new WebSocketPublisher(componentName, webSocketClient, xcConfiguration, privateTopic))
             using (var snapshotReceivedEvent = new AutoResetEvent(false))
             {
-                var millisecondsTimeout = 10000;
                 var snapshotHandler = new Action<List<MessageEventArgs>>(args =>
                 {
                     if (args.All(instance => instance.StateMachineRefHeader.ComponentCode == componentCode
@@ -240,7 +308,7 @@ namespace ReactiveXComponentTest.WebSocket
 
                 webSocketPublisher.GetSnapshotAsync(stateMachineName, snapshotHandler);
 
-                var snapshotReceived = snapshotReceivedEvent.WaitOne(millisecondsTimeout);
+                var snapshotReceived = snapshotReceivedEvent.WaitOne(_timeout);
                 Check.That(snapshotReceived).IsTrue();
 
                 var snapshot = webSocketPublisher.GetSnapshot(stateMachineName);

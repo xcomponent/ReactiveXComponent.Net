@@ -20,7 +20,8 @@ namespace ReactiveXComponent.RabbitMq
                                {HeaderElement.EventType, header?.EventCode},
                                {HeaderElement.IncomingEventType, header?.IncomingEventType},
                                {HeaderElement.PublishTopic, header?.PublishTopic != null ? encoding.GetBytes(header.PublishTopic) : encoding.GetBytes(string.Empty) },
-                               {HeaderElement.MessageType, header?.MessageType != null ? encoding.GetBytes(header.MessageType) : encoding.GetBytes(string.Empty)}
+                               {HeaderElement.MessageType, header?.MessageType != null ? encoding.GetBytes(header.MessageType) : encoding.GetBytes(string.Empty)},
+                               {HeaderElement.ErrorMessage, header?.ErrorMessage != null ? encoding.GetBytes(header.ErrorMessage) : encoding.GetBytes(string.Empty)}
                            };
             return dico;
         }
@@ -38,7 +39,8 @@ namespace ReactiveXComponent.RabbitMq
                                 {HeaderElement.PublishTopic, stateMachineRefHeader?.PrivateTopic != null ? encoding.GetBytes(stateMachineRefHeader.PrivateTopic) : encoding.GetBytes(string.Empty) },
                                 {HeaderElement.MessageType, stateMachineRefHeader?.MessageType != null ? encoding.GetBytes(stateMachineRefHeader.MessageType) : encoding.GetBytes(string.Empty)},
                                 {HeaderElement.EventType, eventCode},
-                                {HeaderElement.IncomingEventType, (int)incomingEventType}
+                                {HeaderElement.IncomingEventType, (int)incomingEventType},
+                                {HeaderElement.ErrorMessage, stateMachineRefHeader?.ErrorMessage != null ? encoding.GetBytes(stateMachineRefHeader.ErrorMessage) : encoding.GetBytes(string.Empty)}
                            };
             return dico;
         }
@@ -53,6 +55,7 @@ namespace ReactiveXComponent.RabbitMq
             var publishTopic = string.Empty;
             var messageType = string.Empty;
             var sessionData = string.Empty;
+            var errorMessage = string.Empty;
 
             if (stateMachineRefHeader.ContainsKey(HeaderElement.StateMachineId))
                 stateMachineId = Convert.ToInt32(stateMachineRefHeader[HeaderElement.StateMachineId]);
@@ -68,6 +71,8 @@ namespace ReactiveXComponent.RabbitMq
                 messageType = encoding.GetString(stateMachineRefHeader[HeaderElement.MessageType] as byte[]);
             if (stateMachineRefHeader.ContainsKey(HeaderElement.SessionData))
                 sessionData = encoding.GetString(stateMachineRefHeader[HeaderElement.SessionData] as byte[]);
+            if (stateMachineRefHeader.ContainsKey(HeaderElement.ErrorMessage))
+                errorMessage = encoding.GetString(stateMachineRefHeader[HeaderElement.ErrorMessage] as byte[]);
 
             return new StateMachineRefHeader()
             {
@@ -77,7 +82,8 @@ namespace ReactiveXComponent.RabbitMq
                 ComponentCode = componentCode,
                 MessageType  = messageType,
                 PrivateTopic = publishTopic,
-                SessionData = sessionData
+                SessionData = sessionData,
+                ErrorMessage = errorMessage
             };                
         }
     }

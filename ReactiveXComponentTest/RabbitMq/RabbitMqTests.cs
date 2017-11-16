@@ -229,6 +229,119 @@ namespace ReactiveXComponentTest.RabbitMq
         }
 
         [Test]
+        public void SubscriberHeaderFieldsTest()
+        {
+            EventingBasicConsumer consumer = null;
+
+            var configuration = Substitute.For<IXCConfiguration>();
+            configuration.GetBusDetails().Returns(_busDetails);
+            configuration.GetSerializationType().ReturnsForAnyArgs(Serialization);
+            configuration.GetStateMachineCode(ComponentNameA, StateMachineA).Returns(2);
+            configuration.GetComponentCode(ComponentNameA).Returns(Convert.ToInt32(ExchangeName));
+            configuration.GetSubscriberTopic(ComponentNameA, StateMachineA).Returns(PublicRoutingKey);
+
+            var connection = Substitute.For<IConnection>();
+            var channel = Substitute.For<IModel>();
+            channel.CreateBasicProperties().ReturnsForAnyArgs(new BasicProperties());
+            connection.CreateModel().Returns(channel);
+            connection.IsOpen.Returns(true);
+            channel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, true, true, null)).DoNotCallBase();
+            var queueDeclareOk = new QueueDeclareOk(QueueName, uint.MaxValue, uint.MaxValue);
+            channel.QueueDeclare().ReturnsForAnyArgs(queueDeclareOk);
+
+            var consumeAction = new Action<string, bool, IBasicConsumer>((queueName, noAck, aconsumer) => 
+            {
+                consumer = (EventingBasicConsumer)aconsumer;
+            });
+
+            channel.WhenForAnyArgs(x => x.BasicConsume("", false, "", false, false, null, null)).Do(callInfo => {
+                var args = callInfo.Args();
+                if (args.Length == 7)
+                {
+                    consumeAction((string)args[0], (bool)args[1], (EventingBasicConsumer)callInfo.Args()[6]);
+                }
+            });
+
+            channel.WhenForAnyArgs(x => x.QueueBind(QueueName, null, null, null)).DoNotCallBase();
+
+            const int receptionTimeout = 10000;
+            const string messageTypeSent = "System.String";
+            const int componentCodeSent = 1;
+            const int stateMachineCodeSent = 2;
+            const long stateMachineIdSent = 81;
+            const int stateCodeSent = -2147483648;
+            const string errorMessageSent = "Some error message";
+            const int eventCode = 1;
+
+            var componentCodeReceived = 0;
+            var stateMachineCodeReceived = 0;
+            var stateMachineIdReceived = 0L;
+            var stateCodeReceived = 0;
+            var errorMessageReceived = string.Empty;
+            
+
+            var receivedMessageType = string.Empty;
+
+            using (var subscriber = new RabbitMqSubscriber(ComponentNameA, configuration, connection, GetSerializer(Serialization), PrivateCommincationIdentifier))
+            using (var messageReceivedEvent = new AutoResetEvent(false))
+            {
+                var messageReceptionHandler = new Action<MessageEventArgs>(args => 
+                {
+                    if (args.StateMachineRefHeader.ComponentCode == componentCodeSent
+                        && args.StateMachineRefHeader.StateMachineCode == stateMachineCodeSent)
+                    {
+                        receivedMessageType = args.StateMachineRefHeader.MessageType;
+
+                        if (receivedMessageType == messageTypeSent)
+                        {
+                            componentCodeReceived = args.StateMachineRefHeader.ComponentCode;
+                            stateMachineCodeReceived = args.StateMachineRefHeader.StateMachineCode;
+                            stateMachineIdReceived = args.StateMachineRefHeader.StateMachineId;
+                            stateCodeReceived = args.StateMachineRefHeader.StateCode;
+                            errorMessageReceived = args.StateMachineRefHeader.ErrorMessage;
+                        }
+
+                        messageReceivedEvent.Set();
+                    }
+                });
+
+                subscriber.Subscribe(StateMachineA, messageReceptionHandler);
+
+                var stateMachineRef = new StateMachineRefHeader() 
+                {
+                    ComponentCode = componentCodeSent,
+                    StateMachineCode = stateMachineCodeSent,
+                    StateMachineId = stateMachineIdSent,
+                    StateCode = stateCodeSent,
+                    MessageType = messageTypeSent,
+                    ErrorMessage = errorMessageSent
+                };
+
+                var basicProperties = new BasicProperties() 
+                {
+                    Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRef, IncomingEventType.Transition, eventCode)
+                };
+
+                var stream = new MemoryStream();
+                GetSerializer(Serialization).Serialize(stream, TestMessage);
+                var message = stream.ToArray();
+                consumer.HandleBasicDeliver(consumer.ConsumerTag, ulong.MaxValue, false, ExchangeName, PublicRoutingKey, basicProperties, message);
+
+                var messageReceived = messageReceivedEvent.WaitOne(receptionTimeout);
+
+                Check.That(messageReceived).IsTrue();
+                Check.That(receivedMessageType).IsEqualTo(messageTypeSent);
+                Check.That(componentCodeReceived).IsEqualTo(componentCodeSent);
+                Check.That(stateMachineCodeReceived).IsEqualTo(stateMachineCodeSent);
+                Check.That(stateMachineIdReceived).IsEqualTo(stateMachineIdSent);
+                Check.That(stateCodeReceived).IsEqualTo(stateCodeSent);
+                Check.That(errorMessageReceived).IsEqualTo(errorMessageSent);
+
+                subscriber.Unsubscribe(StateMachineA, messageReceptionHandler);
+            }
+        }
+
+        [Test]
         public void SnapshotTest()
         {
             EventingBasicConsumer consumer = null;

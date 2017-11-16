@@ -12,5 +12,6 @@ namespace ReactiveXComponent.Common
         public const string MessageType = "MessageType";
         public const string SessionData = "SessionData";
         public const string EventType = "EventType";
+        public const string ErrorMessage = "ErrorMessage";
     }
 }

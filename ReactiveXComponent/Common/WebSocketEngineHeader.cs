@@ -34,5 +34,7 @@ namespace ReactiveXComponent.Common
         public string MessageType { get; set; }
 
         public string PublishTopic { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 }

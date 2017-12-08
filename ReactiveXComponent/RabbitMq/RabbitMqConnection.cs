@@ -16,9 +16,36 @@ namespace ReactiveXComponent.RabbitMq
             _busDetails = configuration?.GetBusDetails();
         }
 
-        public IXCSession CreateSession()
+        public IXCSession CreateSession(ConfigurationOverrides configurationOverrides = null)
         {
-            return new RabbitMqSession(_xcConfiguration, _busDetails, _privateCommunicationIdentifier);
+            if (configurationOverrides == null)
+            {
+                return new RabbitMqSession(_xcConfiguration, _busDetails, _privateCommunicationIdentifier);
+            }
+
+            var busDetails = _busDetails.Clone();
+
+            if (configurationOverrides.Host != null)
+            {
+                busDetails.Host = configurationOverrides.Host;
+            }
+
+            if (configurationOverrides.Port != null)
+            {
+                busDetails.Port = int.Parse(configurationOverrides.Port);
+            }
+
+            if (configurationOverrides.Username != null)
+            {
+                busDetails.Username = configurationOverrides.Username;
+            }
+
+            if (configurationOverrides.Password != null)
+            {
+                busDetails.Password = configurationOverrides.Password;
+            }
+
+            return new RabbitMqSession(_xcConfiguration, busDetails, _privateCommunicationIdentifier);
         }
     }
 }

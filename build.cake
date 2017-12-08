@@ -1,7 +1,7 @@
 #tool "nuget:?package=NUnit.Runners&version=2.6.4"
 #tool "nuget:?package=ILRepack"
-#addin "Cake.FileHelpers&version=1.0.4"
-#addin "Cake.Incubator&version=1.0.56"
+#addin "Cake.FileHelpers&version=2.0.0"
+#addin "Cake.Incubator&version=1.6.0"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ReactiveXComponent.Common
 {
     public class WebSocketEndpoint
     {
+        public WebSocketEndpoint()
+        {
+            
+        }
+
         public WebSocketEndpoint(string name, string host, string port, WebSocketType type)
         {
             Name = name;
@@ -23,5 +23,14 @@ namespace ReactiveXComponent.Common
         public string Port { get; set; }
 
         public WebSocketType Type { get; set; }
+
+        public WebSocketEndpoint Clone()
+        {
+            return new WebSocketEndpoint(
+                (string)Name?.Clone(), 
+                (string)Host?.Clone(), 
+                (string)Port?.Clone(),
+                Type);
+        }
     }
 }

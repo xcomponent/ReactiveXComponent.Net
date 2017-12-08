@@ -1,10 +1,10 @@
-﻿using System;
+﻿using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 
 namespace ReactiveXComponent
 {
     public interface IXComponentApi
     {
-        IXCSession CreateSession();
+        IXCSession CreateSession(ConfigurationOverrides configurationOverrides = null);
     }
 }

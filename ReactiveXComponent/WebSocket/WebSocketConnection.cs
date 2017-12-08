@@ -20,8 +20,30 @@ namespace ReactiveXComponent.WebSocket
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
         }
 
-        public IXCSession CreateSession()
+        public IXCSession CreateSession(ConfigurationOverrides configurationOverrides = null)
         {
+            if (configurationOverrides == null)
+            {
+                return new WebSocketSession(_endpoint, _timeout, _xcConfiguration, _privateCommunicationIdentifier);
+            }
+
+            var endpoint = _endpoint.Clone();
+
+            if (configurationOverrides.Host != null)
+            {
+                endpoint.Host = configurationOverrides.Host;
+            }
+
+            if (configurationOverrides.Port != null)
+            {
+                endpoint.Port = configurationOverrides.Port;
+            }
+
+            if (configurationOverrides.WebSocketType != null)
+            {
+                endpoint.Type = configurationOverrides.WebSocketType.Value;
+            }
+
             return new WebSocketSession(_endpoint, _timeout, _xcConfiguration, _privateCommunicationIdentifier);
         }
     }

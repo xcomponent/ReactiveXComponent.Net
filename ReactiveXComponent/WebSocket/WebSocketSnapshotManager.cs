@@ -7,6 +7,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
+using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponent.WebSocket
 {
@@ -18,6 +19,7 @@ namespace ReactiveXComponent.WebSocket
         private readonly IXCConfiguration _xcConfiguration;
         private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>> _subscriptions;
         private readonly ConcurrentDictionary<SubscriptionKey, IDisposable> _streamSubscriptionsDico;
+        private SerializationType _serializationType;
 
         private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
 
@@ -31,6 +33,7 @@ namespace ReactiveXComponent.WebSocket
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _subscriptions = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<SubscriptionKey, IDisposable>();
+            InitSerializationType();
 
             _snapshotStream = Observable.FromEvent<EventHandler<List<MessageEventArgs>>, List<MessageEventArgs>>(
                 handler => (sender, e) => handler(e),
@@ -133,7 +136,7 @@ namespace ReactiveXComponent.WebSocket
                             StateCode = element.StateCode
                         };
 
-                        var messageEventArgs = new MessageEventArgs(stateMachineRefHeader, element.PublicMember);
+                        var messageEventArgs = new MessageEventArgs(stateMachineRefHeader, element.PublicMember, _serializationType);
                         stateMachineInstances.Add(messageEventArgs);
                     }
 
@@ -189,6 +192,26 @@ namespace ReactiveXComponent.WebSocket
             }
 
             _streamSubscriptionsDico.Clear();
+        }
+
+        private void InitSerializationType()
+        {
+            var serialization = _xcConfiguration.GetSerializationType();
+
+            switch (serialization)
+            {
+                case XCApiTags.Binary:
+                    _serializationType = SerializationType.Binary;
+                    break;
+                case XCApiTags.Json:
+                    _serializationType = SerializationType.Json;
+                    break;
+                case XCApiTags.Bson:
+                    _serializationType = SerializationType.Bson;
+                    break;
+                default:
+                    throw new XCSerializationException("Serialization type not supported");
+            }
         }
 
         #region IDisposable implementation

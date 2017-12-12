@@ -36,6 +36,7 @@ namespace ReactiveXComponentTest.WebSocket
             xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCode);
             xcConfiguration.GetSubscriberTopic(componentName, stateMachineName).Returns(x => subscriberPublicTopic);
             xcConfiguration.GetSnapshotTopic(componentName).Returns(x => snapshotTopic);
+            xcConfiguration.GetSerializationType().Returns(XCApiTags.Json);
 
             var webSocketClient = Substitute.For<IWebSocketClient>();
             webSocketClient.IsOpen.Returns(true);
@@ -191,6 +192,7 @@ namespace ReactiveXComponentTest.WebSocket
             xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCode);
             xcConfiguration.GetPublisherTopic(componentName, stateMachineName).Returns(x => publisherTopic);
             xcConfiguration.GetPublisherEventCode("System.String").Returns(9);
+            xcConfiguration.GetSerializationType().Returns(XCApiTags.Json);
 
             var webSocketClient = Substitute.For<IWebSocketClient>();
             webSocketClient.IsOpen.Returns(true);
@@ -270,6 +272,7 @@ namespace ReactiveXComponentTest.WebSocket
             xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCode);
             xcConfiguration.GetPublisherTopic(componentName, stateMachineName).Returns(x => publisherTopic);
             xcConfiguration.GetSnapshotTopic(componentName).Returns(x => snapshotTopic);
+            xcConfiguration.GetSerializationType().Returns(XCApiTags.Json);
 
             var snapshotReplyTopic = string.Empty;
             var webSocketClient = Substitute.For<IWebSocketClient>();

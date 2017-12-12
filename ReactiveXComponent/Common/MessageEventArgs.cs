@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using ReactiveXComponent.Common;
 using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponent.Common
@@ -8,25 +7,28 @@ namespace ReactiveXComponent.Common
 
     public class MessageEventArgs : EventArgs
     {        
-        public MessageEventArgs(StateMachineRefHeader stateMachineRefHeader, object messageReceived)
+        public MessageEventArgs(StateMachineRefHeader stateMachineRefHeader, object messageReceived, SerializationType serializationType)
         {
             StateMachineRefHeader = stateMachineRefHeader;
             MessageReceived = messageReceived;
+            SerializationType = serializationType;
         }
 
         public  StateMachineRefHeader StateMachineRefHeader { get; }
 
         public object MessageReceived { get; }
 
-        public T GetMessage<T>(SerializationType serializationType) where T : class
+        public SerializationType SerializationType { get; }
+
+        public T GetMessage<T>() where T : class
         {
-            if (serializationType == SerializationType.Binary)
+            if (SerializationType == SerializationType.Binary)
             {
                 return MessageReceived as T;
             }
 
-            if (serializationType == SerializationType.Json
-                     || serializationType == SerializationType.Bson)
+            if (SerializationType == SerializationType.Json
+                     || SerializationType == SerializationType.Bson)
             {
                 var jResult = MessageReceived as JObject;
                 return jResult?.ToObject<T>();

@@ -27,8 +27,8 @@ namespace ReactiveXComponentTest.Common
                 stream.Position = 0;
 
                 var deserializedObject = serializer.Deserialize(stream);
-                var messageEventArgs = new MessageEventArgs(null, deserializedObject);
-                var resultObject = messageEventArgs.GetMessage<TestObject>(serializationType);
+                var messageEventArgs = new MessageEventArgs(null, deserializedObject, serializationType);
+                var resultObject = messageEventArgs.GetMessage<TestObject>();
                 Check.That(resultObject).IsNotNull();
                 Check.That(resultObject).IsEqualTo(testObject);
             }

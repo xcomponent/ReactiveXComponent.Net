@@ -20,6 +20,7 @@ namespace ReactiveXComponent.RabbitMq
         private readonly string _privateCommunicationIdentifier;
         private readonly ISerializer _serializer;
         private readonly string _component;
+        private SerializationType _serializationType;
 
         private readonly ConcurrentDictionary<SubscriptionKey, RabbitMqSubscriberInfos> _subscribersDico;
         private readonly ConcurrentDictionary<StreamSubscriptionKey, IDisposable> _streamSubscriptionsDico;
@@ -36,6 +37,7 @@ namespace ReactiveXComponent.RabbitMq
             _streamSubscriptionsDico = new ConcurrentDictionary<StreamSubscriptionKey, IDisposable>();
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
             _serializer = serializer;
+            InitSerializationType();
             InitObservableCollection();
         }
 
@@ -139,7 +141,7 @@ namespace ReactiveXComponent.RabbitMq
 
                             var obj = _serializer.Deserialize(new MemoryStream(basicAckEventArgs.Body));
 
-                            var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, obj);
+                            var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, obj, _serializationType);
 
                             OnMessageReceived(msgEventArgs);
                         }
@@ -190,6 +192,26 @@ namespace ReactiveXComponent.RabbitMq
             catch (OperationInterruptedException e)
             {
                 throw new ReactiveXComponentException("Failed to init Subscriber: " + e.Message, e);
+            }
+        }
+
+        private void InitSerializationType()
+        {
+            var serialization = _xcConfiguration.GetSerializationType();
+
+            switch (serialization)
+            {
+                case XCApiTags.Binary:
+                    _serializationType = SerializationType.Binary;
+                    break;
+                case XCApiTags.Json:
+                    _serializationType = SerializationType.Json;
+                    break;
+                case XCApiTags.Bson:
+                    _serializationType = SerializationType.Bson;
+                    break;
+                default:
+                    throw new XCSerializationException("Serialization type not supported");
             }
         }
 

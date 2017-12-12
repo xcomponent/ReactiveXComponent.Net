@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
@@ -18,6 +14,7 @@ namespace ReactiveXComponent.WebSocket
         private readonly IWebSocketClient _webSocketClient;
         private readonly IXCConfiguration _xcConfiguration;
         private readonly string _privateCommunicationIdentifier;
+        private SerializationType _serializationType;
 
         private readonly ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>> _subscriptionsDico;
         private readonly ConcurrentDictionary<StreamSubscriptionKey, IDisposable> _streamSubscriptionsDico;
@@ -30,6 +27,7 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient = webSocketClient;
             _xcConfiguration = xcConfiguration;
             _privateCommunicationIdentifier = privateCommunicationIdentifier;
+            InitSerializationType();
 
             _subscriptionsDico = new ConcurrentDictionary<SubscriptionKey, EventHandler<WebSocketMessageEventArgs>>();
             _streamSubscriptionsDico = new ConcurrentDictionary<StreamSubscriptionKey, IDisposable>();
@@ -139,7 +137,7 @@ namespace ReactiveXComponent.WebSocket
                         {
                             var receivedObject = WebSocketMessageHelper.DeserializeString(receivedPacket.JsonMessage);
 
-                            var message = new MessageEventArgs(stateMachineRefHeader, receivedObject);
+                            var message = new MessageEventArgs(stateMachineRefHeader, receivedObject, _serializationType);
 
                             MessageReceived?.Invoke(this, message);
                         }
@@ -238,6 +236,26 @@ namespace ReactiveXComponent.WebSocket
         private T GetOptionalValue<T>(Option<T> optionalValue)
         {
             return optionalValue != null ? optionalValue.Fields[0] : default(T);
+        }
+
+        private void InitSerializationType()
+        {
+            var serialization = _xcConfiguration.GetSerializationType();
+
+            switch (serialization)
+            {
+                case XCApiTags.Binary:
+                    _serializationType = SerializationType.Binary;
+                    break;
+                case XCApiTags.Json:
+                    _serializationType = SerializationType.Json;
+                    break;
+                case XCApiTags.Bson:
+                    _serializationType = SerializationType.Bson;
+                    break;
+                default:
+                    throw new XCSerializationException("Serialization type not supported");
+            }
         }
 
         #region IDisposable implementation

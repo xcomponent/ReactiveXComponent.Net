@@ -1,5 +1,5 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
 using ReactiveXComponent.Parser;
@@ -18,6 +18,19 @@ namespace ReactiveXComponent
             AbstractXCConnectionFactory connectionFactory = new XCConnectionFactory(xcConfiguration, privateCommunicationIdentifier);
             var connectionType = xcConfiguration.GetConnectionType();
             _xcConnection = connectionFactory.CreateConnection(connectionType);
+        }
+
+        public static IXComponentApi CreateFromXCApi(string xcApiFilePath, string privateCommunicationIdentifier = null)
+        {
+            if (!File.Exists(xcApiFilePath))
+            {
+                throw new ReactiveXComponentException($"The file {xcApiFilePath} doesn't exist");
+            }
+
+            using (var stream = new FileStream(xcApiFilePath, FileMode.Open))
+            {
+                return CreateFromXCApi(stream, privateCommunicationIdentifier);
+            }
         }
 
         public static IXComponentApi CreateFromXCApi(Stream xcApiStream, string privateCommunicationIdentifier = null)

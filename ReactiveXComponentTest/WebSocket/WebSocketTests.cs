@@ -119,6 +119,7 @@ namespace ReactiveXComponentTest.WebSocket
             xcConfiguration.GetStateMachineCode(componentName, stateMachineName).Returns(x => stateMachineCodeSent);
             xcConfiguration.GetSubscriberTopic(componentName, stateMachineName).Returns(x => subscriberPublicTopic);
             xcConfiguration.GetSnapshotTopic(componentName).Returns(x => snapshotTopic);
+            xcConfiguration.GetSerializationType().Returns(XCApiTags.Json);
 
             var webSocketClient = Substitute.For<IWebSocketClient>();
             webSocketClient.IsOpen.Returns(true);

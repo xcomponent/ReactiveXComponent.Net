@@ -1,5 +1,5 @@
 
-[![](http://slack.xcomponent.com/badge.svg)](http://slack.xcomponent.com/)
+[![ReactiveXComponent.Net Nuget](https://img.shields.io/nuget/v/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)  [![ReactiveXComponent.Net Downloads](https://img.shields.io/nuget/dt/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)  [![](http://slack.xcomponent.com/badge.svg)](http://slack.xcomponent.com/)
 
 # .Net Reactive XComponent API
 
@@ -8,7 +8,6 @@
 ReactiveXComponent.Net is a .Net client API that allows you to interact with microservices generated with XComponent software.
 
 ## Install
-[![ReactiveXComponent.Net Nuget](https://img.shields.io/nuget/v/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net) [![ReactiveXComponent.Net Downloads](https://img.shields.io/nuget/dt/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)
 
 Use Nuget to install the latest version of the API:
 ``` nuget install ReactiveXComponent.Net -Pre```
@@ -17,24 +16,21 @@ Use Nuget to install the latest version of the API:
 
 Usage example of ReactiveXComponent.Net API
 ```csharp
-// All the info we need is in the xcApi file..
-var xcApiStream = new FileStream("HelloWorld.xcApi", FileMode.Open);
-
-// Get a XComponentApi..
-IXComponentApi xcApi = XComponentApi.CreateFromXCApi(xcApiStream);
+// All the info we need is in the xcApi file. Get a XComponentApi..
+IXComponentApi xcApi = XComponentApi.CreateFromXCApi(@".\HelloWorld.xcApi");
 
 // Create a session..
-using (IXCSession _xcSession = xcApi.CreateSession())
+using (IXCSession xcSession = xcApi.CreateSession())
 {
     var componentName = "HelloWorld";
     var helloWorldManagerStateMachineName = "HelloWorldManager";
     var helloWorldResponseStateMachineCode = 1837059171;
 
     // Create a subscriber..
-    var subscriber = _xcSession.CreateSubscriber(componentName);
+    var subscriber = xcSession.CreateSubscriber(componentName);
 
     // Create a publisher..
-    var publisher = _xcSession.CreatePublisher(componentName);
+    var publisher = xcSession.CreatePublisher(componentName);
 
     // Need to call subscribe for the state machine we are interested in..
     subscriber.Subscribe(helloWorldManagerStateMachineName, arg => {});
@@ -66,13 +62,14 @@ using (IXCSession _xcSession = xcApi.CreateSession())
 ## Build from source
 Download the source code and execute the following command in a PowerShell:
 ``` 
-.\build.ps1 -Target <target> -ScriptArgs '-buildConfiguration="<build_configuration>" -buildVersion="<build_version>"'
+.\build.ps1 -Target All
 ```
-Here is an exmaple:
-```
-.\build.ps1 -Target Build -ScriptArgs '-buildConfiguration="Debug" -buildVersion="1.0.0.1"'
-```
+That would build the source code run the tests and create a Nuget package under the *nuget* folder.
 
+The complete command that contains all the possible parameters is as follows:
+``` 
+.\build.ps1 -Target <Target> --buildConfiguration=<build_config> --buildVersion=<build_version> --setAssemblyVersion=<true_or_false>
+```
 
 **target** can be one of these values:   
 *Clean*  
@@ -89,6 +86,9 @@ Default value: *Release*
 
 **buildVersion** is the build version to set for the assembly or Nuget package.  
 Default value: *1.0.0-build1*
+
+**setAssemblyVersion** can be either *True* or *False*. When set to true the assembly version will be set to the value indicated by **buildVersion**.  
+Default value: *False*
 
 ## Contributing
 1. Fork it!

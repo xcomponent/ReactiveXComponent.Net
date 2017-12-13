@@ -1,4 +1,4 @@
-#tool "nuget:?package=NUnit.Runners&version=2.6.4"
+#tool "nuget:?package=NUnit.Runners&version=3.7.0&include=./**/*"
 #tool "nuget:?package=ILRepack"
 #addin "Cake.FileHelpers&version=2.0.0"
 #addin "Cake.Incubator&version=1.6.0"
@@ -47,8 +47,8 @@ Task("Test")
         };
         
         var testAssemblies = GetFiles(testAssembliesPatterns);
-        var nunitSettings = new NUnitSettings(){ ResultsFile = "TestResults.xml" };
-        NUnit(testAssemblies, nunitSettings);
+        var nunitSettings = new NUnit3Settings(){ Results = new[] { new NUnit3Result { FileName = "TestResults.xml" } } };
+        NUnit3(testAssemblies, nunitSettings);
     });
 
 Task("Merge")
@@ -80,10 +80,10 @@ Task("CreatePackage")
         var formattedNugetVersion = FormatNugetVersion(version);
 
         var filesToPackPatterns = new string[]
-            {
-                "./packaging/*.dll",
-                "./packaging/*.pdb"
-            };
+        {
+            "./packaging/*.dll",
+            "./packaging/*.pdb"
+        };
 
         var filesToPack = GetFiles(filesToPackPatterns);
 

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using NFluent;
 using NUnit.Framework;
 using ReactiveXComponent.Common;
@@ -10,8 +11,8 @@ namespace ReactiveXComponentTest.Configuration
     [TestFixture]
     public class ConfigurationTests
     {
-        private const string RabbitMqApiFileName = "RabbitMqTestApi.xcApi";
-        private const string WebSocketApiFileName = "webSocketTestApi.xcApi";
+        private readonly string _rabbitMqApiFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RabbitMqTestApi.xcApi");
+        private readonly string _webSocketApiFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "webSocketTestApi.xcApi");
 
         private IXCConfiguration _rabbitMqConfiguration;
         private IXCConfiguration _webSocketConfiguration;
@@ -22,11 +23,11 @@ namespace ReactiveXComponentTest.Configuration
 
             if (connectionType == ConnectionType.RabbitMq)
             {
-                apiFileName = RabbitMqApiFileName;
+                apiFileName = _rabbitMqApiFileName;
             }
             else if (connectionType == ConnectionType.WebSocket)
             {
-                apiFileName = WebSocketApiFileName;
+                apiFileName = _webSocketApiFileName;
             }
 
             return apiFileName;
@@ -35,11 +36,11 @@ namespace ReactiveXComponentTest.Configuration
         [SetUp]
         public void SetUp()
         {
-            var rabbitMqstream = new FileStream(RabbitMqApiFileName, FileMode.Open, FileAccess.Read);
+            var rabbitMqstream = new FileStream(_rabbitMqApiFileName, FileMode.Open, FileAccess.Read);
             _rabbitMqConfiguration = new XCConfiguration(new XCApiConfigParser());
             _rabbitMqConfiguration.Init(rabbitMqstream);
 
-            var webSocketstream = new FileStream(WebSocketApiFileName, FileMode.Open, FileAccess.Read);
+            var webSocketstream = new FileStream(_webSocketApiFileName, FileMode.Open, FileAccess.Read);
             _webSocketConfiguration = new XCConfiguration(new XCApiConfigParser());
             _webSocketConfiguration.Init(webSocketstream);
         }

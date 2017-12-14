@@ -27,7 +27,7 @@ namespace ReactiveXComponent
                 throw new ReactiveXComponentException($"The file {xcApiFilePath} doesn't exist");
             }
 
-            using (var stream = new FileStream(xcApiFilePath, FileMode.Open))
+            using (var stream = new FileStream(xcApiFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 return CreateFromXCApi(stream, privateCommunicationIdentifier);
             }

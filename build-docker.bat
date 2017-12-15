@@ -1,0 +1,2 @@
+set "CURRENT_PATH=%cd:\=/%"
+docker run --rm -it -v %CURRENT_PATH%:/repository xcomponent/mono-git:1.0.1 /bin/bash -c "rsync -a /repository/ /src/ --exclude=.git --exclude=.vs --exclude=tools --exclude=bin --exclude=obj --exclude=packages --exclude=nuget && rsync -avz /repository/tools/packages.config /src/tools/ && cd src && dos2unix build.sh && chmod +x build.sh && ./build.sh -t All -mergelib=\"/usr/lib/mono/4.5/Facades/\""

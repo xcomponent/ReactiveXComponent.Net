@@ -12,7 +12,7 @@ namespace ReactiveXComponentTest.Configuration
     public class ConfigurationTests
     {
         private readonly string _rabbitMqApiFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RabbitMqTestApi.xcApi");
-        private readonly string _webSocketApiFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "webSocketTestApi.xcApi");
+        private readonly string _webSocketApiFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WebSocketTestApi.xcApi");
 
         private IXCConfiguration _rabbitMqConfiguration;
         private IXCConfiguration _webSocketConfiguration;

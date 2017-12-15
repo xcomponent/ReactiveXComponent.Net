@@ -1,5 +1,5 @@
 
-[![ReactiveXComponent.Net Nuget](https://img.shields.io/nuget/v/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)  [![ReactiveXComponent.Net Downloads](https://img.shields.io/nuget/dt/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)  [![](http://slack.xcomponent.com/badge.svg)](http://slack.xcomponent.com/)
+[![ReactiveXComponent.Net Nuget](https://img.shields.io/nuget/v/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)  [![ReactiveXComponent.Net Downloads](https://img.shields.io/nuget/dt/ReactiveXComponent.Net.svg)](https://www.nuget.org/packages/ReactiveXComponent.Net)  [![Build Status](https://travis-ci.org/xcomponent/ReactiveXComponent.Net.svg?branch=master)](https://travis-ci.org/xcomponent/ReactiveXComponent.Net)  [![](http://slack.xcomponent.com/badge.svg)](http://slack.xcomponent.com/)
 
 # .Net Reactive XComponent API
 

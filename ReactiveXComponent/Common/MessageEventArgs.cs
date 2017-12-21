@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using ReactiveXComponent.Serializer;
+﻿using ReactiveXComponent.Serializer;
 
 namespace ReactiveXComponent.Common
 {
@@ -22,19 +21,8 @@ namespace ReactiveXComponent.Common
 
         public T GetMessage<T>() where T : class
         {
-            if (SerializationType == SerializationType.Binary)
-            {
-                return MessageReceived as T;
-            }
-
-            if (SerializationType == SerializationType.Json
-                     || SerializationType == SerializationType.Bson)
-            {
-                var jResult = MessageReceived as JObject;
-                return jResult?.ToObject<T>();
-            }
-
-            return null;
+            var serializer = SerializerFactory.CreateSerializer(SerializationType);
+            return serializer.CastObject<T>(MessageReceived);
         }
     }
 }

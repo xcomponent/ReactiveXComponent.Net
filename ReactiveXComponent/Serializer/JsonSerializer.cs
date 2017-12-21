@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ReactiveXComponent.Serializer
 {
@@ -39,6 +40,12 @@ namespace ReactiveXComponent.Serializer
             {
                 throw new XCSerializationException(e.Message, e);
             }
+        }
+
+        public T CastObject<T>(object message) where T : class
+        {
+            var jResult = message as JObject;
+            return jResult?.ToObject<T>();
         }
     }
 }

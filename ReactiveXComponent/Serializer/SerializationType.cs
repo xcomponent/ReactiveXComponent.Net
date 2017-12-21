@@ -4,6 +4,7 @@
     {
         Binary = 0,
         Json = 1,
-        Bson = 2
+        Bson = 2,
+        Custom = 3
     }
 }

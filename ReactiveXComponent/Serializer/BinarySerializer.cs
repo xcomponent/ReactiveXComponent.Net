@@ -38,5 +38,10 @@ namespace ReactiveXComponent.Serializer
 
             return obj;
         }
+
+        public T CastObject<T>(object message) where T : class
+        {
+            return message as T;
+        }
     }
 }

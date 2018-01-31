@@ -12,54 +12,61 @@ namespace ReactiveXComponent.Parser
     public class XCApiConfigParser : IXCApiConfigParser
     {
         private XCApiDescription _xcApiDescription;
-
-        private Dictionary<string, long> _componentCodeByComponent;
-        private Dictionary<string, long> _stateMachineCodeByStateMachine;
+        private XNamespace _xc;
         private Dictionary<string, int> _eventCodeByEvent;
         private Dictionary<TopicIdentifier, string> _publisherTopicByIdentifier;
         private Dictionary<TopicIdentifier, string> _subscriberTopicByIdentifier;
         private Dictionary<long, string> _snapshotTopicByComponent;
+        private Dictionary<string, List<StateMachineInfo>> _stateMachineInfoByComponentRepository;
+        private Dictionary<string, int> _componentCodeByComponentNameRepo;
 
-        private XNamespace _xc;
 
         public void Parse(Stream xcApiStream)
         {
             var reader = XmlReader.Create(xcApiStream);
             _xcApiDescription = new XCApiDescription(reader);
             _xc = "http://xcomponent.com/DeploymentConfig.xsd";
-
-            _componentCodeByComponent = CreateComponentCodeByNameRepository(_xcApiDescription.GetComponentsNode());
-            _stateMachineCodeByStateMachine = CreateStateMachineCodeByNameRepository(_xcApiDescription.GetStateMachinesNode());
+            ParseComponentNodes(_xcApiDescription.GetComponentsNode(), out _componentCodeByComponentNameRepo, out _stateMachineInfoByComponentRepository);
             _eventCodeByEvent = CreateEventCodeByEventRepository(_xcApiDescription.GetPublishersNode());
             _publisherTopicByIdentifier = CreatePublisherTopicByComponentAndStateMachineRepository(_xcApiDescription.GetPublishersNode());
             _subscriberTopicByIdentifier = CreateConsumerTopicByComponentAndStateMachineAndRepository(_xcApiDescription.GetConsumersNode());
-            _snapshotTopicByComponent = CreateSnapshotTopicByComponentRepository(_xcApiDescription.GetSnapshotsNode()); ;
+            _snapshotTopicByComponent = CreateSnapshotTopicByComponentRepository(_xcApiDescription.GetSnapshotsNode());
         }
 
-        private Dictionary<string, long> CreateComponentCodeByNameRepository(IEnumerable<XElement> components)
+
+        private void ParseComponentNodes(IEnumerable<XElement> components, 
+            out Dictionary<string, int> componentCodeByComponentNameRepo, 
+            out Dictionary<string, List<StateMachineInfo>> stateMachineInfoByComponentRepository)
         {
-            Dictionary<string, long> componentCodeByNameRepo = new Dictionary<string, long>();
+            componentCodeByComponentNameRepo = new Dictionary<string, int>();
+            stateMachineInfoByComponentRepository = new Dictionary<string, List<StateMachineInfo>>();
 
             foreach (XElement component in components)
             {
-                AddComponentToRepository(componentCodeByNameRepo, component);
-            }
-            return componentCodeByNameRepo;
-        }
+                var componentName = component.Attribute(XCApiTags.Name)?.Value;
+                if (string.IsNullOrEmpty(componentName))
+                    continue;
 
-        private void AddComponentToRepository(Dictionary<string, long> repository, XElement component)
-        {
-            repository.Add(component.Attribute(XCApiTags.Name).Value, Convert.ToInt64(component.Attribute(XCApiTags.Id).Value));
-        }
+                componentCodeByComponentNameRepo.Add(componentName, Convert.ToInt32(component.Attribute(XCApiTags.Id)?.Value));
+                
+                if (!_stateMachineInfoByComponentRepository.ContainsKey(componentName))
+                {
+                    var stateMachines = component.Descendants(_xc + "stateMachine");
+                    var statemachineInfoList = new List<StateMachineInfo>(
+                        stateMachines.Select(stateMachine => new StateMachineInfo
+                            {
+                                StateMachineName = stateMachine?.Attribute(XCApiTags.Name)?.Value,
+                                StateMachineCode = Convert.ToInt32(stateMachine?.Attribute(XCApiTags.Id)?.Value)
+                            })
+                            .ToList()
+                    );
 
-        private Dictionary<string, long> CreateStateMachineCodeByNameRepository(IEnumerable<XElement> stateMachines)
-        {
-            Dictionary<string, long> stateMachineCodeRepo = new Dictionary<string, long>();
-            foreach (XElement stateMachine in stateMachines)
-            {
-                stateMachineCodeRepo.Add(stateMachine.Attribute(XCApiTags.Name).Value, Convert.ToInt64(stateMachine.Attribute(XCApiTags.Id).Value));
+                    if (statemachineInfoList.Any())
+                    {
+                        _stateMachineInfoByComponentRepository.Add(componentName, statemachineInfoList);
+                    }
+                }
             }
-            return stateMachineCodeRepo;
         }
 
         private Dictionary<string, int> CreateEventCodeByEventRepository(IEnumerable<XElement> publishNodes)
@@ -78,7 +85,7 @@ namespace ReactiveXComponent.Parser
             if (node?.Attribute(XCApiTags.EventName)?.Value != null && !repository.ContainsKey(node.Attribute(XCApiTags.EventName).Value))
             {
                 repository.Add(node.Attribute(XCApiTags.EventName).Value,
-                    Convert.ToInt32(node.Attribute(XCApiTags.EventCode).Value));
+                    Convert.ToInt32(node.Attribute(XCApiTags.EventCode)?.Value));
             }
         }
 
@@ -114,27 +121,27 @@ namespace ReactiveXComponent.Parser
 
             if (!repository.ContainsKey(topicIdentifier))
             {
-                repository.Add(topicIdentifier, node?.Descendants(_xc + XCApiTags.Topic).FirstOrDefault().Value);
+                repository.Add(topicIdentifier, node?.Descendants(_xc + XCApiTags.Topic).FirstOrDefault()?.Value);
             }
         }
 
         private Dictionary<long, string> CreateSnapshotTopicByComponentRepository(IEnumerable<XElement> snapshotNodes)
         {
-            Dictionary<long, string> SnapshotTopicByComponentRepo = new Dictionary<long, string>();
-            foreach (XElement node in snapshotNodes)
+            var snapshotTopicByComponentRepo = new Dictionary<long, string>();
+            foreach (var node in snapshotNodes)
             {
-                AddSnapshotTopicToRepository(SnapshotTopicByComponentRepo, node);
+                AddSnapshotTopicToRepository(snapshotTopicByComponentRepo, node);
             }
-            return SnapshotTopicByComponentRepo;
+            return snapshotTopicByComponentRepo;
         }
 
-        private void AddSnapshotTopicToRepository(Dictionary<long, string> repository, XElement node)
+        private void AddSnapshotTopicToRepository(IDictionary<long, string> repository, XElement node)
         {
             var componentCode = Convert.ToInt64(node?.Attribute(XCApiTags.ComponentCode)?.Value);
 
             if (!repository.ContainsKey(componentCode))
             {
-                repository.Add(componentCode, node?.Descendants(_xc + XCApiTags.Topic).FirstOrDefault().Value);
+                repository.Add(componentCode, node?.Descendants(_xc + XCApiTags.Topic).FirstOrDefault()?.Value);
             }
         }
 
@@ -142,15 +149,12 @@ namespace ReactiveXComponent.Parser
         {
             var commmunicationNode = _xcApiDescription.GetCommunicationNode()?.FirstOrDefault();
 
-            if (commmunicationNode != null)
-            {
-                var communicationChildElements = commmunicationNode.Elements().ToList();
+            var communicationChildElements = commmunicationNode?.Elements().ToList();
 
-                if (communicationChildElements != null && communicationChildElements.Count == 1)
-                {
-                    var connection = communicationChildElements.FirstOrDefault();
-                    return connection.Name.LocalName;
-                }
+            if (communicationChildElements != null && communicationChildElements.Count == 1)
+            {
+                var connection = communicationChildElements.FirstOrDefault();
+                return connection?.Name.LocalName;
             }
 
             return string.Empty;
@@ -196,16 +200,17 @@ namespace ReactiveXComponent.Parser
 
         public long GetComponentCode(string component)
         {
-            long componentCode;
-            _componentCodeByComponent.TryGetValue(component, out componentCode);
+            int componentCode;
+            _componentCodeByComponentNameRepo.TryGetValue(component, out componentCode);
             return componentCode;
         }
 
         public long GetStateMachineCode(string component, string stateMachine)
         {
-            long stateMachineCode = 0;
-            _stateMachineCodeByStateMachine?.TryGetValue(stateMachine, out stateMachineCode);
-            return stateMachineCode;
+            if (!_stateMachineInfoByComponentRepository.ContainsKey(component)) return 0;
+
+            var stateMachineInfo = _stateMachineInfoByComponentRepository[component]?.FirstOrDefault(stmInfo => stmInfo.StateMachineName.Equals(stateMachine));
+            return stateMachineInfo?.StateMachineCode ?? 0;
         }
 
         public int GetPublisherEventCode(string eventName)

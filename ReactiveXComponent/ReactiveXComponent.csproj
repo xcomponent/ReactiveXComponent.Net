@@ -109,6 +109,7 @@
     <Compile Include="Connection\IXCSubscriber.cs" />
     <Compile Include="Connection\IXCConnection.cs" />
     <Compile Include="Parser\IXCApiConfigParser.cs" />
+    <Compile Include="Parser\StateMachineInfo.cs" />
     <Compile Include="Parser\XCApiDescription.cs" />
     <Compile Include="Connection\IXCPublisher.cs" />
     <Compile Include="Connection\IXCSession.cs" />

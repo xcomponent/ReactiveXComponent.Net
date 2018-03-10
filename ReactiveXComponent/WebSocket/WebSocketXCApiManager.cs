@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using ReactiveXComponent.Common;
@@ -62,8 +65,28 @@ namespace ReactiveXComponent.WebSocket
 
             return result;
         }
+     
+        private string unzipString(byte[] data)
 
+        {
 
+            MemoryStream memory = new MemoryStream(data, false);
+
+            // gzip wraps around memory stream, data read with gzip is decompressed from memory stream
+
+            GZipStream gzip = new GZipStream(memory, CompressionMode.Decompress);
+
+            StreamReader rdr = new StreamReader(gzip, Encoding.UTF8);
+
+            string sUnzipped = rdr.ReadToEnd();
+
+            ;
+
+            return sUnzipped;
+
+        }
+
+      
         public string GetXCApi(string apiFullName, string requestId = null, TimeSpan ? timeout = null)
         {
             var delay = timeout ?? TimeSpan.FromSeconds(10);
@@ -73,7 +96,7 @@ namespace ReactiveXComponent.WebSocket
             {
                 if (response.RequestId == requestId && response.ApiFound)
                 {
-                    result = response.ApiName;
+                    result = unzipString(Convert.FromBase64String(response.Content));
                     lockEvent.Set();
                 }
             });

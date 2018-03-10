@@ -32,9 +32,9 @@ namespace ReactiveXComponent.RabbitMq
 
         #region IXCPublisher implementation
 
-        public void SendEvent(string stateMachine, object message, Visibility visibility = Visibility.Public)
+        public void SendEvent(string stateMachine, object message, string messageType, Visibility visibility = Visibility.Public)
         {
-            var header = CreateHeader(_component, stateMachine, message, visibility);
+            var header = CreateHeader(_component, stateMachine, message, messageType, visibility);
 
             if (header == null) return;
 
@@ -45,6 +45,11 @@ namespace ReactiveXComponent.RabbitMq
             message = message ?? 0;
 
             Send(message, routingKey, prop);
+        }
+
+        public void SendEvent(string stateMachine, object message, Visibility visibility = Visibility.Public)
+        {
+            SendEvent(stateMachine, message, message?.GetType().ToString() ?? string.Empty, visibility);
         }
 
         public void SendEvent(StateMachineRefHeader stateMachineRefHeader, object message, Visibility visibility = Visibility.Public)
@@ -87,10 +92,9 @@ namespace ReactiveXComponent.RabbitMq
             _publisherChannel.ExchangeDeclare(_exchangeName, ExchangeType.Topic);
         }
 
-        private Header CreateHeader(string component, string stateMachine, object message, Visibility visibility)
+        private Header CreateHeader(string component, string stateMachine, object message, string messageType, Visibility visibility)
         {
             var defaultValue = -1;
-            var messageType = message?.GetType().ToString() ?? string.Empty;
 
             if (_configuration == null)
             {

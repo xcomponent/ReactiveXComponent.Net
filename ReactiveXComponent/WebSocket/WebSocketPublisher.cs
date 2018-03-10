@@ -27,17 +27,22 @@ namespace ReactiveXComponent.WebSocket
 
         public void SendEvent(string stateMachine, object message, Visibility visibility = Visibility.Public)
         {
+            SendEvent(stateMachine, message, message?.GetType().ToString(), visibility);
+        }
+
+        public void SendEvent(string stateMachine, object message, string messageType, Visibility visibility = Visibility.Public)
+        {
             if (!_webSocketClient.IsOpen) return;
-            
-            var inputHeader = CreateWebSocketHeader(stateMachine, message, visibility);
+
+            var inputHeader = CreateWebSocketHeader(stateMachine, messageType, visibility);
             var componentCode = _xcConfiguration.GetComponentCode(_component);
             var topic = _xcConfiguration.GetPublisherTopic(_component, stateMachine);
             var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
-                    WebSocketCommand.Input,
-                    inputHeader,
-                    message,
-                    componentCode.ToString(),
-                    topic);
+                WebSocketCommand.Input,
+                inputHeader,
+                message,
+                componentCode.ToString(),
+                topic);
 
             _webSocketClient.Send(webSocketRequest);
         }
@@ -71,15 +76,14 @@ namespace ReactiveXComponent.WebSocket
 
         #endregion
 
-        private WebSocketEngineHeader CreateWebSocketHeader(string stateMachine, object message, Visibility visibility = Visibility.Public)
+        private WebSocketEngineHeader CreateWebSocketHeader(string stateMachine, string messageType, Visibility visibility = Visibility.Public)
         {
-            var messageType = message?.GetType();
             var webSocketEngineHeader = new WebSocketEngineHeader
             {
                 ComponentCode = _xcConfiguration.GetComponentCode(_component),
                 StateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine),
-                EventCode = _xcConfiguration.GetPublisherEventCode(messageType?.ToString()),
-                MessageType = messageType?.ToString(),
+                EventCode = _xcConfiguration.GetPublisherEventCode(messageType),
+                MessageType = messageType,
                 PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : null
             };
 

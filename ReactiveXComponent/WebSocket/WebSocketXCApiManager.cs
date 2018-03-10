@@ -66,24 +66,14 @@ namespace ReactiveXComponent.WebSocket
             return result;
         }
      
-        private string unzipString(byte[] data)
-
+        private string UnzipString(byte[] data)
         {
-
-            MemoryStream memory = new MemoryStream(data, false);
-
-            // gzip wraps around memory stream, data read with gzip is decompressed from memory stream
-
-            GZipStream gzip = new GZipStream(memory, CompressionMode.Decompress);
-
-            StreamReader rdr = new StreamReader(gzip, Encoding.UTF8);
-
-            string sUnzipped = rdr.ReadToEnd();
-
-            ;
-
-            return sUnzipped;
-
+            using (var memoryStream = new MemoryStream(data, false))
+            using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+            using (var reader = new StreamReader(gzipStream, Encoding.UTF8))
+            {
+                return reader.ReadToEnd();
+            }
         }
 
       
@@ -96,10 +86,11 @@ namespace ReactiveXComponent.WebSocket
             {
                 if (response.RequestId == requestId && response.ApiFound)
                 {
-                    result = unzipString(Convert.FromBase64String(response.Content));
+                    result = UnzipString(Convert.FromBase64String(response.Content));
                     lockEvent.Set();
                 }
             });
+            
             var request = new WebSocketXCApiCommand
             {
                 Command = WebSocketCommand.GetXCApi,

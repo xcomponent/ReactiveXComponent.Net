@@ -25,22 +25,22 @@ namespace ReactiveXComponent.RabbitMq
 
             var busDetails = _busDetails.Clone();
 
-            if (configurationOverrides.Host != null)
+            if (configurationOverrides.HostHasValue())
             {
                 busDetails.Host = configurationOverrides.Host;
             }
 
-            if (configurationOverrides.Port != null)
+            if (configurationOverrides.PortHasValue())
             {
                 busDetails.Port = int.Parse(configurationOverrides.Port);
             }
 
-            if (configurationOverrides.Username != null)
+            if (configurationOverrides.UsernameHasValue())
             {
                 busDetails.Username = configurationOverrides.Username;
             }
 
-            if (configurationOverrides.Password != null)
+            if (configurationOverrides.PasswordHasValue())
             {
                 busDetails.Password = configurationOverrides.Password;
             }

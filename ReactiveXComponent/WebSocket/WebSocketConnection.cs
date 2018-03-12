@@ -29,22 +29,22 @@ namespace ReactiveXComponent.WebSocket
 
             var endpoint = _endpoint.Clone();
 
-            if (configurationOverrides.Host != null)
+            if (configurationOverrides.HostHasValue())
             {
                 endpoint.Host = configurationOverrides.Host;
             }
 
-            if (configurationOverrides.Port != null)
+            if (configurationOverrides.PortHasValue())
             {
                 endpoint.Port = configurationOverrides.Port;
             }
 
-            if (configurationOverrides.WebSocketType != null)
+            if (configurationOverrides.WebSocketTypeHasValue())
             {
                 endpoint.Type = configurationOverrides.WebSocketType.Value;
             }
 
-            return new WebSocketSession(_endpoint, _timeout, _xcConfiguration, _privateCommunicationIdentifier);
+            return new WebSocketSession(endpoint, _timeout, _xcConfiguration, _privateCommunicationIdentifier);
         }
     }
 }

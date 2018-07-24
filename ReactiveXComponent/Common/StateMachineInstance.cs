@@ -5,7 +5,7 @@ namespace ReactiveXComponent.Common
     [Serializable]
     public class StateMachineInstance
     {
-        public long StateMachineId { get; set; }
+        public string StateMachineId { get; set; }
 
         public int AgentId { get; set; }
 

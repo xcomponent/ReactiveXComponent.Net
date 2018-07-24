@@ -101,7 +101,7 @@ namespace ReactiveXComponentTest.WebSocket
             const string componentName = "GoodByeWorld";
             const int componentCodeSent = -824151934;
             const int stateMachineCodeSent = 405360011;
-            const long stateMachineIdSent = 81;
+            const string stateMachineIdSent = "81";
             const int stateCodeSent = -2147483648;
             const string stateMachineName = "Result";
             const string subscriberPublicTopic = "output.1_0.HelloWorldMicroservice.GoodByeWorld.Result";
@@ -110,7 +110,7 @@ namespace ReactiveXComponentTest.WebSocket
 
             var componentCodeReceived = 0;
             var stateMachineCodeReceived = 0;
-            var stateMachineIdReceived = 0L;
+            string stateMachineIdReceived = null;
             var stateCodeReceived = 0;
             var errorMessageReceived = string.Empty;
 
@@ -177,7 +177,7 @@ namespace ReactiveXComponentTest.WebSocket
             const string publisherTopic = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
 
             var stateMachineRef = new StateMachineRefHeader() {
-                StateMachineId = 0,
+                StateMachineId = "0",
                 ComponentCode = componentCode,
                 StateMachineCode = stateMachineCode,
                 StateCode = 0,

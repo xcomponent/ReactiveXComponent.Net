@@ -70,10 +70,10 @@ namespace ReactiveXComponentTest.RabbitMq
             var exchangeName = string.Empty;
             long componentCode = -1;
             long stateMachineCode = -1;
-            long stateMachineId = -1;
+            string stateMachineId = null;
             var topic = string.Empty;
             const int timeoutReceive = 10000;
-            var stateMachineIdToSend = 1;
+            string stateMachineIdToSend = "1";
 
             using (var publisher = new RabbitMqPublisher(ComponentNameA, configuration, connection, GetSerializer(Serialization), PrivateCommincationIdentifier))
             using (var messageSentEvent = new AutoResetEvent(false))
@@ -268,14 +268,14 @@ namespace ReactiveXComponentTest.RabbitMq
             const string messageTypeSent = "System.String";
             const int componentCodeSent = 1;
             const int stateMachineCodeSent = 2;
-            const long stateMachineIdSent = 81;
+            const string stateMachineIdSent = "81";
             const int stateCodeSent = -2147483648;
             const string errorMessageSent = "Some error message";
             const int eventCode = 1;
 
             var componentCodeReceived = 0;
             var stateMachineCodeReceived = 0;
-            var stateMachineIdReceived = 0L;
+            string stateMachineIdReceived = null;
             var stateCodeReceived = 0;
             var errorMessageReceived = string.Empty;
             

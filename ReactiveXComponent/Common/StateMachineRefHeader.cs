@@ -20,7 +20,7 @@ namespace ReactiveXComponent.Common
         {
             unchecked
             {
-                var hashCode = StateMachineId.GetHashCode();
+                var hashCode = (StateMachineId != null ? StateMachineId.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ StateCode;
                 hashCode = (hashCode * 397) ^ StateMachineCode;
                 hashCode = (hashCode * 397) ^ ComponentCode;
@@ -32,7 +32,7 @@ namespace ReactiveXComponent.Common
             }
         }
 
-        public long StateMachineId { get; set; }
+        public string StateMachineId { get; set; }
 
         public int StateCode { get; set; }
 

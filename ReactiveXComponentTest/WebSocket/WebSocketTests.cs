@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NFluent;
 using NSubstitute;
@@ -301,22 +302,18 @@ namespace ReactiveXComponentTest.WebSocket
             using (var webSocketPublisher = new WebSocketPublisher(componentName, webSocketClient, xcConfiguration, privateTopic))
             using (var snapshotReceivedEvent = new AutoResetEvent(false))
             {
-                var snapshotHandler = new Action<List<MessageEventArgs>>(args =>
+                List<MessageEventArgs> instances = new List<MessageEventArgs>();
+                Task.Run(async () =>
                 {
-                    if (args.All(instance => instance.StateMachineRefHeader.ComponentCode == componentCode
-                                    && instance.StateMachineRefHeader.StateMachineCode == stateMachineCode))
-                    {
-                        snapshotReceivedEvent.Set();
-                    }
+                    instances = await webSocketPublisher.GetSnapshotAsync(stateMachineName, 2);
+                }).GetAwaiter().OnCompleted(() =>
+                {
+                    snapshotReceivedEvent.Set();
                 });
-
-                webSocketPublisher.GetSnapshotAsync(stateMachineName, snapshotHandler);
 
                 var snapshotReceived = snapshotReceivedEvent.WaitOne(_timeout);
                 Check.That(snapshotReceived).IsTrue();
-
-                var snapshot = webSocketPublisher.GetSnapshot(stateMachineName);
-                Check.That(snapshot.Count == 1);
+                Check.That(instances.Count == 1);
             }
         }
 

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NFluent;
 using NSubstitute;
@@ -70,10 +72,10 @@ namespace ReactiveXComponentTest.RabbitMq
             var exchangeName = string.Empty;
             long componentCode = -1;
             long stateMachineCode = -1;
-            long stateMachineId = -1;
+            string stateMachineId = null;
             var topic = string.Empty;
             const int timeoutReceive = 10000;
-            var stateMachineIdToSend = 1;
+            string stateMachineIdToSend = "1";
 
             using (var publisher = new RabbitMqPublisher(ComponentNameA, configuration, connection, GetSerializer(Serialization), PrivateCommincationIdentifier))
             using (var messageSentEvent = new AutoResetEvent(false))
@@ -268,14 +270,14 @@ namespace ReactiveXComponentTest.RabbitMq
             const string messageTypeSent = "System.String";
             const int componentCodeSent = 1;
             const int stateMachineCodeSent = 2;
-            const long stateMachineIdSent = 81;
+            const string stateMachineIdSent = "81";
             const int stateCodeSent = -2147483648;
             const string errorMessageSent = "Some error message";
             const int eventCode = 1;
 
             var componentCodeReceived = 0;
             var stateMachineCodeReceived = 0;
-            var stateMachineIdReceived = 0L;
+            string stateMachineIdReceived = null;
             var stateCodeReceived = 0;
             var errorMessageReceived = string.Empty;
             
@@ -341,8 +343,14 @@ namespace ReactiveXComponentTest.RabbitMq
             }
         }
 
-        [Test]
-        public void SnapshotTest()
+        [TestCase(7, 7)]
+        [TestCase(7, 2)]
+        [TestCase(7, 3)]
+        [TestCase(7, 10)]
+        [TestCase(7, 0)]
+        [TestCase(7, -1)]
+        [TestCase(6, 6)]
+        public void SnapshotTest(int instancesCount, int chunkSize)
         {
             EventingBasicConsumer consumer = null;
 
@@ -361,7 +369,7 @@ namespace ReactiveXComponentTest.RabbitMq
             channel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, true, true, null)).DoNotCallBase();
             var queueDeclareOk = new QueueDeclareOk(QueueName, uint.MaxValue, uint.MaxValue);
             channel.QueueDeclare().ReturnsForAnyArgs(queueDeclareOk);
-
+            
             var consumeAction = new Action<string, bool, IBasicConsumer>((queueName, noAck, aconsumer) => 
             {
                 consumer = (EventingBasicConsumer)aconsumer;
@@ -395,46 +403,50 @@ namespace ReactiveXComponentTest.RabbitMq
             using (var snapshotReceivedEvent = new AutoResetEvent(false))
             {
                 List<MessageEventArgs> snapshotInstances = null;
-
-                var snapshotHandler = new Action<List<MessageEventArgs>>(instances =>
+                Task.Run(async () =>
                 {
-                    snapshotInstances = instances;
+                    snapshotInstances = await publisher.GetSnapshotAsync(StateMachineA, chunkSize);
+                }).GetAwaiter().OnCompleted(() =>
+                {
                     snapshotReceivedEvent.Set();
                 });
 
-                publisher.GetSnapshotAsync(StateMachineA, snapshotHandler);
-
-                var stateMachineRef = new StateMachineRefHeader() {
+                var stateMachineRef = new StateMachineRefHeader 
+                {
                     ComponentCode = componentCode,
                     StateMachineCode = stateMachineCode,
                     PrivateTopic = PublicRoutingKey
                 };
+                
+                var instances = new List<StateMachineInstance>();
 
-                var stateMachineInstances = new List<StateMachineInstance>()
+                for (var i = 0; i < instancesCount; i++)
                 {
-                    new StateMachineInstance()
-                    {
+                    instances.Add(new StateMachineInstance() {
                         ComponentCode = componentCode,
                         StateMachineCode = stateMachineCode,
                         PublicMember = TestMessage
-                    }
-                };
-                
-                var message = SerializeSnapshotInstances(stateMachineInstances);
+                    });
+                }
 
-                var basicProperties = new BasicProperties() 
-                {
+                var chunks = SerializeSnapshotInstancesInChunks(instances, chunkSize);
+                var basicProperties = new BasicProperties {
                     Headers = RabbitMqHeaderConverter.CreateHeaderFromStateMachineRefHeader(stateMachineRef, IncomingEventType.Snapshot, eventCode)
                 };
-
-                consumer.HandleBasicDeliver(consumer.ConsumerTag, ulong.MaxValue, false, ExchangeName, snapshotReplyTopic, basicProperties, message);
+                
+                foreach (var chunk in chunks)
+                {
+                    Thread.Sleep(100);
+                    consumer.HandleBasicDeliver(consumer.ConsumerTag, ulong.MaxValue, false, ExchangeName, snapshotReplyTopic, basicProperties, chunk);
+                }
 
                 var messageReceived = snapshotReceivedEvent.WaitOne(receptionTimeout);
 
                 Check.That(messageReceived).IsTrue();
-                Check.That(snapshotInstances.Count).IsEqualTo(1);
+                Check.That(snapshotInstances.Count).IsEqualTo(instancesCount);
                 Check.That(snapshotInstances.FirstOrDefault()?.MessageReceived).IsInstanceOf<string>();
                 Check.That((string)(snapshotInstances.FirstOrDefault()?.MessageReceived)).IsEqualTo(TestMessage);
+                snapshotReceivedEvent.Dispose();
             }
         }
 
@@ -453,39 +465,66 @@ namespace ReactiveXComponentTest.RabbitMq
                     return new BinarySerializer();
             }
         }
-        private byte[] SerializeSnapshotInstances(List<StateMachineInstance> instances)
+
+        private List<byte[]> SerializeSnapshotInstancesInChunks(List<StateMachineInstance> instances, int? chunkSize = 1)
         {
-            var serializedInstances = JsonConvert.SerializeObject(instances);
-            var stream = new MemoryStream();
-            var streamWriter = new StreamWriter(stream);
-            streamWriter.Write(serializedInstances);
-            streamWriter.Flush();
-            stream.Seek(0, SeekOrigin.Begin);
-            byte[] compressedBytes = null;
-
-            using (var compressed = new MemoryStream())
+            
+            var chunks = new List<byte[]>();
+            var size = 0;
+            if (chunkSize.HasValue && chunkSize.Value <= 0)
             {
-                using (var compressor = new GZipStream(compressed, CompressionMode.Compress))
-                {
-                    stream.CopyTo(compressor);
-                }
-
-                compressedBytes = compressed.ToArray();
+                size = instances.Count;
+            }
+            else
+            {
+                size = chunkSize.Value;
             }
 
-            var base64String = Convert.ToBase64String(compressedBytes, Base64FormattingOptions.None);
-            var snapshotItems = new SnapshotItems() 
+            var chunksCount = 1;
+            if (instances.Count > size)
             {
-                Items = base64String
-            };
+                chunksCount = instances.Count / size + 1;
+            }
 
-            var serializedMessage = JsonConvert.SerializeObject(snapshotItems);
-            var messageStream = new MemoryStream();
-            GetSerializer(SnapshotSerialization).Serialize(messageStream, serializedMessage);
-            messageStream.Flush();
-            messageStream.Seek(0, SeekOrigin.Begin);
+            for (var i = 0; i < chunksCount; i++)
+            {
+                var chunkInstances = new List<SnapshotItem>();
 
-            return messageStream.ToArray();
+                for (var j = i* size; j < i* size + size && j < instances.Count; j++)
+                {
+                    chunkInstances.Add(new SnapshotItem()
+                    {
+                        ComponentCode = instances[j].ComponentCode,
+                        StateMachineCode = instances[j].StateMachineCode,
+                        StateMachineId = instances[j].StateMachineId,
+                        StateCode = instances[j].StateCode,
+                        PublicMember = instances[j].PublicMember
+                    });
+                    
+                }
+
+                var snapshotResponseChunk = new SnapshotResponseChunk 
+                {
+                    ChunkCount = chunksCount,
+                    ChunkId = i,
+                    KnownRuntimeIds = new List<string> { "localhost" },
+                    Response = new SnapshotResponse 
+                    {
+                        Items = chunkInstances
+                    },
+                    RuntimeId = "localhost"
+                };
+
+                var serializedMessage = JsonConvert.SerializeObject(snapshotResponseChunk);
+                var messageStream = new MemoryStream();
+                GetSerializer(SnapshotSerialization).Serialize(messageStream, serializedMessage);
+                messageStream.Flush();
+                messageStream.Seek(0, SeekOrigin.Begin);
+
+                chunks.Add(messageStream.ToArray());
+            }
+
+            return chunks;
         }
     }
 }

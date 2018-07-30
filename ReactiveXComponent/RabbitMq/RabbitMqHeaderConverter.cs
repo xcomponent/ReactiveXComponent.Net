@@ -32,7 +32,7 @@ namespace ReactiveXComponent.RabbitMq
 
             var dico = new Dictionary<string, object>
                            {
-                                {HeaderElement.StateMachineId, stateMachineRefHeader?.StateMachineId},
+                                {HeaderElement.StateMachineId, stateMachineRefHeader?.StateMachineId != null ? Encoding.UTF8.GetBytes(stateMachineRefHeader.StateMachineId) :  encoding.GetBytes(string.Empty)},
                                 {HeaderElement.StateCode, stateMachineRefHeader?.StateCode},
                                 {HeaderElement.StateMachineCode, stateMachineRefHeader?.StateMachineCode},
                                 {HeaderElement.ComponentCode, stateMachineRefHeader?.ComponentCode},
@@ -48,7 +48,7 @@ namespace ReactiveXComponent.RabbitMq
         public static StateMachineRefHeader ConvertStateMachineRefHeader(IDictionary<string,object> stateMachineRefHeader)
         {
             var encoding = new UTF8Encoding();
-            var stateMachineId = -1;
+            string stateMachineId = null;
             var stateCode = -1;
             var stateMachineCode = -1;
             var componentCode = -1;     
@@ -57,8 +57,8 @@ namespace ReactiveXComponent.RabbitMq
             var sessionData = string.Empty;
             var errorMessage = string.Empty;
 
-            if (stateMachineRefHeader.ContainsKey(HeaderElement.StateMachineId))
-                stateMachineId = Convert.ToInt32(stateMachineRefHeader[HeaderElement.StateMachineId]);
+            if (stateMachineRefHeader.ContainsKey(HeaderElement.StateMachineId) && stateMachineRefHeader[HeaderElement.StateMachineId] != null)
+                stateMachineId = Encoding.UTF8.GetString((byte[])stateMachineRefHeader[HeaderElement.StateMachineId]);
             if (stateMachineRefHeader.ContainsKey(HeaderElement.StateCode))
                 stateCode = Convert.ToInt32(stateMachineRefHeader[HeaderElement.StateCode]);
             if (stateMachineRefHeader.ContainsKey(HeaderElement.StateMachineCode))

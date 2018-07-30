@@ -13,7 +13,7 @@ namespace ReactiveXComponent.Common
     /// </summary>
     public class WebSocketEngineHeader
     {
-        public long? StateMachineId { get; set; }
+        public string StateMachineId { get; set; }
 
         public int? StateMachineCode { get; set; }
 

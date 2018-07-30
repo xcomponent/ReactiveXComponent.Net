@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
@@ -21,9 +23,9 @@ namespace ReactiveXComponent.WebSocket
         private readonly ConcurrentDictionary<SubscriptionKey, IDisposable> _streamSubscriptionsDico;
         private SerializationType _serializationType;
 
-        private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
+        private event EventHandler<SnapshotEvent> SnapshotReceived;
 
-        private readonly IObservable<List<MessageEventArgs>> _snapshotStream;
+        private readonly IObservable<SnapshotEvent> _snapshotStream;
 
         public WebSocketSnapshotManager(string component, IWebSocketClient webSocketClient, IXCConfiguration xcConfiguration, string privateCommunicationIdentifier)
         {
@@ -35,22 +37,34 @@ namespace ReactiveXComponent.WebSocket
             _streamSubscriptionsDico = new ConcurrentDictionary<SubscriptionKey, IDisposable>();
             InitSerializationType();
 
-            _snapshotStream = Observable.FromEvent<EventHandler<List<MessageEventArgs>>, List<MessageEventArgs>>(
+            _snapshotStream = Observable.FromEvent<EventHandler<SnapshotEvent>, SnapshotEvent>(
                 handler => (sender, e) => handler(e),
                 h => SnapshotReceived += h,
                 h => SnapshotReceived -= h);
         }
         
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
             var replyTopic = Guid.NewGuid().ToString();
 
             List <MessageEventArgs> result = null;
             var lockEvent = new AutoResetEvent(false);
-            var observer = Observer.Create<List<MessageEventArgs>>(message =>
+            var observer = Observer.Create<SnapshotEvent>(arg =>
             {
-                result = new List<MessageEventArgs>(message);
-                lockEvent.Set();
+                if (arg.RequestId == replyTopic)
+                {
+                    result = new List<MessageEventArgs>(arg.SnapshotResponse.Items.Select(item =>
+                        new MessageEventArgs(new StateMachineRefHeader() {
+                                StateMachineId = item.StateMachineId,
+                                StateMachineCode = item.StateMachineCode,
+                                ComponentCode = item.ComponentCode,
+                                StateCode = item.StateCode
+                            },
+                            item.PublicMember,
+                            _serializationType)).ToList());
+                    lockEvent.Set();
+                }
+                
             });
 
             EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
@@ -60,7 +74,7 @@ namespace ReactiveXComponent.WebSocket
             using (_snapshotStream.Subscribe(observer))
             {
                 SendWebSocketSnapshotSubscriptionResquest(replyTopic);
-                SendWebSocketSnapshotRequest(stateMachine, replyTopic);
+                SendWebSocketSnapshotRequest(stateMachine, replyTopic, chunkSize);
                 lockEvent.WaitOne(timeout);
             }
 
@@ -70,26 +84,12 @@ namespace ReactiveXComponent.WebSocket
             return result;
         }
 
-        public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
-            var replyTopic = Guid.NewGuid().ToString();
-            var componentCode = _xcConfiguration.GetComponentCode(_component);
-            var stateMachineCode = _xcConfiguration.GetStateMachineCode(_component, stateMachine);
-            var subscriptionKey = new SubscriptionKey(componentCode, stateMachineCode, replyTopic);
-            EventHandler<WebSocketMessageEventArgs> subscriptionHandler;
-
-            CreateSnapshotReplyHandler(replyTopic, out subscriptionHandler);
-            _webSocketClient.MessageReceived += subscriptionHandler;
-            var snapshotSubscription = _snapshotStream.Subscribe(onSnapshotReceived);
-
-            SendWebSocketSnapshotSubscriptionResquest(replyTopic);
-            SendWebSocketSnapshotRequest(stateMachine, replyTopic);
-
-            _subscriptions.AddOrUpdate(subscriptionKey, key => subscriptionHandler, (oldKey, oldValue) => oldValue);
-            _streamSubscriptionsDico.AddOrUpdate(subscriptionKey, key => snapshotSubscription, (oldKey, oldValue) => oldValue);
+            return Task.Run(() => GetSnapshot(stateMachine, chunkSize, timeout));
         }
 
-        private void SendWebSocketSnapshotRequest(string stateMachine, string replyTopic)
+        private void SendWebSocketSnapshotRequest(string stateMachine, string replyTopic, int? chunkSize)
         {
             if (!_webSocketClient.IsOpen) return;
 
@@ -101,7 +101,7 @@ namespace ReactiveXComponent.WebSocket
                 ComponentCode = componentCode,
                 StateMachineCode = stateMachineCode
             };
-            var snapshotMessage = new WebSocketSnapshotMessage(stateMachineCode, componentCode, replyTopic, _privateCommunicationIdentifier);
+            var snapshotMessage = new WebSocketSnapshotMessage(stateMachineCode, componentCode, replyTopic, _privateCommunicationIdentifier, chunkSize);
             var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
                     WebSocketCommand.Snapshot,
                     inputHeader,
@@ -122,11 +122,10 @@ namespace ReactiveXComponent.WebSocket
 
                 if (webSocketMessage.Topic == handlerTopic)
                 {
-                    var receivedPacket = WebSocketMessageHelper.DeserializeSnapshot(webSocketMessage.Json);
+                    var snapshotResponse = WebSocketMessageHelper.DeserializeSnapshot(webSocketMessage.Json);
                     var stateMachineInstances = new List<MessageEventArgs>();
-                    var snapshotReceived = JsonConvert.DeserializeObject<List<StateMachineInstance>>(receivedPacket);
 
-                    foreach (var element in snapshotReceived)
+                    foreach (var element in snapshotResponse.Items)
                     {
                         var stateMachineRefHeader = new StateMachineRefHeader()
                         {
@@ -140,7 +139,13 @@ namespace ReactiveXComponent.WebSocket
                         stateMachineInstances.Add(messageEventArgs);
                     }
 
-                    SnapshotReceived?.Invoke(this, stateMachineInstances);
+                    var snapshotEvent = new SnapshotEvent
+                    {
+                        RequestId = replyTopic,
+                        SnapshotResponse = snapshotResponse
+                    };
+
+                    SnapshotReceived?.Invoke(this, snapshotEvent);
                 }
             };
         }

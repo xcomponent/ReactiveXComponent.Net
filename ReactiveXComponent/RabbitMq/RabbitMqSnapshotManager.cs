@@ -3,9 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -29,9 +31,8 @@ namespace ReactiveXComponent.RabbitMq
         private readonly ConcurrentDictionary<SubscriptionKey, RabbitMqSubscriberInfos> _subscribers;
 
         private IModel _snapshotChannel;
-        private event EventHandler<List<MessageEventArgs>> SnapshotReceived;
+        private event EventHandler<ChunkedSnapshotEvent> SnapshotReceived;
         private event EventHandler<string> ConnectionFailed;
-        private IObservable<List<MessageEventArgs>> _snapshotStream;
 
         public RabbitMqSnapshotManager(IConnection connection, string component, IXCConfiguration configuration, ISerializer serializer, string privateCommunicationIdentifier = null)
         {
@@ -43,7 +44,6 @@ namespace ReactiveXComponent.RabbitMq
             _subscribers = new ConcurrentDictionary<SubscriptionKey, RabbitMqSubscriberInfos>();
             InitSerializationType();
             CreateSnapshotChannel(connection);
-            InitObservableCollection();
         }
 
         private void CreateSnapshotChannel(IConnection connection)
@@ -56,49 +56,138 @@ namespace ReactiveXComponent.RabbitMq
             _snapshotChannel.ExchangeDeclare(exchangeName, ExchangeType.Topic);
         }
 
-        private void InitObservableCollection()
+        private static SnapshotResponse AggregateChunks(ConcurrentBag<SnapshotResponseChunk> snapshotChunks)
         {
-            _snapshotStream = Observable.FromEvent<EventHandler<List<MessageEventArgs>>, List<MessageEventArgs>>(
-                handler => (sender, e) => handler(e),
-                h => SnapshotReceived += h,
-                h => SnapshotReceived -= h);
+            if (snapshotChunks.Count == 0)
+            {
+                return null;
+            }
+
+            var aggregatedResult = new SnapshotResponse();
+
+            SnapshotResponseChunk chunk;
+            while (snapshotChunks.TryTake(out chunk))
+            {
+                aggregatedResult.Items.AddRange(chunk.Response.Items);
+            }
+            return aggregatedResult;
         }
 
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
             var guid = Guid.NewGuid();
+            var requestId = guid.ToString();
             List<MessageEventArgs> result = null;
-            var lockEvent = new AutoResetEvent(false);
-            var handler = new EventHandler<List<MessageEventArgs>>((sender, args) =>
+
+            var receivedSnapshotChunksInitialized = new AutoResetEvent(false);
+            var receivedSnapshotChunks = new ConcurrentDictionary<string, ChunkCountdown>();
+            var snapshotChunks = new ConcurrentBag<SnapshotResponseChunk>();
+            List<object> invalidChunks = new List<object>();
+
+            try
             {
-                result = new List<MessageEventArgs>(args);
-                lockEvent.Set();
-            });
-            SnapshotReceived += handler; 
+                EventHandler<ChunkedSnapshotEvent> snapshotListenerOnMessageReceived = (sender, args) =>
+                {
+                    if (args.RequestId != requestId)
+                    {
+                        return;
+                    }
 
-            SubscribeSnapshot(stateMachine, guid.ToString());
-            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
+                    var chunk = args.SnapshotResponseChunk;
+                    if (chunk == null)
+                    {
+                        invalidChunks.Add(args);
+                    }
+                    else
+                    {
+                        snapshotChunks.Add(chunk);
+                        foreach (var runtimeId in chunk.KnownRuntimeIds)
+                        {
+                            receivedSnapshotChunks.TryAdd(runtimeId, new ChunkCountdown());
+                        }
+                        receivedSnapshotChunksInitialized.Set();
 
-            lockEvent.WaitOne(timeout);
+                        ChunkCountdown chunkCountdown;
+                        if (receivedSnapshotChunks.TryGetValue(chunk.RuntimeId, out chunkCountdown))
+                        {
+                            chunkCountdown.SetValueIfNotInitialized(chunk.ChunkCount);
+                            chunkCountdown.Decrement();
+                        }
+                    }
+                };
 
-            SnapshotReceived -= handler;
-            UnsubscribeSnapshot(stateMachine);
+                SnapshotReceived += snapshotListenerOnMessageReceived;
+
+                SubscribeSnapshot(stateMachine, requestId);
+                SendSnapshotRequest(stateMachine, requestId, chunkSize, _privateCommunicationIdentifier);
+
+                if (receivedSnapshotChunksInitialized.WaitOne(timeout))
+                {
+                    var completionEvents =
+                        receivedSnapshotChunks.Values.Select(ccd => ccd.CompletionResetEvent).ToArray();
+                    if (WaitHandle.WaitAll(completionEvents, timeout))
+                    {
+                        SnapshotReceived -= snapshotListenerOnMessageReceived;
+                        return AggregateChunks(snapshotChunks).Items.Select(item =>
+                            new MessageEventArgs(new StateMachineRefHeader()
+                                {
+                                    StateMachineId = item.StateMachineId,
+                                    StateMachineCode = item.StateMachineCode,
+                                    ComponentCode = item.ComponentCode,
+                                    StateCode = item.StateCode
+                                },
+                                item.PublicMember,
+                                _serializationType)).ToList();
+                    }
+                }
+
+                SnapshotReceived -= snapshotListenerOnMessageReceived;
+
+                UnsubscribeSnapshot(stateMachine);
+
+                if (invalidChunks.Count > 0)
+                {
+                    throw new ReactiveXComponentException($"A number of {invalidChunks.Count} chunks are not of the expected type {nameof(SnapshotResponseChunk)}");
+                }
+
+                if (!receivedSnapshotChunks.IsEmpty)
+                {
+                    var errorMessage = new StringBuilder("The snapshot was incomplete: ");
+                    foreach (var remainingSnapshotChunk in receivedSnapshotChunks)
+                    {
+                        var remainingChunkCount = remainingSnapshotChunk.Value.Countdown == Int32.MinValue
+                            ? "all"
+                            : remainingSnapshotChunk.Value.Countdown.ToString();
+                        errorMessage.Append(
+                            $" runtime {remainingSnapshotChunk.Key} missing {remainingChunkCount} chunk(s);");
+                    }
+
+                    throw new ReactiveXComponentException(errorMessage.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                throw new ReactiveXComponentException("Error encoutered while requesting snapshot: " + e.Message, e);
+            }
+            finally
+            {
+                foreach (var chunkCountdown in receivedSnapshotChunks.Values)
+                {
+                    chunkCountdown.Dispose();
+                }
+
+                receivedSnapshotChunksInitialized.Dispose();
+            }
 
             return result;
         }
 
-        public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
-            var guid = Guid.NewGuid();
-            if (onSnapshotReceived != null)
-            {
-                _snapshotStream.Subscribe(onSnapshotReceived);
-            }
-            SubscribeSnapshot(stateMachine, guid.ToString());
-            SendSnapshotRequest(stateMachine, guid, _privateCommunicationIdentifier);
+            return Task.Run(() => GetSnapshot(stateMachine, chunkSize, timeout));
         }
 
-        private void SendSnapshotRequest(string stateMachine, Guid guid, string privateCommunicationIdentifier = null)
+        private void SendSnapshotRequest(string stateMachine, string replyTopic, int? chunkSize, string privateCommunicationIdentifier = null)
         {
             if (_xcConfiguration == null)
                 return;
@@ -118,10 +207,11 @@ namespace ReactiveXComponent.RabbitMq
             var snapshotMessage = new SnapshotMessage()
             {
                 Timeout = TimeSpan.FromSeconds(10),
-                ReplyTopic = guid.ToString(),
+                ReplyTopic = replyTopic,
                 CallerPrivateTopic = !string.IsNullOrEmpty(privateCommunicationIdentifier)
                             ? new List<string>{ privateCommunicationIdentifier}
                             : null,
+                ChunkSize = chunkSize
             };
 
             Send(snapshotMessage, routingKey, prop);
@@ -221,7 +311,7 @@ namespace ReactiveXComponent.RabbitMq
                 rabbitMqSubscriberInfos.Subscriber.Received += (o, e) =>
                 {
                     rabbitMqSubscriberInfos.Channel?.BasicAck(e.DeliveryTag, false);
-                    DispatchMessage(e);
+                    DispatchMessage(e, subscriberKey.RoutingKey);
                 };
             }
             catch (EndOfStreamException ex)
@@ -230,48 +320,19 @@ namespace ReactiveXComponent.RabbitMq
             }
         }
 
-        private void DispatchMessage(BasicDeliverEventArgs basicAckEventArgs)
+        private void DispatchMessage(BasicDeliverEventArgs basicAckEventArgs, string requestId)
         {
             var obj = _serializer.Deserialize(new MemoryStream(basicAckEventArgs.Body));
             
-            var stateMachineRefHeader =
-                RabbitMqHeaderConverter.ConvertStateMachineRefHeader(basicAckEventArgs.BasicProperties.Headers);
-            var zipedObj = JsonConvert.DeserializeObject<SnapshotItems>(obj.ToString());
-            byte[] compressed = Convert.FromBase64String(zipedObj.Items);
-            var compressedMessage = new MemoryStream(compressed);
-            var decompressedMessage = new MemoryStream();
-
-            using (var tmpMessage = new GZipStream(compressedMessage, CompressionMode.Decompress))
+            var snapshotResponseChunk = JsonConvert.DeserializeObject<SnapshotResponseChunk>(obj.ToString());
+            
+            var chunkedSnapshotEvent = new ChunkedSnapshotEvent 
             {
-                tmpMessage.CopyTo(decompressedMessage);
-            }
+                RequestId = requestId,
+                SnapshotResponseChunk = snapshotResponseChunk
+            };
 
-            var message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
-
-            var msgEventArgs = new MessageEventArgs(stateMachineRefHeader, message, _serializationType);
-
-            OnSnapshotReceived(msgEventArgs);
-        }
-
-        private void OnSnapshotReceived(MessageEventArgs e)
-        {
-            var stateMachineInstances = new List<MessageEventArgs>();
-            var messageReceived =
-                JsonConvert.DeserializeObject<List<StateMachineInstance>>(e.MessageReceived.ToString());
-            foreach (var element in messageReceived)
-            {
-                var stateMachineRefHeader = new StateMachineRefHeader()
-                {
-                    StateMachineId = element.StateMachineId,
-                    ComponentCode = element.ComponentCode,
-                    StateMachineCode = element.StateMachineCode,
-                    StateCode = element.StateCode
-                };
-
-                var messageEventArgs = new MessageEventArgs(stateMachineRefHeader, element.PublicMember, _serializationType);
-                stateMachineInstances.Add(messageEventArgs);
-            }
-            SnapshotReceived?.Invoke(this, stateMachineInstances);
+            SnapshotReceived?.Invoke(this, chunkedSnapshotEvent);
         }
 
         private void UnsubscribeSnapshot(string stateMachine)

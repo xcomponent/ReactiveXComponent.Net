@@ -13,5 +13,6 @@ namespace ReactiveXComponent.Common
         public TimeSpan? Timeout { get; set; } = DefaultTimeout;
         public List<string> CallerPrivateTopic { get; set; }
         public string ReplyTopic { get; set; }
+        public int? ChunkSize { get; set; }
     }
 }

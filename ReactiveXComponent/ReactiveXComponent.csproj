@@ -73,13 +73,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\ChunkCountdown.cs" />
+    <Compile Include="Common\ChunkedSnapshotEvent.cs" />
     <Compile Include="Common\ConnectionType.cs" />
+    <Compile Include="Common\GZipSnapshotItemArrayJsonConverter.cs" />
     <Compile Include="Common\Header.cs" />
     <Compile Include="Common\HeaderElement.cs" />
     <Compile Include="Common\IncomingEventType.cs" />
     <Compile Include="Common\MessageEventArgs.cs" />
-    <Compile Include="Common\SnapshotItems.cs" />
+    <Compile Include="Common\SnapshotEvent.cs" />
+    <Compile Include="Common\SnapshotItem.cs" />
+    <Compile Include="Common\SnapshotResponse.cs" />
     <Compile Include="Common\SnapshotMessage.cs" />
+    <Compile Include="Common\SnapshotResponseChunk.cs" />
     <Compile Include="Common\StateMachineInstance.cs" />
     <Compile Include="Common\StateMachineRefHeader.cs" />
     <Compile Include="Common\StreamSubscriptionKey.cs" />

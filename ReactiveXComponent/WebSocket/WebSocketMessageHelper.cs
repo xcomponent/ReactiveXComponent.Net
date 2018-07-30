@@ -193,25 +193,12 @@ namespace ReactiveXComponent.WebSocket
             }
         }
 
-        public static string DeserializeSnapshot(string receivedMessage)
+        public static SnapshotResponse DeserializeSnapshot(string receivedMessage)
         {
             var snapshotHeader = JsonConvert.DeserializeObject<WebSocketPacket>(receivedMessage);
-            var zipedMessage = JsonConvert.DeserializeObject<SnapshotItems>(snapshotHeader.JsonMessage);
-            byte[] compressedMessage = Convert.FromBase64String(zipedMessage.Items);
-            string message;
-            var compressedStream = new MemoryStream(compressedMessage);
+            var snapshotResponse = JsonConvert.DeserializeObject<SnapshotResponse>(snapshotHeader.JsonMessage);
 
-            using (var decompressedMessage = new MemoryStream())
-            {
-                using (var unzippedMessage = new GZipStream(compressedStream, CompressionMode.Decompress))
-                {
-                    unzippedMessage.CopyTo(decompressedMessage);
-                }
-
-                message = Encoding.UTF8.GetString(decompressedMessage.ToArray());
-            }
-
-            return message;
+            return snapshotResponse;
         }
 
         public static string DeserializeXCApi(string receivedMessage)

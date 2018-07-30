@@ -132,7 +132,7 @@ namespace ReactiveXComponent.WebSocket
                             MessageType = receivedPacket.Header.MessageType,
                             StateMachineCode = GetOptionalValue(receivedPacket.Header.StateMachineCode),
                             StateCode = GetOptionalValue(receivedPacket.Header.StateCode),
-                            StateMachineId = GetOptionalValue(receivedPacket.Header.StateMachineId),
+                            StateMachineId = receivedPacket.Header.StateMachineId,
                             PrivateTopic = receivedPacket.Header.PublishTopic,
                             ErrorMessage = receivedPacket.Header.ErrorMessage
                         };

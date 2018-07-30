@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
@@ -69,14 +70,14 @@ namespace ReactiveXComponent.RabbitMq
             Send(message, routingKey, prop);
         }
 
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize, int timeout = 10000)
         {
-            return _rabbitMqSnapshotManager.GetSnapshot(stateMachine, timeout);
+            return _rabbitMqSnapshotManager.GetSnapshot(stateMachine, chunkSize, timeout);
         }
 
-        public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize, int timeout = 10000)
         {
-            _rabbitMqSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
+            return _rabbitMqSnapshotManager.GetSnapshotAsync(stateMachine, chunkSize, timeout);
         }
 
         #endregion

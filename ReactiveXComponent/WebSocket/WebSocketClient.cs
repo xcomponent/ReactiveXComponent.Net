@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ReactiveXComponent.Common;
@@ -31,6 +32,7 @@ namespace ReactiveXComponent.WebSocket
 
             _webSocket.Security.AllowUnstrustedCertificate = true;
             _webSocket.Security.AllowNameMismatchCertificate = true;
+            _webSocket.Security.EnabledSslProtocols = SslProtocols.Tls12;
 
             _webSocket.Opened += WebSocketOnOpened;
             _webSocket.Closed += WebSocketOnClosed;

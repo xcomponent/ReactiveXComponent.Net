@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Configuration;
 using ReactiveXComponent.Connection;
@@ -64,14 +65,14 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient.Send(webSocketRequest);
         }
 
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize, int timeout = 10000)
         {
-            return _webSocketSnapshotManager.GetSnapshot(stateMachine, timeout);
+            return _webSocketSnapshotManager.GetSnapshot(stateMachine, chunkSize, timeout);
         }
 
-        public void GetSnapshotAsync(string stateMachine, Action<List<MessageEventArgs>> onSnapshotReceived)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize, int timeout = 10000)
         {
-            _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, onSnapshotReceived);
+            return _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, chunkSize, timeout);
         }
 
         #endregion

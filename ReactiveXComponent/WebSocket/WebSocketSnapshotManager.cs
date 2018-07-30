@@ -43,7 +43,7 @@ namespace ReactiveXComponent.WebSocket
                 h => SnapshotReceived -= h);
         }
         
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
             var replyTopic = Guid.NewGuid().ToString();
 
@@ -84,7 +84,7 @@ namespace ReactiveXComponent.WebSocket
             return result;
         }
 
-        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize, int timeout = 10000)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
             return Task.Run(() => GetSnapshot(stateMachine, chunkSize, timeout));
         }

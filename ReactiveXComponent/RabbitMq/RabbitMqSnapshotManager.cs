@@ -73,7 +73,7 @@ namespace ReactiveXComponent.RabbitMq
             return aggregatedResult;
         }
 
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
             var guid = Guid.NewGuid();
             var requestId = guid.ToString();
@@ -182,7 +182,7 @@ namespace ReactiveXComponent.RabbitMq
             return result;
         }
 
-        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize, int timeout = 10000)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize = null, int timeout = 10000)
         {
             return Task.Run(() => GetSnapshot(stateMachine, chunkSize, timeout));
         }

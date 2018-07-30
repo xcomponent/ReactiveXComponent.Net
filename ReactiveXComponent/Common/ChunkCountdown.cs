@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ReactiveXComponent.Common
 {
     public class ChunkCountdown : IDisposable
     {
-        private readonly ManualResetEvent _completionResetEvent = new System.Threading.ManualResetEvent(false);
+        private readonly ManualResetEvent _completionResetEvent = new ManualResetEvent(false);
 
         private const int ValueNotSet = int.MinValue;
         private int _countdown = ValueNotSet;

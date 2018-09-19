@@ -74,6 +74,7 @@ namespace ReactiveXComponentTest.Configuration
             var busDetails = _rabbitMqConfiguration.GetBusDetails();
 
             Check.That(busDetails.Host).IsEqualTo("127.0.0.1");
+            Check.That(busDetails.VirtualHost).IsEqualTo("myVirtualHost");
             Check.That(busDetails.Username).IsEqualTo("guest");
             Check.That(busDetails.Password).IsEqualTo("guest");
             Check.That(busDetails.Port).IsEqualTo(5672);

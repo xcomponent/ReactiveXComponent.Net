@@ -21,7 +21,10 @@ namespace ReactiveXComponent.RabbitMq
                                {HeaderElement.IncomingEventType, header?.IncomingEventType},
                                {HeaderElement.PublishTopic, header?.PublishTopic != null ? encoding.GetBytes(header.PublishTopic) : encoding.GetBytes(string.Empty) },
                                {HeaderElement.MessageType, header?.MessageType != null ? encoding.GetBytes(header.MessageType) : encoding.GetBytes(string.Empty)},
-                               {HeaderElement.ErrorMessage, header?.ErrorMessage != null ? encoding.GetBytes(header.ErrorMessage) : encoding.GetBytes(string.Empty)}
+                               {HeaderElement.ErrorMessage, header?.ErrorMessage != null ? encoding.GetBytes(header.ErrorMessage) : encoding.GetBytes(string.Empty)},
+                               {HeaderElement.MessageId, header?.MessageId != null ? encoding.GetBytes(header.MessageId) : encoding.GetBytes(string.Empty) },
+
+
                            };
             return dico;
         }
@@ -40,7 +43,10 @@ namespace ReactiveXComponent.RabbitMq
                                 {HeaderElement.MessageType, stateMachineRefHeader?.MessageType != null ? encoding.GetBytes(stateMachineRefHeader.MessageType) : encoding.GetBytes(string.Empty)},
                                 {HeaderElement.EventType, eventCode},
                                 {HeaderElement.IncomingEventType, (int)incomingEventType},
-                                {HeaderElement.ErrorMessage, stateMachineRefHeader?.ErrorMessage != null ? encoding.GetBytes(stateMachineRefHeader.ErrorMessage) : encoding.GetBytes(string.Empty)}
+                                {HeaderElement.ErrorMessage, stateMachineRefHeader?.ErrorMessage != null ? encoding.GetBytes(stateMachineRefHeader.ErrorMessage) : encoding.GetBytes(string.Empty)},
+                                {HeaderElement.MessageId, stateMachineRefHeader?.MessageId != null ? encoding.GetBytes(stateMachineRefHeader.MessageId) : encoding.GetBytes(string.Empty) },
+                                {HeaderElement.WorkerId, stateMachineRefHeader?.WorkerId},
+
                            };
             return dico;
         }
@@ -56,6 +62,8 @@ namespace ReactiveXComponent.RabbitMq
             var messageType = string.Empty;
             var sessionData = string.Empty;
             var errorMessage = string.Empty;
+            var messageId = string.Empty;
+            var workerId = -1;
 
             if (stateMachineRefHeader.ContainsKey(HeaderElement.StateMachineId) && stateMachineRefHeader[HeaderElement.StateMachineId] != null)
                 stateMachineId = Encoding.UTF8.GetString((byte[])stateMachineRefHeader[HeaderElement.StateMachineId]);
@@ -73,6 +81,10 @@ namespace ReactiveXComponent.RabbitMq
                 sessionData = encoding.GetString(stateMachineRefHeader[HeaderElement.SessionData] as byte[]);
             if (stateMachineRefHeader.ContainsKey(HeaderElement.ErrorMessage))
                 errorMessage = encoding.GetString(stateMachineRefHeader[HeaderElement.ErrorMessage] as byte[]);
+            if (stateMachineRefHeader.ContainsKey(HeaderElement.MessageId))
+                messageId = encoding.GetString(stateMachineRefHeader[HeaderElement.MessageId] as byte[]);
+            if (stateMachineRefHeader.ContainsKey(HeaderElement.WorkerId))
+                workerId = Convert.ToInt32(stateMachineRefHeader[HeaderElement.WorkerId]);
 
             return new StateMachineRefHeader()
             {
@@ -83,7 +95,9 @@ namespace ReactiveXComponent.RabbitMq
                 MessageType  = messageType,
                 PrivateTopic = publishTopic,
                 SessionData = sessionData,
-                ErrorMessage = errorMessage
+                ErrorMessage = errorMessage,
+                MessageId = messageId,
+                WorkerId = workerId,
             };                
         }
     }

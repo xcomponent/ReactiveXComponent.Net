@@ -8,12 +8,14 @@ namespace ReactiveXComponent.Configuration
             
         }
 
-        public BusDetails(string username, string password, string host, int port)
+        public BusDetails(string username, string password, string host, string virtualHost, int port)
         {
             Username = username;
             Password = password;
             Host = host;
+            VirtualHost = virtualHost;
             Port = port;
+
         }
 
         public string Username { get; set; }
@@ -22,14 +24,17 @@ namespace ReactiveXComponent.Configuration
 
         public string Host { get; set; }
 
+        public string VirtualHost { get; set; }
+
         public int Port { get; set; }
 
         public BusDetails Clone()
         {
             return new BusDetails(
-                (string)Username?.Clone(),
-                (string)Password?.Clone(),
-                (string)Host?.Clone(),
+                Username,
+                Password,
+                Host,
+                VirtualHost,
                 Port);
         }
     }

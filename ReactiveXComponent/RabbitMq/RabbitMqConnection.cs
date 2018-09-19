@@ -30,6 +30,11 @@ namespace ReactiveXComponent.RabbitMq
                 busDetails.Host = configurationOverrides.Host;
             }
 
+            if (!string.IsNullOrEmpty(configurationOverrides.VirtualHost))
+            {
+                busDetails.VirtualHost = configurationOverrides.VirtualHost;
+            }
+
             if (configurationOverrides.Port != null)
             {
                 busDetails.Port = int.Parse(configurationOverrides.Port);

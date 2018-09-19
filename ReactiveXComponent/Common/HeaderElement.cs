@@ -13,5 +13,7 @@ namespace ReactiveXComponent.Common
         public const string SessionData = "SessionData";
         public const string EventType = "EventType";
         public const string ErrorMessage = "ErrorMessage";
+        public const string MessageId = "MessageId";
+        public const string WorkerId = "WorkerId";
     }
 }

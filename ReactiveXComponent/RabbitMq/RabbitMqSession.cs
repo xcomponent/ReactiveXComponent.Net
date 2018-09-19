@@ -33,7 +33,7 @@ namespace ReactiveXComponent.RabbitMq
                 {
                     UserName = busDetails.Username ?? XCApiTags.DefaultUserName,
                     Password = busDetails.Password ?? XCApiTags.DefaultPassword,
-                    VirtualHost = ConnectionFactory.DefaultVHost,
+                    VirtualHost = string.IsNullOrEmpty(busDetails.VirtualHost) ? ConnectionFactory.DefaultVHost : busDetails.VirtualHost,
                     HostName = busDetails.Host,
                     Port = busDetails.Port,
                     Protocol = Protocols.DefaultProtocol

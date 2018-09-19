@@ -1,37 +1,10 @@
 ﻿
+using System;
+
 namespace ReactiveXComponent.Common
 {
     public class StateMachineRefHeader
     {
-        protected bool Equals(StateMachineRefHeader other)
-        {
-            return StateMachineId == other.StateMachineId && StateCode == other.StateCode && StateMachineCode == other.StateMachineCode && ComponentCode == other.ComponentCode && string.Equals(MessageType, other.MessageType) && string.Equals(PrivateTopic, other.PrivateTopic) && string.Equals(SessionData, other.SessionData) && string.Equals(ErrorMessage, other.ErrorMessage);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((StateMachineRefHeader) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = (StateMachineId != null ? StateMachineId.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ StateCode;
-                hashCode = (hashCode * 397) ^ StateMachineCode;
-                hashCode = (hashCode * 397) ^ ComponentCode;
-                hashCode = (hashCode * 397) ^ (MessageType != null ? MessageType.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (PrivateTopic != null ? PrivateTopic.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (SessionData != null ? SessionData.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (ErrorMessage != null ? ErrorMessage.GetHashCode() : 0);
-                return hashCode;
-            }
-        }
-
         public string StateMachineId { get; set; }
 
         public int StateCode { get; set; }
@@ -47,5 +20,9 @@ namespace ReactiveXComponent.Common
         public string SessionData { get; set; }
 
         public string ErrorMessage { get; set; }
+
+        public string MessageId { get; set; } = Guid.NewGuid().ToString();
+
+        public int WorkerId { get; set; }
     }
 }

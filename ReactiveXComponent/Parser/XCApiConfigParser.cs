@@ -186,6 +186,7 @@ namespace ReactiveXComponent.Parser
                 busInfos?.Attribute("user")?.Value,
                 busInfos?.Attribute("password")?.Value,
                 busInfos?.Attribute("host")?.Value,
+                busInfos?.Attribute("virtualHost")?.Value,
                 Convert.ToInt32(busInfos?.Attribute("port")?.Value));
 
             return busDetails;

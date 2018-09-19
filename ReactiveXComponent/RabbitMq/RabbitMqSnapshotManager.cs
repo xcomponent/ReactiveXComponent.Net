@@ -134,7 +134,8 @@ namespace ReactiveXComponent.RabbitMq
                                     StateMachineId = item.StateMachineId,
                                     StateMachineCode = item.StateMachineCode,
                                     ComponentCode = item.ComponentCode,
-                                    StateCode = item.StateCode
+                                    StateCode = item.StateCode,
+                                    WorkerId = item.WorkerId,
                                 },
                                 item.PublicMember,
                                 _serializationType)).ToList();

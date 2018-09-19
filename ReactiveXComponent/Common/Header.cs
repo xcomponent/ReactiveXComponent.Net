@@ -1,3 +1,5 @@
+using System;
+
 namespace ReactiveXComponent.Common
 {
     public class Header
@@ -17,5 +19,7 @@ namespace ReactiveXComponent.Common
         public string PublishTopic { get; set; }
 
         public string ErrorMessage { get; set; }
+
+        public string MessageId { get; set; } = Guid.NewGuid().ToString();
     }
 }

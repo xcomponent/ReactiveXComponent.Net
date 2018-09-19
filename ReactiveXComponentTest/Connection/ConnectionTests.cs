@@ -25,7 +25,7 @@ namespace ReactiveXComponentTest.Connection
             _rabbitMqConfiguration = Substitute.For<XCConfiguration>(parser);
             _webSocketConfiguration = Substitute.For<XCConfiguration>(parser);
             
-            var rabbitBusDetails = new BusDetails("guest", "guest", "localhost", 5672);
+            var rabbitBusDetails = new BusDetails("guest", "guest", "localhost", null, 5672);
             var webSocketEndpoint = new WebSocketEndpoint("websocket", "localhost", "443", WebSocketType.Secure);
 
             _rabbitMqConfiguration.GetBusDetails().Returns(rabbitBusDetails);

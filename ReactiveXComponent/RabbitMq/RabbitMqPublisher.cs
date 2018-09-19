@@ -110,7 +110,7 @@ namespace ReactiveXComponent.RabbitMq
                 StateCode = defaultValue,
                 EventCode = _configuration.GetPublisherEventCode(messageType),
                 IncomingEventType = (int)IncomingEventType.Transition,
-                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : string.Empty                
+                PublishTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier)? _privateCommunicationIdentifier : string.Empty,
             };
 
             return header;
@@ -133,7 +133,9 @@ namespace ReactiveXComponent.RabbitMq
                 StateMachineCode = stateMachineRefHeader.StateMachineCode,
                 ComponentCode = stateMachineRefHeader.ComponentCode,
                 MessageType = messageType,
-                PrivateTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _privateCommunicationIdentifier : string.Empty
+                PrivateTopic = visibility == Visibility.Private && !string.IsNullOrEmpty(_privateCommunicationIdentifier) ? _privateCommunicationIdentifier : string.Empty,
+                MessageId = stateMachineRefHeader.MessageId,
+                WorkerId = stateMachineRefHeader.WorkerId,
             };
 
             return stateMachineRefheader;

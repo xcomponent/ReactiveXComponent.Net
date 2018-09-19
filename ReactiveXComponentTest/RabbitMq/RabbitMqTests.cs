@@ -37,7 +37,7 @@ namespace ReactiveXComponentTest.RabbitMq
         private const string PublicRoutingKey = "202";
         private const string Serialization = XCApiTags.Binary;
         private const string SnapshotSerialization = XCApiTags.Json;
-        private readonly BusDetails _busDetails = new BusDetails(User, Password, Host, Port);
+        private readonly BusDetails _busDetails = new BusDetails(User, Password, Host, null, Port);
 
         [TestCase(true, false)]
         [TestCase(false, false)]

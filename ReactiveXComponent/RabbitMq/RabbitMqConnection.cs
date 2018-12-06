@@ -50,6 +50,36 @@ namespace ReactiveXComponent.RabbitMq
                 busDetails.Password = configurationOverrides.Password;
             }
 
+            if (configurationOverrides.SslEnabled != null)
+            {
+                busDetails.SslEnabled = configurationOverrides.SslEnabled.Value;
+            }
+
+            if (configurationOverrides.SslServerName != null)
+            {
+                busDetails.SslServerName = configurationOverrides.SslServerName;
+            }
+
+            if (configurationOverrides.SslCertPath != null)
+            {
+                busDetails.SslCertPath = configurationOverrides.SslCertPath;
+            }
+
+            if (configurationOverrides.SslCertPassphrase != null)
+            {
+                busDetails.SslCertPassphrase = configurationOverrides.SslCertPassphrase;
+            }
+
+            if (configurationOverrides.SslProtocol != null)
+            {
+                busDetails.SslProtocol = configurationOverrides.SslProtocol.Value;
+            }
+
+            if (configurationOverrides.SslAllowUntrustedServerCertificate != null)
+            {
+                busDetails.SslAllowUntrustedServerCertificate = configurationOverrides.SslAllowUntrustedServerCertificate.Value;
+            }
+
             return new RabbitMqSession(_xcConfiguration, busDetails, _privateCommunicationIdentifier);
         }
     }

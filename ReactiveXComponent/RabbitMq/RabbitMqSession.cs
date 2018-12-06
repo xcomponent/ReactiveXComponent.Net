@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Security;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using ReactiveXComponent.Common;
@@ -38,6 +39,39 @@ namespace ReactiveXComponent.RabbitMq
                     Port = busDetails.Port,
                     Protocol = Protocols.DefaultProtocol
                 };
+
+                if (busDetails.SslEnabled)
+                {
+                    _factory.Ssl.Enabled = true;
+
+                    _factory.Ssl.ServerName = busDetails.SslServerName;
+
+                    if (!string.IsNullOrEmpty(busDetails.SslCertPath))
+                    {
+                        _factory.Ssl.CertPath = busDetails.SslCertPath;
+                    }
+
+                    if (!string.IsNullOrEmpty(busDetails.SslCertPassphrase))
+                    {
+                        _factory.Ssl.CertPassphrase = busDetails.SslCertPassphrase;
+                    }
+
+                    _factory.Ssl.Version = busDetails.SslProtocol;
+
+                    if (busDetails.SslAllowUntrustedServerCertificate)
+                    {
+                        _factory.Ssl.CertificateValidationCallback += (sender, certificate, chain, errors) =>
+                        {
+                            if ((errors & SslPolicyErrors.RemoteCertificateNameMismatch) == SslPolicyErrors.RemoteCertificateNameMismatch ||
+                                (errors & SslPolicyErrors.RemoteCertificateNotAvailable) == SslPolicyErrors.RemoteCertificateNotAvailable)
+                            {
+                                return false;
+                            }
+
+                            return true;
+                        };
+                    }
+                }
 
                 _connection = _factory?.CreateConnection();
 

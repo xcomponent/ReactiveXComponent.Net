@@ -1,4 +1,5 @@
-﻿using ReactiveXComponent.Common;
+﻿using System.Security.Authentication;
+using ReactiveXComponent.Common;
 
 namespace ReactiveXComponent.Configuration
 {
@@ -15,5 +16,17 @@ namespace ReactiveXComponent.Configuration
         public string Password { get; set; }
 
         public WebSocketType? WebSocketType { get; set; }
+
+        public bool? SslEnabled { get; set; }
+
+        public string SslServerName { get; set; }
+
+        public string SslCertificatePath { get; set; }
+
+        public string SslCertificatePassphrase { get; set; }
+
+        public SslProtocols? SslProtocol { get; set; }
+
+        public bool? SslAllowUntrustedServerCertificate { get; set; }
     }
 }

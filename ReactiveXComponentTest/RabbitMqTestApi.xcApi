@@ -3,7 +3,7 @@
   <threading />
   <serialization>Binary</serialization>
   <communication>
-    <bus name="rabbitmq" host="127.0.0.1" virtualHost="myVirtualHost" port="5672" user="guest" password="guest" type="RABBIT_MQ" />
+    <bus name="rabbitmq" host="127.0.0.1" virtualHost="myVirtualHost" port="5671" user="guest" password="guest" type="RABBIT_MQ" sslEnabled="True" sslServerName="XComponent RMq" sslCertPath="some_cert_path" sslCertPassphrase="some_cert_pass" sslProtocol="Default" sslAllowUntrustedServerCertificate="True" />
   </communication>
   <clientAPICommunication>
     <publish componentCode="-69981087" stateMachineCode="-829536631" eventType="UPDATE" topicType="output" communicationType="BUS" stateCode="0" eventCode="9" event="XComponent.HelloWorld.UserObject.SayHello" communication="rabbitmq">

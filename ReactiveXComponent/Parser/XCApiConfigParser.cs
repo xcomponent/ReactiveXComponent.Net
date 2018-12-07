@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Authentication;
 using System.Xml;
 using System.Xml.Linq;
 using ReactiveXComponent.Common;
@@ -182,12 +183,44 @@ namespace ReactiveXComponent.Parser
         public BusDetails GetBusDetails()
         {
             XElement busInfos = _xcApiDescription.GetBusNode()?.FirstOrDefault();
+
+            var sslEnabledString = busInfos?.Attribute(XCApiTags.BusSslEnabled)?.Value;
+            var sslEnabled = false;
+            if (!string.IsNullOrEmpty(sslEnabledString))
+            {
+                bool.TryParse(sslEnabledString, out sslEnabled);
+            }
+
+            var sslServerName = busInfos?.Attribute(XCApiTags.BusSslServerName)?.Value;
+            var sslCertificatePath = busInfos?.Attribute(XCApiTags.BusSslCertificatePath)?.Value;
+            var sslCertificatePassphrase = busInfos?.Attribute(XCApiTags.BusSslCertificatePassphrase)?.Value;
+
+            var sslProtocolString = busInfos?.Attribute(XCApiTags.BusSslProtocol)?.Value;
+            SslProtocols sslProtocol = SslProtocols.Default;
+            if (!string.IsNullOrEmpty(sslProtocolString))
+            {
+                Enum.TryParse(sslProtocolString, out sslProtocol);
+            }
+
+            var sslAllowUntrustedServerCertificateString = busInfos?.Attribute(XCApiTags.BusSslAllowUntrustedServerCertificate)?.Value;
+            var sslAllowUntrustedServerCertificate = false;
+            if (!string.IsNullOrEmpty(sslAllowUntrustedServerCertificateString))
+            {
+                bool.TryParse(sslAllowUntrustedServerCertificateString, out sslAllowUntrustedServerCertificate);
+            }
+
             var busDetails = new BusDetails(
-                busInfos?.Attribute("user")?.Value,
-                busInfos?.Attribute("password")?.Value,
-                busInfos?.Attribute("host")?.Value,
-                busInfos?.Attribute("virtualHost")?.Value,
-                Convert.ToInt32(busInfos?.Attribute("port")?.Value));
+                busInfos?.Attribute(XCApiTags.User)?.Value,
+                busInfos?.Attribute(XCApiTags.Password)?.Value,
+                busInfos?.Attribute(XCApiTags.Host)?.Value,
+                busInfos?.Attribute(XCApiTags.VirtualHost)?.Value,
+                Convert.ToInt32(busInfos?.Attribute(XCApiTags.Port)?.Value),
+                sslEnabled,
+                sslServerName,
+                sslCertificatePath,
+                sslCertificatePassphrase,
+                sslProtocol,
+                sslAllowUntrustedServerCertificate);
 
             return busDetails;
         }
@@ -197,16 +230,16 @@ namespace ReactiveXComponent.Parser
             XElement websocketInfos = _xcApiDescription.GetWebSocketNode()?.FirstOrDefault();
 
             WebSocketType webSocketType;
-            var webSocketTypeString = websocketInfos?.Attribute("type")?.Value;
+            var webSocketTypeString = websocketInfos?.Attribute(XCApiTags.WebsocketType)?.Value;
             if (!Enum.TryParse(webSocketTypeString, out webSocketType))
             {
                 throw new ReactiveXComponentException($"Could not parse communication type: {webSocketTypeString}");
             }
 
             var webSocketEndpoint = new WebSocketEndpoint(
-                websocketInfos?.Attribute("name")?.Value,
-                websocketInfos?.Attribute("host")?.Value,
-                websocketInfos?.Attribute("port")?.Value,
+                websocketInfos?.Attribute(XCApiTags.Name)?.Value,
+                websocketInfos?.Attribute(XCApiTags.Host)?.Value,
+                websocketInfos?.Attribute(XCApiTags.Port)?.Value,
                 webSocketType);
 
             return webSocketEndpoint;

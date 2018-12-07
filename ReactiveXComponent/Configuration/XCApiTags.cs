@@ -29,5 +29,13 @@
         public const string Json = "Json";
         public const string Bson = "Bson";
         public const string GzipJson = "GzipJson";
+        public const string WebsocketType = "type";
+        public const string VirtualHost = "virtualHost";
+        public const string BusSslEnabled = "sslEnabled";
+        public const string BusSslServerName = "sslServerName";
+        public const string BusSslCertificatePath = "sslCertPath";
+        public const string BusSslCertificatePassphrase = "sslCertPassphrase";
+        public const string BusSslProtocol = "sslProtocol";
+        public const string BusSslAllowUntrustedServerCertificate = "sslAllowUntrustedServerCertificate";
     }
 }

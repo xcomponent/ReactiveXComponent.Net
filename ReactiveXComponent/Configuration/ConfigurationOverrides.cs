@@ -21,9 +21,9 @@ namespace ReactiveXComponent.Configuration
 
         public string SslServerName { get; set; }
 
-        public string SslCertPath { get; set; }
+        public string SslCertificatePath { get; set; }
 
-        public string SslCertPassphrase { get; set; }
+        public string SslCertificatePassphrase { get; set; }
 
         public SslProtocols? SslProtocol { get; set; }
 

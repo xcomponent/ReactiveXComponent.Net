@@ -60,14 +60,14 @@ namespace ReactiveXComponent.RabbitMq
                 busDetails.SslServerName = configurationOverrides.SslServerName;
             }
 
-            if (configurationOverrides.SslCertPath != null)
+            if (configurationOverrides.SslCertificatePath != null)
             {
-                busDetails.SslCertPath = configurationOverrides.SslCertPath;
+                busDetails.SslCertificatePath = configurationOverrides.SslCertificatePath;
             }
 
-            if (configurationOverrides.SslCertPassphrase != null)
+            if (configurationOverrides.SslCertificatePassphrase != null)
             {
-                busDetails.SslCertPassphrase = configurationOverrides.SslCertPassphrase;
+                busDetails.SslCertificatePassphrase = configurationOverrides.SslCertificatePassphrase;
             }
 
             if (configurationOverrides.SslProtocol != null)

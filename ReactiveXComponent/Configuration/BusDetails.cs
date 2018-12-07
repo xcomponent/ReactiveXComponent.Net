@@ -18,8 +18,8 @@ namespace ReactiveXComponent.Configuration
             int port,
             bool sslEnabled = false,
             string sslServerName = "",
-            string sslCertPath = "",
-            string sslCertPassphrase = "",
+            string sslCertificatePath = "",
+            string sslCertificatePassphrase = "",
             SslProtocols sslProtocol = SslProtocols.Default,
             bool sslAllowUntrustedServerCertificate = false)
         {
@@ -30,32 +30,65 @@ namespace ReactiveXComponent.Configuration
             Port = port;
             SslEnabled = sslEnabled;
             SslServerName = sslServerName;
-            SslCertPath = sslCertPath;
-            SslCertPassphrase = sslCertPassphrase;
+            SslCertificatePath = sslCertificatePath;
+            SslCertificatePassphrase = sslCertificatePassphrase;
             SslProtocol = sslProtocol;
             SslAllowUntrustedServerCertificate = sslAllowUntrustedServerCertificate;
         }
 
+        /// <summary>
+        /// Rabbit Mq user.
+        /// </summary>
         public string Username { get; set; }
 
+        /// <summary>
+        /// Rabbit Mq password for user.
+        /// </summary>
         public string Password { get; set; }
 
+        /// <summary>
+        /// Rabbit Mq server's address.
+        /// </summary>
         public string Host { get; set; }
 
+        /// <summary>
+        /// Rabbit Mq virtual host to connect to. 
+        /// </summary>
         public string VirtualHost { get; set; }
 
+        /// <summary>
+        /// Rabbit Mq server's port.
+        /// </summary>
         public int Port { get; set; }
 
+        /// <summary>
+        /// To enable SSL.
+        /// </summary>
         public bool SslEnabled { get; set; }
         
+        /// <summary>
+        /// Server's Common Name. It's indicated in the CN field of the server's certificate.
+        /// </summary>
         public string SslServerName { get; set; }
         
-        public string SslCertPath { get; set; }
+        /// <summary>
+        /// Path to the client's certificate.
+        /// </summary>
+        public string SslCertificatePath { get; set; }
 
-        public string SslCertPassphrase { get; set; }
+        /// <summary>
+        /// Passphrase for the client's certificate if it has one.
+        /// </summary>
+        public string SslCertificatePassphrase { get; set; }
 
+        /// <summary>
+        /// SSL protocol to use.
+        /// </summary>
         public SslProtocols SslProtocol { get; set; }
 
+        /// <summary>
+        /// To accept untrusted (e.g self-signed) server certificates. Only use this in Dev environment.
+        /// </summary>
         public bool SslAllowUntrustedServerCertificate { get; set; }
 
         public BusDetails Clone()
@@ -68,8 +101,8 @@ namespace ReactiveXComponent.Configuration
                 Port,
                 SslEnabled,
                 SslServerName,
-                SslCertPath,
-                SslCertPassphrase,
+                SslCertificatePath,
+                SslCertificatePassphrase,
                 SslProtocol,
                 SslAllowUntrustedServerCertificate);
         }

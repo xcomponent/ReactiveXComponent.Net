@@ -46,14 +46,14 @@ namespace ReactiveXComponent.RabbitMq
 
                     _factory.Ssl.ServerName = busDetails.SslServerName;
 
-                    if (!string.IsNullOrEmpty(busDetails.SslCertPath))
+                    if (!string.IsNullOrEmpty(busDetails.SslCertificatePath))
                     {
-                        _factory.Ssl.CertPath = busDetails.SslCertPath;
+                        _factory.Ssl.CertPath = busDetails.SslCertificatePath;
                     }
 
-                    if (!string.IsNullOrEmpty(busDetails.SslCertPassphrase))
+                    if (!string.IsNullOrEmpty(busDetails.SslCertificatePassphrase))
                     {
-                        _factory.Ssl.CertPassphrase = busDetails.SslCertPassphrase;
+                        _factory.Ssl.CertPassphrase = busDetails.SslCertificatePassphrase;
                     }
 
                     _factory.Ssl.Version = busDetails.SslProtocol;

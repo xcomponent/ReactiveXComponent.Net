@@ -192,8 +192,8 @@ namespace ReactiveXComponent.Parser
             }
 
             var sslServerName = busInfos?.Attribute(XCApiTags.BusSslServerName)?.Value;
-            var sslCertPath = busInfos?.Attribute(XCApiTags.BusSslCertPath)?.Value;
-            var sslCertPassphrase = busInfos?.Attribute(XCApiTags.BusSslCertPassphrase)?.Value;
+            var sslCertificatePath = busInfos?.Attribute(XCApiTags.BusSslCertificatePath)?.Value;
+            var sslCertificatePassphrase = busInfos?.Attribute(XCApiTags.BusSslCertificatePassphrase)?.Value;
 
             var sslProtocolString = busInfos?.Attribute(XCApiTags.BusSslProtocol)?.Value;
             SslProtocols sslProtocol = SslProtocols.Default;
@@ -217,8 +217,8 @@ namespace ReactiveXComponent.Parser
                 Convert.ToInt32(busInfos?.Attribute(XCApiTags.Port)?.Value),
                 sslEnabled,
                 sslServerName,
-                sslCertPath,
-                sslCertPassphrase,
+                sslCertificatePath,
+                sslCertificatePassphrase,
                 sslProtocol,
                 sslAllowUntrustedServerCertificate);
 

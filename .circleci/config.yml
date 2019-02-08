@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  checkout_code:
+    docker:
+      - image: circleci/node:10.12
+    steps:
+      - checkout
+      - run echo "Hello Xcomponent"
+
+workflows:
+  version: 2
+  xcomponent_runtime:
+    job:
+      - checkout_code

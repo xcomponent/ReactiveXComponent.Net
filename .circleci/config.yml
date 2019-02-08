@@ -10,5 +10,5 @@ jobs:
 workflows:
   version: 2
   xcomponent_runtime:
-    job:
+    jobs:
       - checkout_code

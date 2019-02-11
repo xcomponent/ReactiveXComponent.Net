@@ -137,14 +137,6 @@ Task("All")
   {
   });
 
-Task("CrossPlatformBuild")
-  .Does(() =>
-{
-    var solution = Argument("solution", "");
-	var buildSettings = new Settings { Configuration = configuration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
-	CrossPlatformBuild(solution, buildSettings);
-});
-
 Task("BuildIntegrationTests")
   .IsDependentOn("Restore-NuGet-Packages")
   .Does(() =>

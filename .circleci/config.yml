@@ -62,8 +62,8 @@ workflows:
     jobs:
       - checkout_code
       - build_sh_reactiveapi:
-        requires:
-        - checkout_code
+          requires:
+          - checkout_code
       - reactiveapi_integrationtests:
           requires:
           - build_sh_reactiveapi

@@ -1,0 +1,40 @@
+Component(s) :
+
+- HelloWorld			-69981087
+    - HelloWorld			-69981087
+        - EntryPoint			XComponent.Build.Manager.StateIndexData
+        - Listening			XComponent.Build.Manager.StateIndexData
+
+    - ResponseListener			-1152526010
+        - Up			XComponent.Build.Manager.StateIndexData
+
+    - HelloWorldResponse			-343862282
+        - Published			XComponent.Build.Manager.StateIndexData
+        - Gone			XComponent.Build.Manager.StateIndexData
+
+
+Events :
+
+- HelloWorld			0
+    - XComponent.Common.Event.ApiProxy.ApiInitError			0
+    - XComponent.Common.Event.ApiProxy.ApiInitSuccessful			1
+    - XComponent.Common.Event.ApiProxy.CancelApiInit			2
+    - XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription			3
+    - XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription			4
+    - XComponent.Common.Event.ApiProxy.SnapshotOptions			5
+    - XComponent.Common.Event.DefaultEvent			6
+    - XComponent.Common.Event.ExceptionEvent			7
+    - XComponent.HelloWorld.UserObject.ChangeName			8
+    - XComponent.HelloWorld.UserObject.ConnectionStateChanged			9
+    - XComponent.HelloWorld.UserObject.CreateListener			10
+    - XComponent.HelloWorld.UserObject.HelloWorldResponse			11
+    - XComponent.HelloWorld.UserObject.Kill			12
+    - XComponent.HelloWorld.UserObject.OriginatorNameChanged			13
+    - XComponent.HelloWorld.UserObject.Ping			14
+    - XComponent.HelloWorld.UserObject.PingCountModified			15
+    - XComponent.HelloWorld.UserObject.ResponseListener			16
+    - XComponent.HelloWorld.UserObject.ResponseListenerInternal			17
+    - XComponent.HelloWorld.UserObject.SayGoodbye			18
+    - XComponent.HelloWorld.UserObject.SayGoodbyeToAll			19
+    - XComponent.HelloWorld.UserObject.SayHello			20
+

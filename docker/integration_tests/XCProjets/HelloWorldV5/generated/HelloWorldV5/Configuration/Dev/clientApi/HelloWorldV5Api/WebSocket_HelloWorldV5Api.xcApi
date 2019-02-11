@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<deployment environment="Dev" xcProjectName="HelloWorldV5" deploymentTargetCode="702762649" deploymentTargetName="HelloWorldV5Api" version="1.0" frameworkType="Framework46" productVersion="5.0.0-B1" xmlns="http://xcomponent.com/DeploymentConfig.xsd">
+  <threading />
+  <serialization>Json</serialization>
+  <communication>
+    <websocket name="toto" host="localhost" virtualHost="" port="443" user="" password="" type="Secure" sslEnabled="False" sslServerName="" sslCertPath="" sslCertPassphrase="" sslProtocol="Default" sslAllowUntrustedServerCertificate="True" />
+  </communication>
+  <clientAPICommunication>
+    <publish componentCode="-69981087" stateMachineCode="-69981087" eventType="UPDATE" topicType="output" communicationType="WEB_SOCKET" stateCode="1" eventCode="10" event="XComponent.HelloWorld.UserObject.CreateListener" communication="toto">
+      <topic type="STATIC">input.1_0.microservice1.HelloWorld.HelloWorld</topic>
+    </publish>
+    <publish componentCode="-69981087" stateMachineCode="-69981087" eventType="UPDATE" topicType="output" communicationType="WEB_SOCKET" stateCode="1" eventCode="20" event="XComponent.HelloWorld.UserObject.SayHello" communication="toto">
+      <topic type="STATIC">input.1_0.microservice1.HelloWorld.HelloWorld</topic>
+    </publish>
+    <publish componentCode="-69981087" stateMachineCode="-343862282" eventType="UPDATE" topicType="output" communicationType="WEB_SOCKET" stateCode="1" eventCode="12" event="XComponent.HelloWorld.UserObject.Kill" communication="toto">
+      <topic type="STATIC">input.1_0.microservice1.HelloWorld.HelloWorldResponse</topic>
+    </publish>
+    <publish componentCode="-69981087" stateMachineCode="-343862282" eventType="UPDATE" topicType="output" communicationType="WEB_SOCKET" stateCode="1" eventCode="14" event="XComponent.HelloWorld.UserObject.Ping" communication="toto">
+      <topic type="STATIC">input.1_0.microservice1.HelloWorld.HelloWorldResponse</topic>
+    </publish>
+    <publish componentCode="-69981087" stateMachineCode="-343862282" eventType="UPDATE" topicType="output" communicationType="WEB_SOCKET" stateCode="1" eventCode="18" event="XComponent.HelloWorld.UserObject.SayGoodbye" communication="toto">
+      <topic type="STATIC">input.1_0.microservice1.HelloWorld.HelloWorldResponse</topic>
+    </publish>
+    <publish componentCode="-69981087" stateMachineCode="-343862282" eventType="UPDATE" topicType="output" communicationType="WEB_SOCKET" stateCode="1" eventCode="19" event="XComponent.HelloWorld.UserObject.SayGoodbyeToAll" communication="toto">
+      <topic type="STATIC">input.1_0.microservice1.HelloWorld.HelloWorldResponse</topic>
+    </publish>
+    <subscribe componentCode="-69981087" eventType="ERROR" topicType="input" communicationType="WEB_SOCKET" communication="toto">
+      <topic type="STATIC">error.1_0.microservice1.HelloWorld</topic>
+    </subscribe>
+    <subscribe componentCode="-69981087" stateMachineCode="-69981087" eventType="UPDATE" topicType="input" communicationType="WEB_SOCKET" event="" communication="toto">
+      <topic type="STATIC">output.1_0.microservice1.HelloWorld.HelloWorld</topic>
+    </subscribe>
+    <subscribe componentCode="-69981087" stateMachineCode="-1152526010" eventType="UPDATE" topicType="input" communicationType="WEB_SOCKET" event="XComponent.HelloWorld.UserObject.ResponseListener" communication="toto">
+      <topic type="STATIC">output.1_0.microservice1.HelloWorld.ResponseListener</topic>
+    </subscribe>
+    <subscribe componentCode="-69981087" stateMachineCode="-343862282" eventType="UPDATE" topicType="input" communicationType="WEB_SOCKET" event="XComponent.HelloWorld.UserObject.HelloWorldResponse" communication="toto">
+      <topic type="STATIC">output.1_0.microservice1.HelloWorld.HelloWorldResponse</topic>
+    </subscribe>
+    <snapshot componentCode="-69981087">
+      <topic type="STATIC">snapshot.1_0.microservice1.HelloWorld</topic>
+    </snapshot>
+  </clientAPICommunication>
+  <codesConverter>
+    <components>
+      <component name="HelloWorld" id="-69981087">
+        <events>
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="1" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="2" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="3" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="4" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="5" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="6" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="7" />
+          <event name="XComponent.HelloWorld.UserObject.ChangeName" id="8" />
+          <event name="XComponent.HelloWorld.UserObject.ConnectionStateChanged" id="9" />
+          <event name="XComponent.HelloWorld.UserObject.CreateListener" id="10" />
+          <event name="XComponent.HelloWorld.UserObject.HelloWorldResponse" id="11" />
+          <event name="XComponent.HelloWorld.UserObject.Kill" id="12" />
+          <event name="XComponent.HelloWorld.UserObject.OriginatorNameChanged" id="13" />
+          <event name="XComponent.HelloWorld.UserObject.Ping" id="14" />
+          <event name="XComponent.HelloWorld.UserObject.PingCountModified" id="15" />
+          <event name="XComponent.HelloWorld.UserObject.ResponseListener" id="16" />
+          <event name="XComponent.HelloWorld.UserObject.ResponseListenerInternal" id="17" />
+          <event name="XComponent.HelloWorld.UserObject.SayGoodbye" id="18" />
+          <event name="XComponent.HelloWorld.UserObject.SayGoodbyeToAll" id="19" />
+          <event name="XComponent.HelloWorld.UserObject.SayHello" id="20" />
+        </events>
+        <stateMachines>
+          <stateMachine name="HelloWorld" id="-69981087">
+            <states>
+              <State name="EntryPoint" id="0" isEntryPoint="true" />
+              <State name="Listening" id="1" isEntryPoint="false" />
+            </states>
+          </stateMachine>
+          <stateMachine name="ResponseListener" id="-1152526010">
+            <states>
+              <State name="Up" id="0" isEntryPoint="false" />
+            </states>
+          </stateMachine>
+          <stateMachine name="HelloWorldResponse" id="-343862282">
+            <states>
+              <State name="Published" id="1" isEntryPoint="false" />
+              <State name="Gone" id="0" isEntryPoint="false" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
+    </components>
+  </codesConverter>
+</deployment>

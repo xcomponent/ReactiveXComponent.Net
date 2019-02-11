@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<deployment environment="Dev" version="1.0" debugType="Debug" frameworkType="Framework46" visualstudioVersion="VS2017" defaultExportPath="" extractConfig="false" generateWebSocketApi="false" embedUserObjects="false" defaultDeployPath="" logsDirectory="$(installdir)" logsPattern="pid-${processid}-${component}-${shortdate}" runtimesLogs="True" logsLevel="TRACE" logsMaxSize="50" reactiveApiName="ReactiveXComponent.Net" reactiveApiVersion="6.0.0">
+  <!--
+	THREADING IMPLEMENTATION VALUES = AKKA - ->
+	<!- - THREADING TYPE VALUES = ONEBYSTM, ONEBYINSTANCE, INHERITFROMPARENT, INHERITFROMLINKING - ->
+	<!- - SERIALIZATION TYPE VALUES = BINARY, XML, JSON - ->
+	<!- - MESSAGE QUEUE VALUES = ONEBYSTM, ONEBYINSTANCE, INHERITFROMPARENT-->
+  <buildEvents>
+    <preBuildEvent></preBuildEvent>
+    <postBuildEvent></postBuildEvent>
+    <exportFolders>
+      <exportFolder websocket="False" rest="False" folder="CreateInstancesReactiveApi/CreateInstances">
+        <apistomerge>
+          <clientAPI name="HelloWorldV5Api" selected="True" />
+        </apistomerge>
+      </exportFolder>
+    </exportFolders>
+    <exportRuntimeFolders>
+      <exportRuntimeFolder folder="xcr" docker="False" />
+    </exportRuntimeFolders>
+  </buildEvents>
+  <components>
+    <component name="HelloWorld" alias="HelloWorld" deploymentTarget="microservice1">
+      <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+        <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
+        <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
+      </communication>
+      <threading impl="Akka" type="SEQUENTIAL" />
+      <stateMachines>
+        <stateMachine id="1" poolSize="100" numberOfWorker="0">
+          <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+            <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
+            <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
+          </communication>
+          <threading impl="Akka" type="INHERITFROMPARENT" />
+        </stateMachine>
+        <stateMachine id="2" poolSize="100" numberOfWorker="4">
+          <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+            <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
+            <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
+          </communication>
+          <threading impl="Akka" type="INHERITFROMPARENT" />
+        </stateMachine>
+        <stateMachine id="3" poolSize="100" numberOfWorker="4">
+          <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+            <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
+            <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
+          </communication>
+          <threading impl="Akka" type="INHERITFROMPARENT" />
+        </stateMachine>
+      </stateMachines>
+    </component>
+  </components>
+  <clientAPIs>
+    <clientAPI name="HelloWorldV5Api" messageQueue="INHERITFROMPARENT">
+      <component name="HelloWorld" messageQueue="INHERITFROMPARENT">
+        <update from="1" state="-1" messageQueue="INHERITFROMPARENT" />
+        <update from="2" state="-1" messageQueue="INHERITFROMPARENT" />
+        <update from="3" state="-1" messageQueue="INHERITFROMPARENT" />
+      </component>
+    </clientAPI>
+  </clientAPIs>
+  <configuration serialization="Json">
+    <communication>
+      <bus name="rabbitMq" host="127.0.0.1" virtualHost="" port="5672" user="guest" password="guest" type="RABBIT_MQ" sslEnabled="False" sslServerName="" sslCertPath="" sslCertPassphrase="" sslProtocol="Default" sslAllowUntrustedServerCertificate="True" />
+    </communication>
+    <gateways>
+      <websocket name="toto" host="localhost" port="443" bridgeport="443" type="Secure" user="" password="">
+        <loggedTopics><![CDATA[]]></loggedTopics>
+      </websocket>
+    </gateways>
+    <runtimes>
+      <runtime name="microservice1" platform="AnyCpu" functionManagerServiceUrl="http://127.0.0.1:9676" />
+    </runtimes>
+  </configuration>
+</deployment>

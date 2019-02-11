@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FAF849A5-C2E7-4CCD-AB00-DEBDC5FF3BED}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>XComponent.Configuration</RootNamespace>
+    <AssemblyName>XComponent.HelloWorldV5Api.xcApi</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="HelloWorldV5Api.xcApi">
+      <LogicalName>XComponent.Configuration.HelloWorldV5Api.xcApi</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WebSocket_HelloWorldV5Api.xcApi">
+      <LogicalName>XComponent.Configuration.WebSocket_HelloWorldV5Api.xcApi</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="xcresources.data">
+      <LogicalName>HelloWorldV5Api.xcApi_xcresources.data</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HelloWorldV5-EMBEDDED.xcr" Condition="False">
+      <LogicalName>XComponent.Configuration.HelloWorldV5-EMBEDDED.xcr</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  -->
+  <Target Name="AfterBuild">
+		<Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFolder="$(ProjectDir)"/>
+		<Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFolder="$(ProjectDir)"/>
+	</Target>
+</Project>

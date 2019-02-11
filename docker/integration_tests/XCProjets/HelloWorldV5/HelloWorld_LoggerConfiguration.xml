@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<asyncComponentLogger name="HelloWorld" level="TRACE" >
+  <runtimeLogKeys>
+	<logKey enabled="False">Messages</logKey>
+<logKey enabled="False">Messaging</logKey>
+<logKey enabled="True">Agent</logKey>
+<logKey enabled="False">PerfTest</logKey>
+<logKey enabled="False">Processing</logKey>
+
+  </runtimeLogKeys>
+  <componentLogKeys>
+	
+  </componentLogKeys>
+  <appenders>
+    <consoleAppender
+                   pattern="${runtime} ${longdate} ${level:uppercase=true} ${message} ${exception:format=tostring}" />   
+    <asyncFileAppender
+                   filePath="%LOG_DIR%/pid-${processid}-${component}-${shortdate}.log"
+				   archiveFilePath="%LOG_DIR%/backup/pid-${processid}-${component}-${shortdate}.{#####}.log"
+				   archiveAboveSize="51200000"
+                   pattern="${runtime} ${longdate} ${level:uppercase=true} ${message} ${exception:format=tostring}" />    
+  </appenders>
+</asyncComponentLogger>

@@ -1,0 +1,35 @@
+version: '3.0'
+services:
+  service1:
+    build:
+      context: ./XCContainer
+      dockerfile: Dockerfile
+    environment:
+      LOG_DIR: "/home/circleci/project/logs"
+      XCRFILE: "../xcassemblies/HelloWorldV5-microservice1.xcr"
+      XCASSEMBLIESZIP: HelloWorldV5XCassemblies.zip
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq1
+  clientapp:
+    build: 
+      context: ./AppsContainer
+      dockerfile: Dockerfile
+      args:
+        - APPZIP=CreateInstanceReactiveApi.zip
+    environment:
+      APP: CreateInstances.exe
+      HOST: rabbitmq
+      PORT: 5672
+      BUSTYPE: RABBIT_MQ
+      XCAPIFILE: "/Debug/xcassemblies/HelloWorldV5Api.xcApi"
+    networks:
+      - rabbitmq1  
+  rabbitmq:
+    image: rabbitmq:3-management
+    networks:
+      - rabbitmq1  
+networks:
+  rabbitmq1:
+    driver: bridge

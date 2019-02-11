@@ -137,6 +137,34 @@ Task("All")
   {
   });
 
+Task("Install-MSBuildTasks-Package")
+  .Does(() =>
+{
+  var nugetConfigPath = new FilePath("NuGet.Config");
+  var packageTargetDir = new DirectoryPath("packages");
+  NuGetInstall("MSBuildTasks", new NuGetInstallSettings {Version = "1.5.0.235", ConfigFile = nugetConfigPath, OutputDirectory = packageTargetDir, ExcludeVersion = true } );
+});
+
+Task("Restore-NuGet-Packages")
+  .IsDependentOn("Install-MSBuildTasks-Package")
+  .Does(() =>
+{
+  var solutions = GetFiles("./**/*.sln", fileSystemInfo => !fileSystemInfo.Path.FullPath.Contains("Resources") && !fileSystemInfo.Path.FullPath.Contains("template"));
+  foreach(var solution in solutions)
+  {
+    if (IsRunningOnUnix() && (solution.FullPath.Contains("XComponent.Spy.sln") || solution.FullPath.Contains("XComponent.Studio.sln")) ){
+      Information("Skipping solution {0}", solution);
+    }
+    else{
+      Information("Restoring packages for {0}", solution);
+      NuGetRestore(solution, new NuGetRestoreSettings { Verbosity = NuGetVerbosity.Detailed });
+    }
+  }
+  var nugetConfigPath = new FilePath("NuGet.Config");
+  var packageTargetDir = new DirectoryPath("packages");
+  NuGetInstall("XComponentLib", new NuGetInstallSettings {Version = "1.0.1", ConfigFile = nugetConfigPath, OutputDirectory = packageTargetDir, ExcludeVersion = true } );
+});
+
 Task("BuildIntegrationTests")
   .IsDependentOn("Restore-NuGet-Packages")
   .Does(() =>

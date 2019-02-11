@@ -1,14 +1,42 @@
 version: 2
+references:
+  restore_repo: &restore_repo
+    restore_cache:
+      name: Restore checked out code
+      keys:
+        - v1-xcomponent-repo-{{ .Branch }}-{{ .Revision }}
+        - v1-xcomponent-repo-{{ .Branch }}-
+        - v1-xcomponent-repo-
+
 jobs:
-  checkout_code:
+  build_sh_reactiveapi:
     docker:
       - image: xcomponent/mono-git:1.3.0
     steps:
       - checkout
-      - run: ./build.sh -t All
+      - run: 
+          name: ReactiveApi - Build runtime
+          command: ./build.sh -t All
+
+  reactiveapi_integrationtests:
+    docker:
+      - image: circleci/node:10.12
+    steps:
+      - setup_remote_docker  
+      - *restore_repo      
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          name: Run docker compose for reactiveapi integration tests
+          command: |
+            cd ./docker/integration_tests/dockerScripts
+            docker-compose -f ./docker-compose-reactiveapi.yml up --exit-code-from clientapp
 
 workflows:
   version: 2
   xcomponent_runtime:
     jobs:
-      - checkout_code
+      - build_sh_reactiveapi
+      - reactiveapi_integrationtests:
+          requires:
+          - build_sh_reactiveapi

@@ -6,9 +6,17 @@
 
 var target = Argument("target", "Build");
 var buildConfiguration = Argument("buildConfiguration", "Release");
+var configuration = Argument("buildConfiguration", "Debug");
+var distribution = Argument("distribution", "Community");
+var buildVersion = Argument("buildVersion", "5.0.0-B1");
 var version = Argument("buildVersion", "1.0.0-build1");
+var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
+
+var wixVersion = FormatWixVersion(buildVersion);
+var isCommunityEdition = distribution == "Community";
+
 
 Task("Clean")
     .Does(() =>
@@ -128,5 +136,23 @@ Task("All")
   .Does(() =>
   {
   });
+
+Task("BuildIntegrationTests")
+  .IsDependentOn("Restore-NuGet-Packages")
+  .Does(() =>
+ {
+    var buildSettings = new Settings { Configuration = configuration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
+  
+    CrossPlatformBuild(@"docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
+ });
+
+Task("PackageDockerIntegrationTests")
+  .Does(() =>
+ {
+    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
+    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/Debug", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
+	
+});
+
 
 RunTarget(target);

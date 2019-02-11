@@ -29,6 +29,7 @@ jobs:
       - run:
           name: Run docker compose for reactiveapi integration tests
           command: |
+            ls
             cd ./docker/integration_tests/dockerScripts
             docker-compose -f ./docker-compose-reactiveapi.yml up --exit-code-from clientapp
 

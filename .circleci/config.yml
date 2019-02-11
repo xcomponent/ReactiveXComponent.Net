@@ -2,10 +2,10 @@ version: 2
 jobs:
   checkout_code:
     docker:
-      - image: circleci/node:10.12
+      - image: xcomponent/mono-git:1.3.0
     steps:
       - checkout
-      - run echo "Hello Xcomponent"
+      - run: ./build.sh -t All
 
 workflows:
   version: 2

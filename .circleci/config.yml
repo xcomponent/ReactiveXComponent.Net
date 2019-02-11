@@ -8,6 +8,19 @@ references:
         - v1-xcomponent-repo-{{ .Branch }}-
         - v1-xcomponent-repo-
 
+  restore_nuget: &restore_nuget
+    restore_cache:
+      name: Restore nuget cache
+      keys:
+        - v1-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
+        - v1-nuget-{{ .Branch }}-
+        - v1-nuget-
+
+  generate_nuget_shasum: &generate_nuget_shasum
+    run:
+      name: Generate cache shasum
+      command: find . -name "packages.config" -exec shasum {} \+ | sort -n > shasum.tmp
+
   save_nuget: &save_nuget
     save_cache:
       name: Save nuget cache
@@ -31,6 +44,9 @@ jobs:
     docker:
       - image: xcomponent/mono-git:1.3.0
     steps:
+      - *restore_repo
+      - *generate_nuget_shasum
+      - *restore_nuget
       - run: 
           name: ReactiveApi - Build runtime
           command: ./build.sh -t All

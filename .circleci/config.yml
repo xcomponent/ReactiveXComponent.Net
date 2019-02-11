@@ -54,9 +54,7 @@ jobs:
       - persist_to_workspace:
           root: /home/circleci/project
           paths:
-            - generated/
-            - build/*.Tests/bin/*/*
-            - core/*.Tests/bin/*/*
+            - docker
 
   reactiveapi_integrationtests:
     docker:

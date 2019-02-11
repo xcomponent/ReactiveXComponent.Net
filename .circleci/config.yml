@@ -55,7 +55,6 @@ jobs:
           root: /home/circleci/project
           paths:
             - docker
-
   reactiveapi_integrationtests:
     docker:
       - image: circleci/node:10.12

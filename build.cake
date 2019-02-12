@@ -172,7 +172,32 @@ Task("BuildIntegrationTests")
   .Does(() =>
  {
     var buildSettings = new Settings { Configuration = configuration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
-  
+    var exitCode = 0;
+
+    var outputReactiveApiParam = " --output=\"" + MakeAbsolute(Directory("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/lib")) + "\"";
+    var reactiveApiParams = outputReactiveApiParam + " --exportReactiveClientApi --reactiveClientApiPackageName ReactiveXComponent.Net --reactiveClientApiPackageVersion 6.0.0";
+    var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
+
+    var mono = "mono";
+    var xcbuild = "./generated/XCBuild/xcbuild.exe";
+    var cleanArgs = " --compilationmode=Debug --clean --env=Dev --vs=";
+    var buildArgs = " --compilationmode=Debug --build --env=Dev --vs=";
+    var exportArgs = " --compilationmode=Debug --exportInterface --env=Dev --vs=";
+
+    if (IsRunningOnUnix()) {
+      exitCode = StartProcess(mono, xcbuild + cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+      StartProcess(mono, xcbuild + buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+      StartProcess(mono, xcbuild + exportArgs + vsVersion + helloWorldProjectPathParam + reactiveApiParams + GetXCBuildExtraParam());
+    } else {
+      exitCode =  StartProcess(xcbuild, cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+      StartProcess(xcbuild, buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+      StartProcess(xcbuild, exportArgs + vsVersion + helloWorldProjectPathParam + reactiveApiParams);
+    }
+
+    if (exitCode != 0) {
+      throw new Exception();
+    }
+
     CrossPlatformBuild(@"docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
  });
 

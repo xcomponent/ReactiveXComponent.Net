@@ -2,6 +2,7 @@
 #tool "nuget:?package=ILRepack"
 #addin "Cake.FileHelpers&version=2.0.0"
 #addin "Cake.Incubator&version=1.6.0"
+#addin "Cake.XComponent"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
@@ -128,13 +129,13 @@ Task("PushPackage")
     });
 
 Task("All")
+  .IsDependentOn("BuildIntegrationTests")
+  .IsDependentOn("PackageDockerIntegrationTests")
   .IsDependentOn("Clean")
   .IsDependentOn("RestoreNugetPackages")
   .IsDependentOn("Build")
   .IsDependentOn("Test")
   .IsDependentOn("CreatePackage")
-  .IsDependentOn("BuildIntegrationTests")
-  .IsDependentOn("PackageDockerIntegrationTests")
   .Does(() =>
   {
   });
@@ -172,27 +173,6 @@ Task("BuildIntegrationTests")
   .Does(() =>
  {
     var buildSettings = new Settings { Configuration = configuration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
-    var exitCode = 0;
-
-    var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
-
-    var mono = "mono";
-    var xcbuild = "./generated/XCBuild/xcbuild.exe";
-    var cleanArgs = " --compilationmode=Debug --clean --env=Dev --vs=";
-    var buildArgs = " --compilationmode=Debug --build --env=Dev --vs=";
-    var exportArgs = " --compilationmode=Debug --exportInterface --env=Dev --vs=";
-
-    if (IsRunningOnUnix()) {
-      exitCode = StartProcess(mono, xcbuild + cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-      StartProcess(mono, xcbuild + buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-    } else {
-      exitCode =  StartProcess(xcbuild, cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-      StartProcess(xcbuild, buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-    }
-
-    if (exitCode != 0) {
-      throw new Exception();
-    }
 
     CrossPlatformBuild(@"docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
  });

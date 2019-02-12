@@ -2,7 +2,6 @@
 #tool "nuget:?package=ILRepack"
 #addin "Cake.FileHelpers&version=2.0.0"
 #addin "Cake.Incubator&version=1.6.0"
-#addin "Cake.XComponent"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");

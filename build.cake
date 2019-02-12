@@ -5,8 +5,7 @@
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
-var buildConfiguration = Argument("buildConfiguration", "Release");
-var configuration = Argument("buildConfiguration", "Debug");
+var buildConfiguration = Argument("buildConfiguration", "Debug");
 var distribution = Argument("distribution", "Community");
 var buildVersion = Argument("buildVersion", "5.0.0-B1");
 var version = Argument("buildVersion", "1.0.0-build1");
@@ -20,6 +19,7 @@ var isCommunityEdition = distribution == "Community";
 Task("Clean")
     .Does(() =>
     {
+        #break
         if (DirectoryExists("nuget"))
         {
             CleanDirectory("nuget");
@@ -136,41 +136,22 @@ Task("All")
   {
   });
 
-Task("Install-MSBuildTasks-Package")
-  .Does(() =>
-{
-  var nugetConfigPath = new FilePath("NuGet.Config");
-  var packageTargetDir = new DirectoryPath("packages");
-  NuGetInstall("MSBuildTasks", new NuGetInstallSettings {Version = "1.5.0.235", ConfigFile = nugetConfigPath, OutputDirectory = packageTargetDir, ExcludeVersion = true } );
-});
-
-Task("Restore-NuGet-Packages")
-  .IsDependentOn("Install-MSBuildTasks-Package")
-  .Does(() =>
-{
-  var solutions = GetFiles("./**/*.sln", fileSystemInfo => !fileSystemInfo.Path.FullPath.Contains("Resources") && !fileSystemInfo.Path.FullPath.Contains("template"));
-  foreach(var solution in solutions)
-  {
-    if (IsRunningOnUnix() && (solution.FullPath.Contains("XComponent.Spy.sln") || solution.FullPath.Contains("XComponent.Studio.sln")) ){
-      Information("Skipping solution {0}", solution);
-    }
-    else{
-      Information("Restoring packages for {0}", solution);
-      NuGetRestore(solution, new NuGetRestoreSettings { Verbosity = NuGetVerbosity.Detailed });
-    }
-  }
-  var nugetConfigPath = new FilePath("NuGet.Config");
-  var packageTargetDir = new DirectoryPath("packages");
-  NuGetInstall("XComponentLib", new NuGetInstallSettings {Version = "1.0.1", ConfigFile = nugetConfigPath, OutputDirectory = packageTargetDir, ExcludeVersion = true } );
-});
-
 Task("BuildIntegrationTests")
-  .IsDependentOn("Restore-NuGet-Packages")
   .Does(() =>
  {
-    var buildSettings = new Settings { Configuration = configuration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
+    var rxcAssembliesPatterns = new string[]
+    {
+        "./ReactiveXComponent/bin/" + buildConfiguration + "/ReactiveXComponent.dll"
+    };
 
-    CrossPlatformBuild(@"docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
+    var pathrxcAssembliesDirectory = "./docker/integration_tests/XCProjects/HelloWorldV5/rxcAssemblies";
+    var rxcAssemblies = GetFiles(rxcAssembliesPatterns);
+
+    CreateDirectory(pathrxcAssembliesDirectory);
+    CopyFiles(rxcAssemblies, pathrxcAssembliesDirectory);
+    var buildSettings = new Settings { Configuration = buildConfiguration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
+
+    CrossPlatformBuild(@"./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
  });
 
 Task("PackageDockerIntegrationTests")

@@ -183,16 +183,6 @@ public class Settings {
   public string VSVersion {get; set; }
 }
 
-class MsiSettings 
-{
-  public string Distribution { get; set; }
-  public string PackageVersion { get; set; }
-  public string HarvestDirectory { get; set; }
-  public string WorkingDirectory { get; set; }
-  public string OutputDirectory { get; set; }
-  public bool Verbose { get; set; }
-}
-
 Func<bool> IsRunningOnOsx = () => 
 {
     return DirectoryExists("/Applications");
@@ -203,19 +193,6 @@ Func<bool> IsRunningOnLinux = () =>
     return IsRunningOnUnix() && !IsRunningOnOsx();
 };
 
-Func<string> GetXCBuildExtraParam = () => {
-    if (IsRunningOnLinux()) 
-    {
-        return " --monoPath=\"/usr/lib/mono/4.5/Facades/\"";
-    }
-    if (IsRunningOnOsx()) 
-    {
-        return " --monoPath=\"/Library/Frameworks/Mono.framework/Versions/5.2.0/lib/mono/4.5/Facades/\"";
-    }
-
-    return "";
-};
-
 public MSBuildSettings GetDefaultMSBuildSettings() 
 {
     if (IsRunningOnLinux()){
@@ -223,21 +200,6 @@ public MSBuildSettings GetDefaultMSBuildSettings()
     }
     return new MSBuildSettings();
 }
-
-
-Action<string> BuildNETSolution = (solution) => 
-{
-    try 
-    {
-       NuGetRestore(solution, new NuGetRestoreSettings { NoCache = true });   
-    } catch(Exception) 
-    {
-
-    }
-
-   MSBuild(solution, GetDefaultMSBuildSettings());
-};
-
 
 public void CrossPlatformBuild(string filePath, Settings settings) 
 {  
@@ -281,72 +243,6 @@ public void CrossPlatformBuild(string filePath, Settings settings)
 		
 		MSBuild(filePath, msbuildSettings);
     }
-}
-
-public void GenerateNugetPackage(string fromNuspec, IDictionary<string, string> properties, bool isCommunityEdition, string tags) 
-{
-	var outputFolder = GetDistributionDirectory(isCommunityEdition);
-	
-	var settings = new NuGetPackSettings() {Verbosity = NuGetVerbosity.Quiet, OutputDirectory = new DirectoryPath(outputFolder), Tags = tags.Split(' '), Properties = properties };
-	NuGetPack(new FilePath(fromNuspec), settings);
-}
-
-public string ReplaceTag(string filePath, string tag, string value) 
-{
-	var content = ReadFile(filePath);
-	var newContent = content.Replace(tag, value);
-	SaveFile(filePath, newContent);
-	return content;
-}
-
-public string ReadFile(string filePath)
-{
-	var utf8WithoutBom = new System.Text.UTF8Encoding(true);
-	var content = System.IO.File.ReadAllText(filePath, utf8WithoutBom);
-	return content;
-}
-
-public void SaveFile(string filePath, string content)
-{
-	var utf8WithoutBom = new System.Text.UTF8Encoding(true);
-	System.IO.File.WriteAllText(filePath, content, utf8WithoutBom);
-}
-
-Dictionary<string, string> GetCommonNugetReplacements(bool isCommunityEdition, string buildVersion, string nugetFrameworkVersion)
-{
-	Dictionary<string, string> properties = new Dictionary<string, string>();
-	var nugetVersion = FormatNugetVersion(buildVersion);
-	properties.Add("productVersion", "\"" + nugetVersion + "\"");
-	var distribution = isCommunityEdition ? "Community" : "Workgroup";
-	properties.Add("distribution", distribution);
-	properties.Add("distributionLowercase", distribution.ToLower());
-	properties.Add("frameworkVersion", nugetFrameworkVersion);
-	return properties;
-}
-
-public void GenerateToolNugetPackage(string tool, bool isCommunityEdition, string buildVersion, string nugetFrameworkVersion, string targetDir, string customTags)
-{
-	// Generate xcbridge
-	var toolReplacements  = GetCommonNugetReplacements(isCommunityEdition, buildVersion, nugetFrameworkVersion);
-	var toolName = tool;
-	toolReplacements.Add("tool", toolName);
-	toolReplacements.Add("nugetname", toolName.Replace("XC",""));
-	toolReplacements.Add("toolLowercase", toolName.ToLower());
-	toolReplacements.Add("targetDir", targetDir);
-
-	var tags = "xcomponent microservices state machine api " + customTags;
-	
-	GenerateNugetPackage("./xcomponenttool.nuspec", toolReplacements, isCommunityEdition, tags);
-}
-
-public string GetDistributionDirectoryRoot() 
-{
-	return "generatedDistributions";
-}
-
-public string GetDistributionDirectory(bool isCommunityEdition)
-{
-	return System.IO.Path.Combine(GetDistributionDirectoryRoot(), isCommunityEdition ? "CommunityEdition" : "WorkgroupEdition");
 }
 
 public string PadBuildPart(int buildPart) 
@@ -407,88 +303,3 @@ public string FormatWixVersion(string buildVersion)
 
 	throw new ArgumentException("Invalid build version", "buildVersion");
 }
-
-Action<MsiSettings> CreateInstaller = (MsiSettings msiSettings) =>
-{
-    var tmpDirectory = System.IO.Path.Combine(msiSettings.WorkingDirectory, "tmp");
-    EnsureDirectoryExists(tmpDirectory);
-
-    var wxsFile = System.IO.Path.Combine(tmpDirectory, "XCStudio.wxs");
-
-    var heatSettings = new HeatSettings 
-      { 
-        ComponentGroupName = "XCStudio",
-        DirectoryReferenceId = "XCSTUDIO",
-        PreprocessorVariable = "var.srcXCStudioDir",
-        GenerateGuid = true,
-        SuppressCom = true, 
-        SuppressFragments = true,
-        SuppressRegistry = true,
-        SuppressRootDirectory = true,
-        NoLogo = true,
-        Verbose = msiSettings.Verbose
-      };
-
-    WiXHeat(msiSettings.HarvestDirectory, wxsFile, WiXHarvestType.Dir, heatSettings);
-
-    var xcomponentWxsTemplate = File(System.IO.Path.Combine(msiSettings.WorkingDirectory, "XComponentWxs.tt"));
-    var argumentCustomization = new Func<ProcessArgumentBuilder, ProcessArgumentBuilder>(args => args.Append("-a=Distribution!" + msiSettings.Distribution + " -a=Version!" + msiSettings.PackageVersion));
-    var textTransformSettings = new TextTransformSettings
-    {
-      OutputFile = System.IO.Path.Combine(msiSettings.WorkingDirectory, "XComponent.wxs"),
-      ArgumentCustomization = argumentCustomization
-    };
-
-    TransformTemplate(xcomponentWxsTemplate, textTransformSettings);
-
-    var licenseTemplate = File(System.IO.Path.Combine(msiSettings.WorkingDirectory, "License.tt"));
-    var licenseArgumentCustomization = new Func<ProcessArgumentBuilder, ProcessArgumentBuilder>(args => args.Append("-a=Distribution!" + msiSettings.Distribution.ToUpper()));
-    var licenseTransformSettings = new TextTransformSettings
-    {
-      OutputFile = System.IO.Path.Combine(msiSettings.WorkingDirectory, "License.rtf"),
-      ArgumentCustomization = licenseArgumentCustomization
-    };
-
-    TransformTemplate(licenseTemplate, licenseTransformSettings);
-
-    var filesToCopyPatterns = new []
-    {
-      System.IO.Path.Combine(msiSettings.WorkingDirectory, "*.wxs"),
-      System.IO.Path.Combine(msiSettings.WorkingDirectory, "*.rtf")
-    };
-    var filesToCopy = GetFiles(filesToCopyPatterns);
-    CopyFiles(filesToCopy, tmpDirectory);
-    var variablesDefinitions = new Dictionary<string, string> 
-    {
-      { "srcXCStudioDir", MakeAbsolute(Directory(msiSettings.HarvestDirectory)).FullPath } 
-    };
-
-    var candleSettings = new CandleSettings 
-      {
-        Architecture = Architecture.X86,
-        NoLogo = true,
-        WorkingDirectory = tmpDirectory,
-        Defines = variablesDefinitions,
-        Extensions = new List<string>() { "WixNetFxExtension" },
-        Verbose = msiSettings.Verbose
-      };
-    
-    var wxsFilesPattern = System.IO.Path.Combine(tmpDirectory, "*.wxs");
-    WiXCandle(wxsFilesPattern, candleSettings);
-
-    var msiFileName = "XComponent " + msiSettings.Distribution + " Edition." + msiSettings.PackageVersion + ".msi";
-    var msiFilePath = msiSettings.OutputDirectory + "/" + msiFileName;
-    var rawArguments = "-spdb";
-    var lightSettings = new LightSettings 
-    {
-      OutputFile = msiFilePath,
-      WorkingDirectory = msiSettings.WorkingDirectory,
-      RawArguments = msiSettings.Verbose ? rawArguments + " -v" : rawArguments,
-      Extensions = new List<string>() { "WixUIExtension", "WixNetFxExtension" }
-    };
-
-    var wixobjFilesPattern = System.IO.Path.Combine(tmpDirectory, "*.wixobj");
-    WiXLight(wixobjFilesPattern, lightSettings);
-
-    CleanDirectory(tmpDirectory);
-};

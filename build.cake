@@ -129,13 +129,13 @@ Task("PushPackage")
     });
 
 Task("All")
-  .IsDependentOn("BuildIntegrationTests")
-  .IsDependentOn("PackageDockerIntegrationTests")
   .IsDependentOn("Clean")
   .IsDependentOn("RestoreNugetPackages")
   .IsDependentOn("Build")
   .IsDependentOn("Test")
   .IsDependentOn("CreatePackage")
+  .IsDependentOn("BuildIntegrationTests")
+  .IsDependentOn("PackageDockerIntegrationTests")
   .Does(() =>
   {
   });

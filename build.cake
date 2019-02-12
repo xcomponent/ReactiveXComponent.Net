@@ -133,8 +133,6 @@ Task("All")
   .IsDependentOn("Build")
   .IsDependentOn("Test")
   .IsDependentOn("CreatePackage")
-  .IsDependentOn("BuildIntegrationTests")
-  .IsDependentOn("PackageDockerIntegrationTests")
   .Does(() =>
   {
   });

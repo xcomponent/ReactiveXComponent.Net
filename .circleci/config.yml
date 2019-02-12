@@ -47,9 +47,15 @@ jobs:
       - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
-      - run: 
-          name: ReactiveApi - Build runtime
+      - run:
+          name: ReactiveApi - Build All
           command: ./build.sh -t All
+      - run:
+          name: ReactiveApi - Build BuildIntegrationTests
+          command: ./build.sh -t BuildIntegrationTests
+      - run:
+          name: ReactiveApi - Build PackageDockerIntegrationTests
+          command: ./build.sh -t PackageDockerIntegrationTests
       - *save_nuget
       - persist_to_workspace:
           root: /home/circleci/project

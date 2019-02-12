@@ -1,9 +1,6 @@
 #tool "nuget:?package=NUnit.Runners&version=3.7.0&include=./**/*"
 #tool "nuget:?package=ILRepack"
-#addin "Cake.XComponent"
-#addin nuget:?package=Cake.Yarn
-#addin nuget:?package=Cake.DoInDirectory
-#addin "Cake.FileHelpers&version=3.0.0"
+#addin "Cake.FileHelpers&version=2.0.0"
 #addin "Cake.Incubator&version=1.6.0"
 #load "cake.scripts/utilities.cake"
 

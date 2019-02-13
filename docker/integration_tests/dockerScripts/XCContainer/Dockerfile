@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
 	unzip \
 	nodejs \
 	&& rm -rf /var/lib/apt/lists/* /tmp/*
+COPY XCRuntime.zip ./
+RUN rm -rf XCRuntime
+RUN unzip /XCRuntime.zip -d XCRuntime
 
 COPY wait_for_it.sh ./
 COPY HelloWorldV5XCassemblies.zip ./

@@ -1,4 +1,4 @@
-#tool "nuget:?package=NUnit.Runners&version=3.7.0&include=./**/*"
+#tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
 #tool "nuget:?package=ILRepack"
 #addin "Cake.FileHelpers&version=3.1.0"
 #addin "Cake.Incubator&version=3.0.0"
@@ -6,7 +6,7 @@
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
-var buildConfiguration = Argument("buildConfiguration", "Release");
+var buildConfiguration = Argument("buildConfiguration", "Debug");
 var distribution = Argument("distribution", "Community");
 var buildVersion = Argument("buildVersion", "5.0.0-B1");
 var version = Argument("buildVersion", "1.0.0-build1");

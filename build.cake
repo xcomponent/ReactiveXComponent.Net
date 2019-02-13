@@ -1,7 +1,8 @@
 #tool "nuget:?package=NUnit.Runners&version=3.7.0&include=./**/*"
 #tool "nuget:?package=ILRepack"
-#addin "Cake.FileHelpers&version=2.0.0"
-#addin "Cake.Incubator&version=1.6.0"
+#addin "Cake.FileHelpers&version=3.1.0"
+#addin "Cake.Incubator&version=3.0.0"
+#addin "Cake.DoInDirectory&version=3.2.0"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
@@ -15,6 +16,14 @@ var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
 
 var wixVersion = FormatWixVersion(buildVersion);
 var isCommunityEdition = distribution == "Community";
+
+var XComponentVersion = "6.0.3";
+
+Setup(context=> {
+    DoInDirectory(@"tools", () => {
+        NuGetInstall("XComponent.Build.Community", new NuGetInstallSettings{ Version=XComponentVersion, ExcludeVersion=true });
+    });
+});
 
 Task("Clean")
     .Does(() =>
@@ -31,12 +40,32 @@ Task("Clean")
         }
 
         CleanSolution("ReactiveXComponent.sln", buildConfiguration);
+
+        var pathHelloWorldIntegrationTest = "./docker/integration_tests/XCProjects/HelloWorldV5/";
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "xcr"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "xcr");
+        }
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "generated"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "generated");
+        }
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "rxcAssemblies"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "rxcAssemblies");
+        }
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies");
+        }
+        CleanSolution(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances.sln", buildConfiguration);
     });
 
 Task("RestoreNugetPackages")
     .Does(() =>
     {
         NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });
+        NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
     });
 
 Task("Build")
@@ -136,9 +165,34 @@ Task("All")
   {
   });
 
+Task("BuildHelloWorld")
+    .Does(() =>
+    {
+        var exitCode = 0;
+        var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
+    
+        var mono = "mono";
+        var xcbuild = "./tools/XComponent.Build.Community/tools/XCBuild/xcbuild.exe";
+        var cleanArgs = " --compilationmode=Debug --clean --env=Dev --vs=";
+        var buildArgs = " --compilationmode=Debug --build --env=Dev --vs=";
+
+        if (IsRunningOnUnix()) {
+            exitCode = StartProcess(mono, xcbuild + cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+            StartProcess(mono, xcbuild + buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+        } else {
+            exitCode =  StartProcess(xcbuild, cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+            StartProcess(xcbuild, buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+        }
+        if (exitCode != 0) {
+            throw new Exception();
+        }
+    });
+
 Task("BuildIntegrationTests")
+  .IsDependentOn("RestoreNugetPackages")
+  .IsDependentOn("BuildHelloWorld")
   .Does(() =>
- {
+  {
     var rxcAssembliesPatterns = new string[]
     {
         "./ReactiveXComponent/bin/" + buildConfiguration + "/ReactiveXComponent.dll"
@@ -152,7 +206,7 @@ Task("BuildIntegrationTests")
     var buildSettings = new Settings { Configuration = buildConfiguration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
 
     CrossPlatformBuild(@"./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
- });
+  });
 
 Task("PackageDockerIntegrationTests")
   .Does(() =>

@@ -1,5 +1,5 @@
-#addin "Cake.Incubator&version=1.6.0"
-#addin "Cake.VsixSignTool&version=1.1.0"
+#addin "Cake.Incubator&version=3.0.0"
+#addin "Cake.VsixSignTool&version=1.2.0"
 #tool "nuget:?package=WiX&version=3.11.0"
 
 var FormatAssemblyVersion = new Func<string, string>(currentVersion =>
@@ -191,6 +191,19 @@ Func<bool> IsRunningOnOsx = () =>
 Func<bool> IsRunningOnLinux = () => 
 {
     return IsRunningOnUnix() && !IsRunningOnOsx();
+};
+
+Func<string> GetXCBuildExtraParam = () => {
+    if (IsRunningOnLinux()) 
+    {
+        return " --monoPath=\"/usr/lib/mono/4.5/Facades/\"";
+    }
+    if (IsRunningOnOsx()) 
+    {
+        return " --monoPath=\"/Library/Frameworks/Mono.framework/Versions/5.2.0/lib/mono/4.5/Facades/\"";
+    }
+
+    return "";
 };
 
 public MSBuildSettings GetDefaultMSBuildSettings() 

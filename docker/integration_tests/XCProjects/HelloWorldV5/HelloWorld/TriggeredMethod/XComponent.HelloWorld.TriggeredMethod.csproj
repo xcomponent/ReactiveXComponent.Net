@@ -60,5 +60,5 @@
       <Project>{DA246311-853B-4193-8E98-384FFE004004}</Project>
     </ProjectReference>
   </ItemGroup>
-  <Import Condition="true" Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="true" />
 </Project>

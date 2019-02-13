@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>WiX</id>
+    <version>3.11.0</version>
+    <title>WiX: Windows Installer XML Toolset</title>
+    <authors>Rob Mensching, Bob Arnson</authors>
+    <owners>Rob Mensching, Bob Arnson</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://wixtoolset.org/about/license/</licenseUrl>
+    <projectUrl>http://wixtoolset.org/</projectUrl>
+    <iconUrl>http://static.wixtoolset.org/assets/img/logo_framed.png</iconUrl>
+    <description>This package simply bundles the official binaries as a nuget, with all binaries under tools. An MSBuild 
+      .props file automatically resolves a .wixproj targets and paths to that location.
+      This allows build scripts to just install this package (potentially using -ExcludeVersion) and use it to build MSIs without requiring additional software on a build server.</description>
+    <summary>The most powerful set of tools available to create your Windows installation experience.</summary>
+    <copyright>Copyright Outercurve Foundation</copyright>
+    <tags>FireGiant WiX</tags>
+  </metadata>
+</package>

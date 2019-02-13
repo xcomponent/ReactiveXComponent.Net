@@ -38,8 +38,16 @@
       <HintPath>..\UserReference\XComponent.Core.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
+    <Reference Include="XComponent.Core.dll">
+      <HintPath>..\UserReference\XComponent.Core.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
     <Reference Include="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <HintPath>..\UserReference\mscorlib.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="XComponent.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\UserReference\XComponent.Core.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>

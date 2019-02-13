@@ -189,13 +189,14 @@ Task("BuildHelloWorld")
     });
 
 Task("BuildIntegrationTests")
+  .IsDependentOn("Merge")
   .IsDependentOn("RestoreNugetPackages")
   .IsDependentOn("BuildHelloWorld")
   .Does(() =>
   {
     var rxcAssembliesPatterns = new string[]
     {
-        "./ReactiveXComponent/bin/" + buildConfiguration + "/ReactiveXComponent.dll"
+        "./packaging/ReactiveXComponent.dll"
     };
 
     var pathrxcAssembliesDirectory = "./docker/integration_tests/XCProjects/HelloWorldV5/rxcAssemblies";

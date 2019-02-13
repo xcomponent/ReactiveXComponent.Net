@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <ProjectGuid>{ED6E227E-2D23-4181-8CF2-D155C9F3F001}</ProjectGuid>
+    <ProjectGuid>{3A2AEA42-B63B-48FA-822F-5D8B95705743}</ProjectGuid>
     <RootNamespace>XComponent.HelloWorld.StateMachine</RootNamespace>
     <AssemblyName>XComponent.HelloWorld.StateMachine</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
@@ -56,7 +56,7 @@
     </ProjectReference>
     <ProjectReference Include="..\Common\XComponent.HelloWorld.Common.csproj">
       <Name>XComponent.HelloWorld.Common</Name>
-      <Project>{67737DE5-92D0-4796-8F52-3B4022FDFBF2}</Project>
+      <Project>{0599E34C-D931-4AC7-A298-F02F117510BE}</Project>
     </ProjectReference>
     <ProjectReference Include="..\TriggeredMethod\XComponent.HelloWorld.TriggeredMethod.csproj">
       <Name>XComponent.HelloWorld.TriggeredMethod</Name>

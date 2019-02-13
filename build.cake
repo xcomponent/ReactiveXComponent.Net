@@ -6,7 +6,7 @@
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
-var buildConfiguration = Argument("buildConfiguration", "Debug");
+var buildConfiguration = Argument("buildConfiguration", "Release");
 var distribution = Argument("distribution", "Community");
 var buildVersion = Argument("buildVersion", "5.0.0-B1");
 var version = Argument("buildVersion", "1.0.0-build1");

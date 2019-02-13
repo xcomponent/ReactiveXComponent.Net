@@ -7,15 +7,10 @@
 
 var target = Argument("target", "Build");
 var buildConfiguration = Argument("buildConfiguration", "Debug");
-var distribution = Argument("distribution", "Community");
-var buildVersion = Argument("buildVersion", "5.0.0-B1");
 var version = Argument("buildVersion", "1.0.0-build1");
 var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
-
-var wixVersion = FormatWixVersion(buildVersion);
-var isCommunityEdition = distribution == "Community";
 
 var XComponentVersion = "6.0.3";
 
@@ -204,7 +199,7 @@ Task("BuildIntegrationTests")
 
     CreateDirectory(pathrxcAssembliesDirectory);
     CopyFiles(rxcAssemblies, pathrxcAssembliesDirectory);
-    var buildSettings = new Settings { Configuration = buildConfiguration, IsCommunityEdition = isCommunityEdition, VersionNumber = wixVersion, VSVersion = vsVersion };
+    var buildSettings = new Settings { Configuration = buildConfiguration, VSVersion = vsVersion };
 
     CrossPlatformBuild(@"./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
   });

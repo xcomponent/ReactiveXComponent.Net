@@ -1,6 +1,5 @@
 #addin "Cake.Incubator&version=3.0.0"
 #addin "Cake.VsixSignTool&version=1.2.0"
-#tool "nuget:?package=WiX&version=3.11.0"
 
 var FormatAssemblyVersion = new Func<string, string>(currentVersion =>
 {
@@ -256,63 +255,4 @@ public void CrossPlatformBuild(string filePath, Settings settings)
 		
 		MSBuild(filePath, msbuildSettings);
     }
-}
-
-public string PadBuildPart(int buildPart) 
-{
-	string paddedBuildPart = buildPart.ToString();
-	if (buildPart < 10)
-	{
-		paddedBuildPart = "000" + paddedBuildPart;
-	}
-	else if (buildPart < 100)
-	{
-		paddedBuildPart = "00" + paddedBuildPart;
-	}
-	else if (buildPart < 1000)
-	{
-		paddedBuildPart = "0" + paddedBuildPart;
-	}
-	else if (buildPart > 60000) 
-	{
-		paddedBuildPart = "9";
-	}
-	return paddedBuildPart;
-}
-
-// convert version (ex : 3.x.y-G15) to wix format (ex : 3.x.y.415)
-public string FormatWixVersion(string buildVersion) 
-{
-	var versionMatch = System.Text.RegularExpressions.Regex.Match(buildVersion, @"(?<major>\d+\.\d+\.\d+)-(?<type>[ZDBCG])(?<build>\d+)");
-	if (versionMatch.Success)
-	{
-		string typePart = versionMatch.Groups["type"].Value;
-		string majorPart = versionMatch.Groups["major"].Value;
-		int buildPart = Int32.Parse(versionMatch.Groups["build"].Value);
-		string paddedBuildPart = PadBuildPart(buildPart);
-
-		int versionTypeDigit = 0;
-		switch (typePart)
-		{
-			case "Z":
-				versionTypeDigit = 1;
-				break;
-			case "D":
-				versionTypeDigit = 2;
-				break;
-			case "B":
-				versionTypeDigit = 3;
-				break;
-			case "C":
-				versionTypeDigit = 4;
-				break;
-			case "G": 
-				versionTypeDigit = 5;
-				break;
-		}
-
-		return string.Format("{0}.{1}{2}", majorPart, versionTypeDigit, paddedBuildPart);
-	}
-
-	throw new ArgumentException("Invalid build version", "buildVersion");
 }

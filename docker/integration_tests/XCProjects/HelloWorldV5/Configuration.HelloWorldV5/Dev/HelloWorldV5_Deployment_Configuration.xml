@@ -21,28 +21,28 @@
   </buildEvents>
   <components>
     <component name="HelloWorld" alias="HelloWorld" deploymentTarget="microservice1">
-      <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+      <communication name="RabbitMq" type="BUS" messageQueue="SEQUENTIAL">
         <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
         <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
       </communication>
       <threading impl="Akka" type="SEQUENTIAL" />
       <stateMachines>
         <stateMachine id="1" poolSize="100" numberOfWorker="0">
-          <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+          <communication name="RabbitMq" type="BUS" messageQueue="SEQUENTIAL">
             <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
             <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
           </communication>
           <threading impl="Akka" type="INHERITFROMPARENT" />
         </stateMachine>
         <stateMachine id="2" poolSize="100" numberOfWorker="4">
-          <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+          <communication name="RabbitMq" type="BUS" messageQueue="SEQUENTIAL">
             <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
             <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
           </communication>
           <threading impl="Akka" type="INHERITFROMPARENT" />
         </stateMachine>
         <stateMachine id="3" poolSize="100" numberOfWorker="4">
-          <communication name="rabbitMq" type="BUS" messageQueue="SEQUENTIAL">
+          <communication name="RabbitMq" type="BUS" messageQueue="SEQUENTIAL">
             <input>{topicType}.{version}.{runtime}.{component}.{std}</input>
             <output>{topicType}.{version}.{runtime}.{component}.{std}</output>
           </communication>
@@ -62,7 +62,7 @@
   </clientAPIs>
   <configuration serialization="Json">
     <communication>
-      <bus name="rabbitMq" host="127.0.0.1" virtualHost="" port="5672" user="guest" password="guest" type="RABBIT_MQ" sslEnabled="False" sslServerName="" sslCertPath="" sslCertPassphrase="" sslProtocol="Default" sslAllowUntrustedServerCertificate="True" />
+      <bus name="RabbitMq" host="rabbitmq" virtualHost="" port="5672" user="guest" password="guest" type="RABBIT_MQ" sslEnabled="False" sslServerName="" sslCertPath="" sslCertPassphrase="" sslProtocol="Default" sslAllowUntrustedServerCertificate="True" />
     </communication>
     <gateways>
       <websocket name="toto" host="localhost" port="443" bridgeport="443" type="Secure" user="" password="">

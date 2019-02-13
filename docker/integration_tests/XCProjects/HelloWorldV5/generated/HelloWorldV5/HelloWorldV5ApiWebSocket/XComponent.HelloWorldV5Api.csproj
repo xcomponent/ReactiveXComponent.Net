@@ -47,18 +47,18 @@
       <SpecificVersion>false</SpecificVersion>
     </Reference>
 
-    <Reference Include="C:\SourceXcomponent\xcomponent.net\generated\XCStudio\XCBuild\Newtonsoft.Json.dll">
-      <HintPath>C:\SourceXcomponent\xcomponent.net\generated\XCStudio\XCBuild\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="C:\SourceXcomponent\xcomponent.net\generated\XCBuild\Newtonsoft.Json.dll">
+      <HintPath>C:\SourceXcomponent\xcomponent.net\generated\XCBuild\Newtonsoft.Json.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
 
-    <Reference Include="C:\SourceXcomponent\xcomponent.net\generated\XCStudio\XCBuild\XComponent.Core.dll">
-      <HintPath>C:\SourceXcomponent\xcomponent.net\generated\XCStudio\XCBuild\XComponent.Core.dll</HintPath>
+    <Reference Include="C:\SourceXcomponent\xcomponent.net\generated\XCBuild\XComponent.Core.dll">
+      <HintPath>C:\SourceXcomponent\xcomponent.net\generated\XCBuild\XComponent.Core.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
 
-    <Reference Include="C:\SourceXcomponent\ReactiveXComponent.Net\docker\integration_tests\XCProjets\HelloWorldV5\HelloWorld\generated\UserObject\XComponent.HelloWorld.UserObject.dll">
-      <HintPath>C:\SourceXcomponent\ReactiveXComponent.Net\docker\integration_tests\XCProjets\HelloWorldV5\HelloWorld\generated\UserObject\XComponent.HelloWorld.UserObject.dll</HintPath>
+    <Reference Include="C:\SourceXcomponent\xcomponent.net\docker\integration_tests\XCProjects\HelloWorldV5\HelloWorld\generated\UserObject\XComponent.HelloWorld.UserObject.dll">
+      <HintPath>C:\SourceXcomponent\xcomponent.net\docker\integration_tests\XCProjects\HelloWorldV5\HelloWorld\generated\UserObject\XComponent.HelloWorld.UserObject.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
 

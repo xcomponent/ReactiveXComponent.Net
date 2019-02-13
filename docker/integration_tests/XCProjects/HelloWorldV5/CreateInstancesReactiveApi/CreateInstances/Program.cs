@@ -1,14 +1,15 @@
 using System;
+using System.CodeDom;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading;
 using XComponent.HelloWorld.UserObject;
 using ReactiveXComponent;
 using ReactiveXComponent.Common;
 using ReactiveXComponent.Connection;
+using System.Reactive.Linq;
 
 
 namespace CreateInstances
@@ -33,7 +34,6 @@ namespace CreateInstances
                 try
                 {
                     int result = TryToRunTest();
-                    Console.ReadKey();
                     return result;
                 }
                 catch (Exception e)

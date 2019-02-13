@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <ProjectGuid>{46B8053A-B15C-4EA1-A10C-2D915B383609}</ProjectGuid>
+    <ProjectGuid>{8903629F-66B5-427E-A3C5-0BF34E95C9A2}</ProjectGuid>
     <RootNamespace>XComponent.HelloWorld.StateMachine</RootNamespace>
     <AssemblyName>XComponent.HelloWorld.StateMachine</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>

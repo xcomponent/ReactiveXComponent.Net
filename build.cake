@@ -211,6 +211,7 @@ Task("BuildIntegrationTests")
 Task("PackageDockerIntegrationTests")
   .Does(() =>
  {
+    Zip("./tools/XComponent.Build.Community/tools\XCBuild/XCRuntime", "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/Debug", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
 	

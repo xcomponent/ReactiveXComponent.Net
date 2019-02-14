@@ -251,6 +251,8 @@ nuget/
 # Merging assemblies
 packaging/
 
+# Build.cake .zip generated
+**/*.zip
 
 # XComponent generated stuff
 **/xcassemblies

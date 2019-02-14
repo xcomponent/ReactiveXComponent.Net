@@ -23,7 +23,6 @@ Setup(context=> {
 Task("Clean")
     .Does(() =>
     {
-        #break
         if (DirectoryExists("nuget"))
         {
             CleanDirectory("nuget");

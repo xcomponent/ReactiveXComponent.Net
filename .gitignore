@@ -256,6 +256,7 @@ packaging/
 
 # XComponent generated stuff
 **/xcassemblies
+docker/integration_tests/XCProjects/HelloWorldV5/Scripts
 docker/integration_tests/XCProjects/HelloWorldV5/generated
 docker/integration_tests/XCProjects/HelloWorldV5/*/Common
 docker/integration_tests/XCProjects/HelloWorldV5/*/StateMachine

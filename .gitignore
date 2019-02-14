@@ -20,6 +20,7 @@ x86/
 bld/
 [Bb]in/
 [Oo]bj/
+[Ll]ib/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -249,3 +250,12 @@ nuget/
 
 # Merging assemblies
 packaging/
+
+
+# XComponent generated stuff
+**/xcassemblies
+docker/integration_tests/XCProjects/HelloWorldV5/generated
+docker/integration_tests/XCProjects/HelloWorldV5/*/Common
+docker/integration_tests/XCProjects/HelloWorldV5/*/StateMachine
+docker/integration_tests/XCProjects/HelloWorldV5/*/UserReference
+**/index.txt

@@ -20,6 +20,7 @@ x86/
 bld/
 [Bb]in/
 [Oo]bj/
+[Ll]ib/
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -239,14 +240,7 @@ _Pvt_Extensions
 .fake/
 
 # Cake - C# Make
-tools/Addins
-tools/Cake
-tools/Cake.XComponent
-tools/NUnit.Runners*
-tools/XComponent.MSBuild.Tasks
-tools/nuget.exe
-tools/packages.config.md5sum
-tools/ILRepack
+tools
 
 # Test Results
 TestResults.xml
@@ -256,3 +250,15 @@ nuget/
 
 # Merging assemblies
 packaging/
+
+# Build.cake .zip generated
+**/*.zip
+
+# XComponent generated stuff
+**/xcassemblies
+docker/integration_tests/XCProjects/HelloWorldV5/Scripts
+docker/integration_tests/XCProjects/HelloWorldV5/generated
+docker/integration_tests/XCProjects/HelloWorldV5/*/Common
+docker/integration_tests/XCProjects/HelloWorldV5/*/StateMachine
+docker/integration_tests/XCProjects/HelloWorldV5/*/UserReference
+**/index.txt

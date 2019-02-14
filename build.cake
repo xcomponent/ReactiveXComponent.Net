@@ -1,14 +1,24 @@
-#tool "nuget:?package=NUnit.Runners&version=3.7.0&include=./**/*"
+#tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
 #tool "nuget:?package=ILRepack"
-#addin "Cake.FileHelpers&version=2.0.0"
-#addin "Cake.Incubator&version=1.6.0"
+#addin "Cake.FileHelpers&version=3.1.0"
+#addin "Cake.Incubator&version=3.0.0"
+#addin "Cake.DoInDirectory&version=3.2.0"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
-var buildConfiguration = Argument("buildConfiguration", "Release");
+var buildConfiguration = Argument("buildConfiguration", "Debug");
 var version = Argument("buildVersion", "1.0.0-build1");
+var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
+
+var XComponentVersion = "6.0.3";
+
+Setup(context=> {
+    DoInDirectory(@"tools", () => {
+        NuGetInstall("XComponent.Build.Community", new NuGetInstallSettings{ Version=XComponentVersion, ExcludeVersion=true });
+    });
+});
 
 Task("Clean")
     .Does(() =>
@@ -24,17 +34,31 @@ Task("Clean")
         }
 
         CleanSolution("ReactiveXComponent.sln", buildConfiguration);
-    });
 
-Task("RestoreNugetPackages")
-    .Does(() =>
-    {
-        NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });
+        var pathHelloWorldIntegrationTest = "./docker/integration_tests/XCProjects/HelloWorldV5/";
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "xcr"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "xcr");
+        }
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "generated"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "generated");
+        }
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "rxcAssemblies"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "rxcAssemblies");
+        }
+        if (DirectoryExists(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies"))
+        {
+            CleanDirectory(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies");
+        }
+        CleanSolution(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances.sln", buildConfiguration);
     });
 
 Task("Build")
     .Does(() =>
     {
+        NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });
         BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration, setAssemblyVersion, version);
     });
 
@@ -121,12 +145,64 @@ Task("PushPackage")
 
 Task("All")
   .IsDependentOn("Clean")
-  .IsDependentOn("RestoreNugetPackages")
   .IsDependentOn("Build")
   .IsDependentOn("Test")
   .IsDependentOn("CreatePackage")
   .Does(() =>
   {
   });
+
+Task("BuildHelloWorld")
+    .Does(() =>
+    {
+        NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
+        var exitCode = 0;
+        var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
+    
+        var mono = "mono";
+        var xcbuild = "./tools/XComponent.Build.Community/tools/XCBuild/xcbuild.exe";
+        var cleanArgs = " --compilationmode=Debug --clean --env=Dev --vs=";
+        var buildArgs = " --compilationmode=Debug --build --env=Dev --vs=";
+
+        if (IsRunningOnUnix()) {
+            exitCode = StartProcess(mono, xcbuild + cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+            StartProcess(mono, xcbuild + buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+        } else {
+            exitCode =  StartProcess(xcbuild, cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+            StartProcess(xcbuild, buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+        }
+        if (exitCode != 0) {
+            throw new Exception();
+        }
+    });
+
+Task("BuildIntegrationTests")
+  .IsDependentOn("BuildHelloWorld")
+  .Does(() =>
+  {
+    var rxcAssembliesPatterns = new string[]
+    {
+        "./packaging/ReactiveXComponent.dll"
+    };
+
+    var pathrxcAssembliesDirectory = "./docker/integration_tests/XCProjects/HelloWorldV5/rxcAssemblies";
+    var rxcAssemblies = GetFiles(rxcAssembliesPatterns);
+
+    CreateDirectory(pathrxcAssembliesDirectory);
+    CopyFiles(rxcAssemblies, pathrxcAssembliesDirectory);
+    var buildSettings = new Settings { Configuration = buildConfiguration, VSVersion = vsVersion };
+
+    CrossPlatformBuild(@"./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
+  });
+
+Task("PackageDockerIntegrationTests")
+  .Does(() =>
+ {
+    Zip("./tools/XComponent.Build.Community/tools/XCBuild/XCRuntime", "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
+    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
+    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/Debug", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
+	
+});
+
 
 RunTarget(target);

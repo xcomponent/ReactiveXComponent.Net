@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!-- LEVEL VALUES = TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF -->
+<runtimesLoggerConfiguration xmlns="http://xcomponent.com/XCLoggerEngineConfigurationFileSchema.xsd">
+  <runtimeLoggers level="TRACE">
+    <!-- Default Appenders -->
+    <appenders>
+      <asyncFileAppender queueLimit="200"
+                   bufferSize="64000"
+                   filePath="%LOG_DIR%/pid-${processid}-${component}-${shortdate}.log"
+                   archiveFilePath="%LOG_DIR%/backup/pid-${processid}-${component}-${shortdate}.{#####}.log"
+				           archiveAboveSize="51200000"
+                   pattern="${runtime} ${longdate} ${level:uppercase=true} ${message} ${exception:format=tostring}" />
+      <consoleAppender pattern="${runtime} ${longdate} ${level:uppercase=true} ${message} ${exception:format=tostring}"/>
+    </appenders>
+  </runtimeLoggers>
+</runtimesLoggerConfiguration>

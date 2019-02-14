@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ComponentData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="HelloWorld" Version="59">
+  <StateMachines>
+    <StateMachineData Id="1" Name="HelloWorld" />
+    <StateMachineData Id="2" Name="ResponseListener" PublicMember="XComponent.HelloWorld.UserObject.ResponseListener" InternalMember="XComponent.HelloWorld.UserObject.ResponseListenerInternal" />
+    <StateMachineData Id="3" Name="HelloWorldResponse" PublicMember="XComponent.HelloWorld.UserObject.HelloWorldResponse" />
+  </StateMachines>
+  <States>
+    <StateData Id="1" Name="EntryPoint" IsEntryPoint="true" EntryPointTriggeredMethod="native" SubGraphKey="StateMachine1" />
+    <StateData Id="2" Name="Listening" SubGraphKey="StateMachine1">
+      <TriggeredMethods>
+        <TriggeredMethodData TransitionName="Init" TriggeringEvent="XComponent.Common.Event.DefaultEvent" />
+      </TriggeredMethods>
+    </StateData>
+    <StateData Id="3" Name="Up" SubGraphKey="StateMachine2">
+      <TriggeredMethods>
+        <TriggeredMethodData TransitionName="CreateListener" TriggeringEvent="XComponent.HelloWorld.UserObject.CreateListener" />
+        <TriggeredMethodData TransitionName="Count" TriggeringEvent="XComponent.HelloWorld.UserObject.HelloWorldResponse" />
+      </TriggeredMethods>
+    </StateData>
+    <StateData Id="4" Name="Published" SubGraphKey="StateMachine3">
+      <TriggeredMethods>
+        <TriggeredMethodData TransitionName="SayHello" TriggeringEvent="XComponent.HelloWorld.UserObject.SayHello" />
+        <TriggeredMethodData TransitionName="Ping" TriggeringEvent="XComponent.HelloWorld.UserObject.Ping" />
+        <TriggeredMethodData TransitionName="SayGoodbye" TriggeringEvent="XComponent.HelloWorld.UserObject.SayGoodbye" />
+        <TriggeredMethodData TransitionName="SayGoodbyeToAll" TriggeringEvent="XComponent.HelloWorld.UserObject.SayGoodbyeToAll" />
+      </TriggeredMethods>
+    </StateData>
+    <StateData Id="5" Name="Gone" SubGraphKey="StateMachine3" />
+  </States>
+  <Links>
+    <TransitionData Id="1" Name="Init" FromKey="State1" ToKey="State2" Type="TimeOut" TriggeringEvent="XComponent.Common.Event.DefaultEvent" />
+    <TransitionData Id="2" Name="CreateListener" FromKey="State2" ToKey="State3" Type="X" TriggeringEvent="XComponent.HelloWorld.UserObject.CreateListener" />
+    <TransitionData Id="4" Name="Count" FromKey="State3" ToKey="State3" Type="Standard" TriggeringEvent="XComponent.HelloWorld.UserObject.HelloWorldResponse" />
+    <TransitionData Id="5" Name="Kill" FromKey="State4" ToKey="State5" Type="Standard" TriggeringEvent="XComponent.HelloWorld.UserObject.Kill" />
+    <TransitionData Id="7" Name="SayHello" FromKey="State2" ToKey="State4" Type="X" TriggeringEvent="XComponent.HelloWorld.UserObject.SayHello" />
+    <TransitionData Id="8" Name="Ping" FromKey="State4" ToKey="State4" Type="Standard" TriggeringEvent="XComponent.HelloWorld.UserObject.Ping" />
+    <TransitionData Id="10" Name="SayGoodbye" FromKey="State4" ToKey="State4" Type="Standard" TriggeringEvent="XComponent.HelloWorld.UserObject.SayGoodbye" />
+    <TransitionData Id="9" Name="SayGoodbyeToAll" FromKey="State4" ToKey="State4" Type="Standard" TriggeringEvent="XComponent.HelloWorld.UserObject.SayGoodbyeToAll">
+      <MatchingRules>
+        <MatchingRuleData EventProperty="WithName" IsInternalMemberProperty="false" MemberProperty="OriginatorName" />
+      </MatchingRules>
+    </TransitionData>
+  </Links>
+  <TransversalLinks>
+    <TransversalTransitionData Id="3" Name="" FromKey="State2" ToId="2" SelectAllTransitions="true" Type="Triggerable">
+      <SelectedTransitions>
+        <SelectedTransitionData Event="XComponent.Common.Event.DefaultEvent" Name="Init" />
+      </SelectedTransitions>
+    </TransversalTransitionData>
+    <TransversalTransitionData Id="11" Name="" FromKey="State4" ToId="4" SelectAllTransitions="true" Type="Internal">
+      <SelectedTransitions>
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.SayHello" Name="SayHello" />
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.Ping" Name="Ping" />
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.SayGoodbye" Name="SayGoodbye" />
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.SayGoodbyeToAll" Name="SayGoodbyeToAll" />
+      </SelectedTransitions>
+    </TransversalTransitionData>
+    <TransversalTransitionData Id="12" Name="" FromKey="State4" ToId="5" SelectAllTransitions="true" Type="Triggerable">
+      <SelectedTransitions>
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.SayHello" Name="SayHello" />
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.Ping" Name="Ping" />
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.SayGoodbye" Name="SayGoodbye" />
+        <SelectedTransitionData Event="XComponent.HelloWorld.UserObject.SayGoodbyeToAll" Name="SayGoodbyeToAll" />
+      </SelectedTransitions>
+    </TransversalTransitionData>
+  </TransversalLinks>
+</ComponentData>

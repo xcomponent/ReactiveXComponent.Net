@@ -4,9 +4,9 @@ references:
     restore_cache:
       name: Restore checked out code
       keys:
-        - v1-xcomponent-repo-{{ .Branch }}-{{ .Revision }}
-        - v1-xcomponent-repo-{{ .Branch }}-
-        - v1-xcomponent-repo-
+        - v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+        - v1-reactivexcomponent-net-repo-{{ .Branch }}-
+        - v1-reactivexcomponent-net-repo-
 
   restore_nuget: &restore_nuget
     restore_cache:
@@ -36,7 +36,7 @@ jobs:
       - *restore_repo
       - checkout
       - save_cache:
-          key: v1-xcomponent-repo-{{ .Branch }}-{{ .Revision }}
+          key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
           paths:
             - .
 

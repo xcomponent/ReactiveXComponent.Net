@@ -55,16 +55,10 @@ Task("Clean")
         CleanSolution(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances.sln", buildConfiguration);
     });
 
-Task("RestoreNugetPackages")
-    .Does(() =>
-    {
-        NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });
-        NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
-    });
-
 Task("Build")
     .Does(() =>
     {
+        NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });
         BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration, setAssemblyVersion, version);
     });
 
@@ -151,7 +145,6 @@ Task("PushPackage")
 
 Task("All")
   .IsDependentOn("Clean")
-  .IsDependentOn("RestoreNugetPackages")
   .IsDependentOn("Build")
   .IsDependentOn("Test")
   .IsDependentOn("CreatePackage")
@@ -162,6 +155,7 @@ Task("All")
 Task("BuildHelloWorld")
     .Does(() =>
     {
+        NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
         var exitCode = 0;
         var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
     
@@ -183,8 +177,6 @@ Task("BuildHelloWorld")
     });
 
 Task("BuildIntegrationTests")
-  .IsDependentOn("Merge")
-  .IsDependentOn("RestoreNugetPackages")
   .IsDependentOn("BuildHelloWorld")
   .Does(() =>
   {

@@ -1,5 +1,4 @@
 #addin "Cake.Incubator&version=3.0.0"
-#addin "Cake.VsixSignTool&version=1.2.0"
 
 var FormatAssemblyVersion = new Func<string, string>(currentVersion =>
 {

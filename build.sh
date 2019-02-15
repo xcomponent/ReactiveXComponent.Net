@@ -82,10 +82,7 @@ if [ ! -f "$PACKAGES_CONFIG_MD5" ] || [ "$( cat "$PACKAGES_CONFIG_MD5" | sed 's/
     find . -type d ! -name . | xargs rm -rf
 fi
 
-if (mono)
-    echo "Mono : not Found"
-
-mono "$NUGET_EXE" install -ExcludeVersion
+mono "$NUGET_EXE" install -ExcludeVersion || echo "mono fail"
 if [ $? -ne 0 ]; then
     echo "Could not restore NuGet tools."
     exit 1

@@ -85,7 +85,7 @@ fi
 mono "$NUGET_EXE" install -ExcludeVersion
 if [ $? -ne 0 ]; then
     echo "Could not restore NuGet tools."
-    exit 1
+    # exit 1
 fi
 
 $MD5_EXE "$PACKAGES_CONFIG" | awk '{ print $1 }' >| "$PACKAGES_CONFIG_MD5"

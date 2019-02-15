@@ -44,12 +44,12 @@ jobs:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
-      - run:
-        name: setenv home
-        command: export HOME=/home/circleci ; cd
       - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
+      - run:
+        name: setenv home
+        command: export HOME=/home/circleci ; cd
       - run:
           name: ReactiveApi - Build All
           command: ./build.sh -t All

@@ -6,12 +6,13 @@
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
-var buildConfiguration = Argument("buildConfiguration", "Debug");
+var buildConfiguration = Argument("buildConfiguration", "Release");
 var configuration = Argument("configuration", "Release");
 var version = Argument("buildVersion", "1.0.0-build1");
 var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
+var packageVersion = Argument("PackageVersion", "8.8.8");
 
 var XComponentVersion = "6.0.3";
 
@@ -60,12 +61,12 @@ Task("Clean")
 Task("Build")
     .Does(() =>
     {
-            NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });        DotNetCoreBuild(
-            @"./ReactiveXComponent.sln",
-            new DotNetCoreBuildSettings {
-                Configuration = configuration,
-            }
-        );
+        DotNetCoreRestore("ReactiveXComponent.sln");
+        DotNetCoreBuild(
+        "ReactiveXComponent.sln",
+        new DotNetCoreBuildSettings {
+            Configuration = configuration,
+        });
     });
 
 Task("Test")
@@ -84,8 +85,9 @@ Task("Test")
 Task("Merge")
     .Does(() =>
     {
-        EnsureDirectoryExists("packaging");
+//        EnsureDirectoryExists("packaging");
 
+        CreateDirectory("packaging");
         var filesToMerge = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll");
 
         // var ilRepackSettings = new ILRepackSettings { Parallel = true, Internalize = true };
@@ -106,29 +108,38 @@ Task("CreatePackage")
     .IsDependentOn("Merge")
     .Does(() =>
     {
-        EnsureDirectoryExists("nuget");
+        DotNetCorePack(
+            "ReactiveXComponent/ReactiveXComponent.csproj",
+            new DotNetCorePackSettings  {
+                Configuration = configuration,
+                OutputDirectory = @"nuget",
+                VersionSuffix = packageVersion,
+                MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(packageVersion),
+            }
+        );
+        // EnsureDirectoryExists("nuget");
 
-        var formattedNugetVersion = FormatNugetVersion(version);
+        // var formattedNugetVersion = FormatNugetVersion(version);
 
-        var filesToPackPatterns = new string[]
-        {
-            "./packaging/*.dll",
-            "./packaging/*.pdb"
-        };
+        // var filesToPackPatterns = new string[]
+        // {
+        //     "./packaging/*.dll",
+        //     "./packaging/*.pdb"
+        // };
 
-        var filesToPack = GetFiles(filesToPackPatterns);
+        // var filesToPack = GetFiles(filesToPackPatterns);
 
-        var nuSpecContents = filesToPack.Select(file => new NuSpecContent {Source = file.FullPath, Target = @"lib\net451"}).ToList();
+        // var nuSpecContents = filesToPack.Select(file => new NuSpecContent {Source = file.FullPath, Target = @"lib\net451"}).ToList();
 
-        var nugetPackSettings = new NuGetPackSettings()
-        { 
-            OutputDirectory = @"./nuget",
-            Files = nuSpecContents,
-            Version = formattedNugetVersion,
-            IncludeReferencedProjects = true
-        };
+        // var nugetPackSettings = new NuGetPackSettings()
+        // { 
+        //     OutputDirectory = @"./nuget",
+        //     Files = nuSpecContents,
+        //     Version = formattedNugetVersion,
+        //     IncludeReferencedProjects = true
+        // };
 
-        NuGetPack("ReactiveXComponent.Net.nuspec", nugetPackSettings);
+        // NuGetPack("ReactiveXComponent.Net.nuspec", nugetPackSettings);
     });
 
 Task("PushPackage")

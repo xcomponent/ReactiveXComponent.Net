@@ -37,6 +37,8 @@ jobs:
       - checkout
       - save_cache:
           key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .
 
   build_sh_reactiveapi:
     docker:

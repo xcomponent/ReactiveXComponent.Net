@@ -52,13 +52,13 @@ jobs:
       - *restore_nuget
       - run:
           name: ReactiveApi - Build All
-          command: /home/circleci/project/build.sh -t All
+          command: ./build.sh -t All
       - run:
           name: ReactiveApi - Build BuildIntegrationTests
-          command: /home/circleci/project/build.sh -t BuildIntegrationTests
+          command: ./build.sh -t BuildIntegrationTests
       - run:
           name: ReactiveApi - Build PackageDockerIntegrationTests
-          command: /home/circleci/project/build.sh -t PackageDockerIntegrationTests
+          command: ./build.sh -t PackageDockerIntegrationTests
       - *save_nuget
       - persist_to_workspace:
           root: /home/circleci/project

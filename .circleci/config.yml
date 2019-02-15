@@ -3,8 +3,6 @@ references:
   restore_repo: &restore_repo
     restore_cache:
       name: Restore checked out code
-      paths:
-        - /home/circleci/project
       keys:
         - v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
         - v2-reactivexcomponent-net-repo-{{ .Branch }}-
@@ -49,6 +47,9 @@ jobs:
       - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
+      - run:
+          name: Go to directory
+          command: cd /home/circleci/project
       - run:
           name: ReactiveApi - Build All
           command: ./build.sh -t All

@@ -7,6 +7,7 @@
 
 var target = Argument("target", "Build");
 var buildConfiguration = Argument("buildConfiguration", "Debug");
+var configuration = Argument("configuration", "Release");
 var version = Argument("buildVersion", "1.0.0-build1");
 var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
@@ -17,6 +18,7 @@ var XComponentVersion = "6.0.3";
 Setup(context=> {
     DoInDirectory(@"tools", () => {
         NuGetInstall("XComponent.Build.Community", new NuGetInstallSettings{ Version=XComponentVersion, ExcludeVersion=true });
+        NuGetInstall("XComponent.Studio.Community", new NuGetInstallSettings{ Version=XComponentVersion, ExcludeVersion=true });
     });
 });
 
@@ -33,7 +35,7 @@ Task("Clean")
             CleanDirectory("packages");
         }
 
-        CleanSolution("ReactiveXComponent.sln", buildConfiguration);
+        // CleanSolution("ReactiveXComponent.sln", buildConfiguration);
 
         var pathHelloWorldIntegrationTest = "./docker/integration_tests/XCProjects/HelloWorldV5/";
         if (DirectoryExists(pathHelloWorldIntegrationTest + "xcr"))
@@ -52,14 +54,18 @@ Task("Clean")
         {
             CleanDirectory(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies");
         }
-        CleanSolution(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances.sln", buildConfiguration);
+        // CleanSolution(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances.sln", buildConfiguration);
     });
 
 Task("Build")
     .Does(() =>
     {
-        NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });
-        BuildSolution(@"./ReactiveXComponent.sln", buildConfiguration, setAssemblyVersion, version);
+            NuGetRestore("ReactiveXComponent.sln", new NuGetRestoreSettings { NoCache = true });        DotNetCoreBuild(
+            @"./ReactiveXComponent.sln",
+            new DotNetCoreBuildSettings {
+                Configuration = configuration,
+            }
+        );
     });
 
 Task("Test")
@@ -67,7 +73,7 @@ Task("Test")
     {
         var testAssembliesPatterns = new string[]
         {
-            "./ReactiveXComponentTest/bin/" + buildConfiguration + "/ReactiveXComponentTest.dll"
+            "./ReactiveXComponentTest/bin/" + buildConfiguration + "/netstandard2.0/ReactiveXComponentTest.dll"
         };
         
         var testAssemblies = GetFiles(testAssembliesPatterns);
@@ -80,18 +86,19 @@ Task("Merge")
     {
         EnsureDirectoryExists("packaging");
 
-        var filesToMerge = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/*.dll");
+        var filesToMerge = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll");
 
-        var ilRepackSettings = new ILRepackSettings { Parallel = true, Internalize = true };
+        // var ilRepackSettings = new ILRepackSettings { Parallel = true, Internalize = true };
 
-        ILRepack(
-            "./packaging/ReactiveXComponent.dll",
-            "./ReactiveXComponent/bin/"+ buildConfiguration + "/ReactiveXComponent.dll",
-            filesToMerge,
-            ilRepackSettings
-		);
+        // ILRepack(
+        //     "./packaging/ReactiveXComponent.dll",
+        //     "./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll",
+        //     filesToMerge,
+        //     ilRepackSettings
+		// );
 
-        var pdbFiles = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/ReactiveXComponent.pdb");
+        var pdbFiles = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.pdb");
+        CopyFiles(filesToMerge, "./packaging");
         CopyFiles(pdbFiles, "./packaging");
     });
 

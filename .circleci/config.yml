@@ -42,7 +42,7 @@ jobs:
 
   build_sh_reactiveapi:
     docker:
-      - image: xcomponent/mono-git:1.3.0
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - *restore_repo
       - *generate_nuget_shasum

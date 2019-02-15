@@ -49,7 +49,7 @@ jobs:
       - *restore_nuget
       - run:
           name: ReactiveApi - Build All
-          command: ./build.sh -t All
+          command: ./build.sh -t All -exclusive
       - run:
           name: ReactiveApi - Build BuildIntegrationTests
           command: ./build.sh -t BuildIntegrationTests

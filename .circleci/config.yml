@@ -31,7 +31,7 @@ references:
 jobs:
   checkout_code:
     docker:
-      - image: microsoft/dotnet:2.1-sdk
+      - image: circleci/node:10.12
     steps:
       - *restore_repo
       - checkout

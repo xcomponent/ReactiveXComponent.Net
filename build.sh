@@ -21,7 +21,7 @@ else
 fi
 
 # Define default arguments.
-SCRIPT="build.cake"
+SCRIPT="/home/circleci/project/build.cake"
 TARGET="Build"
 CONFIGURATION="Release"
 VERBOSITY="verbose"

@@ -15,6 +15,7 @@ NUGET_EXE=$TOOLS_DIR/nuget.exe
 CAKE_EXE=$TOOLS_DIR/Cake/Cake.exe
 PACKAGES_CONFIG=$TOOLS_DIR/packages.config
 PACKAGES_CONFIG_MD5=$TOOLS_DIR/packages.config.md5sum
+PACKAGES_CSPROJ=$TOOLS_DIR/packages.csproj
 ADDINS_PACKAGES_CONFIG=$ADDINS_DIR/packages.config
 MODULES_PACKAGES_CONFIG=$MODULES_DIR/packages.config
 MONO_IOMAP=case
@@ -82,7 +83,7 @@ if [ ! -f "$PACKAGES_CONFIG_MD5" ] || [ "$( cat "$PACKAGES_CONFIG_MD5" | sed 's/
     find . -type d ! -name . | xargs rm -rf
 fi
 
-mono "$NUGET_EXE" install -ExcludeVersion
+mono "$NUGET_EXE" install -ExcludeVersion || dotnet restore $PACKAGES_CSPROJ --packages $TOOLS_DIR
 if [ $? -ne 0 ]; then
     echo "Could not restore NuGet tools."
     exit 1

@@ -34,12 +34,19 @@ jobs:
       - image: microsoft/dotnet:2.1-sdk
     steps:
       - *restore_repo
-      - *generate_nuget_shasum
       - checkout
       - save_cache:
           key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
           paths:
             - .
+
+  build_sh_reactiveapi:
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
+    steps:
+      - *restore_repo
+      - *generate_nuget_shasum
+      - *restore_nuget
       - run:
           name: ReactiveApi - Build All
           command: ./build.sh -t All
@@ -74,6 +81,9 @@ workflows:
   xcomponent_reactive_api:
     jobs:
       - checkout_code
-      - reactiveapi_integrationtests:
+      - build_sh_reactiveapi:
           requires:
           - checkout_code
+      - reactiveapi_integrationtests:
+          requires:
+          - build_sh_reactiveapi

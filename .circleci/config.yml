@@ -44,6 +44,9 @@ jobs:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
+      - run:
+        name: setenv home
+        command: export HOME=/home/circleci ; cd
       - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget

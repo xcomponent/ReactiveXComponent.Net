@@ -19,9 +19,6 @@ ADDINS_PACKAGES_CONFIG=$ADDINS_DIR/packages.config
 MODULES_PACKAGES_CONFIG=$MODULES_DIR/packages.config
 MONO_IOMAP=case
 
-PACKAGES_CSPROJ=$TOOLS_DIR/packages.csproj
-PACKAGES_CSPROJ_MD5=$TOOLS_DIR/packages.csproj.md5sum
-
 # Define md5sum or md5 depending on Linux/OSX
 MD5_EXE=
 if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -85,7 +82,7 @@ if [ ! -f "$PACKAGES_CONFIG_MD5" ] || [ "$( cat "$PACKAGES_CONFIG_MD5" | sed 's/
     find . -type d ! -name . | xargs rm -rf
 fi
 
-mono "$NUGET_EXE" install -ExcludeVersion || dotnet restore $PACKAGES_CSPROJ --packages $TOOLS_DIR
+mono "$NUGET_EXE" install -ExcludeVersion
 if [ $? -ne 0 ]; then
     echo "Could not restore NuGet tools."
     exit 1

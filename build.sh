@@ -13,6 +13,7 @@ ADDINS_DIR=$TOOLS_DIR/addins
 MODULES_DIR=$TOOLS_DIR/modules
 NUGET_EXE=$TOOLS_DIR/nuget.exe
 CAKE_EXE=$TOOLS_DIR/Cake/Cake.exe
+CAKE_DLL="$(find . -name Cake.dll)"
 PACKAGES_CONFIG=$TOOLS_DIR/packages.config
 PACKAGES_CONFIG_MD5=$TOOLS_DIR/packages.config.md5sum
 PACKAGES_CSPROJ=$TOOLS_DIR/packages.csproj
@@ -122,13 +123,16 @@ fi
 # Make sure that Cake has been installed.
 if [ ! -f "$CAKE_EXE" ]; then
     echo "Could not find Cake.exe at '$CAKE_EXE'."
-    exit 1
+    if [ ! -f "$CAKE_DLL" ]; then
+        echo "Could not find Cake.exe at '$CAKE_DLL'."
+        exit 1
+    fi
 fi
 
 # Start Cake
 if $SHOW_VERSION; then
-    exec mono "$CAKE_EXE" -version || dotnet "$CAKE_EXE" -version
+    exec mono "$CAKE_EXE" -version || dotnet "$CAKE_DLL" -version
 else
     exec mono "$CAKE_EXE" $SCRIPT -verbosity=$VERBOSITY -configuration=$CONFIGURATION -target=$TARGET $DRYRUN "${SCRIPT_ARGUMENTS[@]}" \
-    || dotnet "$CAKE_EXE" $SCRIPT -verbosity=$VERBOSITY -configuration=$CONFIGURATION -target=$TARGET $DRYRUN ${SCRIPT_ARGUMENTS[@]}
+    || dotnet "$CAKE_DLL" $SCRIPT -verbosity=$VERBOSITY -configuration=$CONFIGURATION -target=$TARGET $DRYRUN ${SCRIPT_ARGUMENTS[@]}
 fi

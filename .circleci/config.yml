@@ -35,13 +35,8 @@ jobs:
     steps:
       - *restore_repo
       - checkout
-      - run:
-          name: Generate cache shasum
-          command: find . -name "packages.config" -exec shasum {} \+ | sort -n > shasum.tmp
       - save_cache:
           key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
-          paths:
-            - .
 
   build_sh_reactiveapi:
     docker:

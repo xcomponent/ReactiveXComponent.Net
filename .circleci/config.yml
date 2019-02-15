@@ -3,6 +3,8 @@ references:
   restore_repo: &restore_repo
     restore_cache:
       name: Restore checked out code
+      paths:
+        - /home/circleci/project
       keys:
         - v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
         - v2-reactivexcomponent-net-repo-{{ .Branch }}-

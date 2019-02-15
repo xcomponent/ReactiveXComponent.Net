@@ -17,6 +17,7 @@ CAKE_DLL="$(find . -name Cake.dll)"
 PACKAGES_CONFIG=$TOOLS_DIR/packages.config
 PACKAGES_CONFIG_MD5=$TOOLS_DIR/packages.config.md5sum
 PACKAGES_CSPROJ=$TOOLS_DIR/packages.csproj
+PACKAGES_CSPROJ_MD5=$TOOLS_DIR/packages.csproj.md5sum
 ADDINS_PACKAGES_CONFIG=$ADDINS_DIR/packages.config
 MODULES_PACKAGES_CONFIG=$MODULES_DIR/packages.config
 MONO_IOMAP=case
@@ -78,19 +79,33 @@ if [ ! -f "$NUGET_EXE" ]; then
     fi
 fi
 
-# Restore tools from NuGet.
+# # Restore tools from NuGet.
+# pushd "$TOOLS_DIR" >/dev/null
+# if [ ! -f "$PACKAGES_CONFIG_MD5" ] || [ "$( cat "$PACKAGES_CONFIG_MD5" | sed 's/\r$//' )" != "$( $MD5_EXE "$PACKAGES_CONFIG" | awk '{ print $1 }' )" ]; then
+#     find . -type d ! -name . | xargs rm -rf
+# fi
+
+# mono "$NUGET_EXE" install -ExcludeVersion
+# if [ $? -ne 0 ]; then
+#     echo "Could not restore NuGet tools."
+#     exit 1
+# fi
+
+# $MD5_EXE "$PACKAGES_CONFIG" | awk '{ print $1 }' >| "$PACKAGES_CONFIG_MD5"
+
+# Restore tools from NuGet .NetCore.
 pushd "$TOOLS_DIR" >/dev/null
-if [ ! -f "$PACKAGES_CONFIG_MD5" ] || [ "$( cat "$PACKAGES_CONFIG_MD5" | sed 's/\r$//' )" != "$( $MD5_EXE "$PACKAGES_CONFIG" | awk '{ print $1 }' )" ]; then
+if [ ! -f $PACKAGES_CSPROJ_MD5 ] || [ "$( cat $PACKAGES_CSPROJ_MD5 | sed 's/\r$//' )" != "$( $MD5_EXE $PACKAGES_CSPROJ | awk '{ print $1 }' )" ]; then
     find . -type d ! -name . | xargs rm -rf
 fi
 
-mono "$NUGET_EXE" install -ExcludeVersion || dotnet restore $PACKAGES_CSPROJ --packages $TOOLS_DIR
+dotnet restore $PACKAGES_CSPROJ --packages $TOOLS_DIR
 if [ $? -ne 0 ]; then
     echo "Could not restore NuGet tools."
     exit 1
 fi
 
-$MD5_EXE "$PACKAGES_CONFIG" | awk '{ print $1 }' >| "$PACKAGES_CONFIG_MD5"
+$MD5_EXE $PACKAGES_CSPROJ | awk '{ print $1 }' >| $PACKAGES_CSPROJ_MD5
 
 popd >/dev/null
 

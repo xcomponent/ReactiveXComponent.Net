@@ -35,9 +35,6 @@ jobs:
     steps:
       - *restore_repo
       - checkout
-      - run:
-          name: ReactiveApi - Build All
-          command: ./build.sh -t All
       - save_cache:
           key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -45,7 +42,7 @@ jobs:
 
   build_sh_reactiveapi:
     docker:
-      - image:  microsoft/dotnet:2.1-sdk
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - *restore_repo
       - *generate_nuget_shasum
@@ -64,6 +61,10 @@ jobs:
           root: /home/circleci/project
           paths:
             - docker
+      - save_cache:
+          key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - .
   
   reactiveapi_integrationtests:
     docker:

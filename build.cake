@@ -19,7 +19,6 @@ var XComponentVersion = "6.0.3";
 Setup(context=> {
     DoInDirectory(@"tools", () => {
         NuGetInstall("XComponent.Build.Community", new NuGetInstallSettings{ Version=XComponentVersion, ExcludeVersion=true });
-        NuGetInstall("XComponent.Studio.Community", new NuGetInstallSettings{ Version=XComponentVersion, ExcludeVersion=true });
     });
 });
 
@@ -85,22 +84,10 @@ Task("Test")
 Task("Merge")
     .Does(() =>
     {
-//        EnsureDirectoryExists("packaging");
-
         CreateDirectory("packaging");
-        var filesToMerge = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll");
-
-        // var ilRepackSettings = new ILRepackSettings { Parallel = true, Internalize = true };
-
-        // ILRepack(
-        //     "./packaging/ReactiveXComponent.dll",
-        //     "./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll",
-        //     filesToMerge,
-        //     ilRepackSettings
-		// );
-
+        var filesXCReactive = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll");
         var pdbFiles = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.pdb");
-        CopyFiles(filesToMerge, "./packaging");
+        CopyFiles(filesXCReactive, "./packaging");
         CopyFiles(pdbFiles, "./packaging");
     });
 
@@ -117,31 +104,9 @@ Task("CreatePackage")
                 MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(packageVersion),
             }
         );
-        // EnsureDirectoryExists("nuget");
-
-        // var formattedNugetVersion = FormatNugetVersion(version);
-
-        // var filesToPackPatterns = new string[]
-        // {
-        //     "./packaging/*.dll",
-        //     "./packaging/*.pdb"
-        // };
-
-        // var filesToPack = GetFiles(filesToPackPatterns);
-
-        // var nuSpecContents = filesToPack.Select(file => new NuSpecContent {Source = file.FullPath, Target = @"lib\net451"}).ToList();
-
-        // var nugetPackSettings = new NuGetPackSettings()
-        // { 
-        //     OutputDirectory = @"./nuget",
-        //     Files = nuSpecContents,
-        //     Version = formattedNugetVersion,
-        //     IncludeReferencedProjects = true
-        // };
-
-        // NuGetPack("ReactiveXComponent.Net.nuspec", nugetPackSettings);
     });
 
+//A modifier pour .NetCore
 Task("PushPackage")
     .IsDependentOn("All")
     .Does(() =>

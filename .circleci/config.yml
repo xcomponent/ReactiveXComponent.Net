@@ -4,17 +4,17 @@ references:
     restore_cache:
       name: Restore checked out code
       keys:
-        - v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
-        - v1-reactivexcomponent-net-repo-{{ .Branch }}-
-        - v1-reactivexcomponent-net-repo-
+        - v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+        - v2-reactivexcomponent-net-repo-{{ .Branch }}-
+        - v2-reactivexcomponent-net-repo-
 
   restore_nuget: &restore_nuget
     restore_cache:
       name: Restore nuget cache
       keys:
-        - v1-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
-        - v1-nuget-{{ .Branch }}-
-        - v1-nuget-
+        - v2-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
+        - v2-nuget-{{ .Branch }}-
+        - v2-nuget-
 
   generate_nuget_shasum: &generate_nuget_shasum
     run:
@@ -24,7 +24,7 @@ references:
   save_nuget: &save_nuget
     save_cache:
       name: Save nuget cache
-      key: v1-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
+      key: v2-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
       paths:
           - /home/circleci/.nuget
 
@@ -36,7 +36,7 @@ jobs:
       - *restore_repo
       - checkout
       - save_cache:
-          key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+          key: v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
           paths:
             - .
 

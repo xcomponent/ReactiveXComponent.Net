@@ -65,7 +65,7 @@ jobs:
       - *restore_nuget
       - run:
           name: Install mono
-          command: apt-get update && apt-get install -y mono-devel
+          command: echo "deb http://download.mono-project.com/repo/debian stable-stretch/snapshots/5.16.0.179 main" > /etc/apt/sources.list.d/mono-official-stable.list && apt-get update && apt-get install -y mono-devel
       - attach_workspace:
           at: /home/circleci/project
       - run:

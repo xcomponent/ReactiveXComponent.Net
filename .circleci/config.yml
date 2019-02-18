@@ -58,19 +58,22 @@ jobs:
 
   build_sh_intergration_test_reactiveapi:
     docker:
-      - image: xcomponent/mono-git:1.3.0
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
+      - run:
+        name: Install mono
+        command: sudo apt-get install mono-devel
       - attach_workspace:
           at: /home/circleci/project
       - run:
           name: ReactiveApi - Build BuildIntegrationTests
-          command: ./build.sh -t BuildIntegrationTests
+          command: cd /home/circleci/project/ && ./build.sh -t BuildIntegrationTests
       - run:
           name: ReactiveApi - Build PackageDockerIntegrationTests
-          command: ./build.sh -t PackageDockerIntegrationTests
+          command: cd /home/circleci/project/ && ./build.sh -t PackageDockerIntegrationTests
       - *save_nuget
       - persist_to_workspace:
           root: /home/circleci/project
@@ -104,4 +107,4 @@ workflows:
           - build_sh_reactiveapi
       - reactiveapi_integrationtests:
           requires:
-          - build_sh_reactiveapi
+          - build_sh_intergration_test_reactiveapi

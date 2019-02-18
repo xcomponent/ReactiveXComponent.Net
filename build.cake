@@ -48,14 +48,11 @@ Task("Build")
 Task("Test")
     .Does(() =>
     {
-        var testAssembliesPatterns = new string[]
+        var projectFiles = GetFiles("./**/*Test.csproj");
+        foreach(var file in projectFiles)
         {
-            "./ReactiveXComponentTest/bin/" + buildConfiguration + "/netstandard2.0/ReactiveXComponentTest.dll"
-        };
-        
-        var testAssemblies = GetFiles(testAssembliesPatterns);
-        var nunitSettings = new NUnit3Settings(){ Results = new[] { new NUnit3Result { FileName = "TestResults.xml" } } };
-        NUnit3(testAssemblies, nunitSettings);
+                DotNetCoreTest(file.FullPath);
+        }
     });
 
 Task("Merge")

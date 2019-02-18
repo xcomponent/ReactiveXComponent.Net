@@ -17,8 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="ReactiveXComponent">
-      <HintPath>..\ReactiveXComponent\bin\Release\netstandard2.0\ReactiveXComponent.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\ReactiveXComponent\ReactiveXComponent.csproj" />
   </ItemGroup>
 </Project>

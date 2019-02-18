@@ -19,8 +19,11 @@ Task("Clean")
     {
         CleanDirectory("nuget");
         CleanDirectory("packages");
+        CleanDirectory("packaging");
         CleanDirectory("./ReactiveXComponent/bin");
         CleanDirectory("./ReactiveXComponent/obj");
+        CleanDirectory("./ReactiveXComponentTest/bin");
+        CleanDirectory("./ReactiveXComponenttest/obj");
 
         var pathHelloWorldIntegrationTest = "./docker/integration_tests/XCProjects/HelloWorldV5/";
         CleanDirectory(pathHelloWorldIntegrationTest + "xcr");
@@ -80,23 +83,22 @@ Task("CreatePackage")
         );
     });
 
-//A modifier pour .NetCore
 Task("PushPackage")
     .IsDependentOn("All")
     .Does(() =>
     {
-        var formattedNugetVersion = FormatNugetVersion(version);
-        if (FileExists("./nuget/ReactiveXComponent.Net." + formattedNugetVersion + ".nupkg")
-            && !string.IsNullOrEmpty(apiKey))
+        if (!string.IsNullOrEmpty(apiKey))
         {
-            var package = "./nuget/ReactiveXComponent.Net." + formattedNugetVersion + ".nupkg";
-            var nugetPushSettings = new NuGetPushSettings 
+            var package = "./nuget/ReactiveXComponent.Net." + packageVersion + ".nupkg";
+            DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings 
             {
                 Source = "https://www.nuget.org/api/v2/package",
                 ApiKey = apiKey
-            };
-
-            NuGetPush(package, nugetPushSettings);
+            });
+        }
+        else
+        {
+            Error("No Api Key provided. Can't deploy package to Nuget.");
         }
     });
 

@@ -65,7 +65,7 @@ jobs:
       - *restore_nuget
       - run:
           name: Install mono
-          command: apt-get install mono-devel
+          command: apt-get update && apt-get install mono-devel
       - attach_workspace:
           at: /home/circleci/project
       - run:

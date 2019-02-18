@@ -48,11 +48,8 @@ jobs:
       - *generate_nuget_shasum
       - *restore_nuget
       - run:
-        name: Change Directory
-        command: cd /home/circleci/project/
-      - run:
           name: ReactiveApi - Build All
-          command: ./build.sh -t All
+          command: cd /home/circleci/project/ && ./build.sh -t All
       - *save_nuget
       - persist_to_workspace:
           root: /home/circleci/project

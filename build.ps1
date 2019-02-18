@@ -98,24 +98,9 @@ if(!$PSScriptRoot){
 }
 
 $TOOLS_DIR = Join-Path $PSScriptRoot "tools"
-$NUGET_EXE = Join-Path $TOOLS_DIR "nuget.exe"
-$NUGET_URL = "https://dist.nuget.org/win-x86-commandline/v4.4.1/nuget.exe"
 $CAKE_EXE = Join-Path $TOOLS_DIR "Cake/Cake.exe"
 $PACKAGES_CSPROJ = Join-Path $TOOLS_DIR "packages.csproj"
 $PACKAGES_CSPROJ_MD5 = Join-Path $TOOLS_DIR "packages.csproj.md5sum"
-
-# Try download NuGet.exe if not exists
-if (!(Test-Path $NUGET_EXE)) {
-    Write-Verbose -Message "Downloading NuGet.exe..."
-    try {
-        (New-Object System.Net.WebClient).DownloadFile($NUGET_URL, $NUGET_EXE)
-    } catch {
-        Throw "Could not download NuGet.exe."
-    }
-}
-
-# Save nuget.exe path to environment to be available to child processed
-$ENV:NUGET_EXE = $NUGET_EXE
 
 # Make sure tools folder exists
 if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {

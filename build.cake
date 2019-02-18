@@ -14,14 +14,6 @@ var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
 var packageVersion = Argument("PackageVersion", "8.8.8");
 
-var XComponentVersion = "6.0.3";
-
-Setup(context=> {
-    DoInDirectory(@"tools", () => {
-        NuGetInstall("XComponent.Build.Community", new NuGetInstallSettings{ Version=XComponentVersion, ExcludeVersion=true });
-    });
-});
-
 Task("Clean")
     .Does(() =>
     {
@@ -125,7 +117,7 @@ Task("BuildHelloWorld")
         var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
     
         var mono = "mono";
-        var xcbuild = "./tools/XComponent.Build.Community/tools/XCBuild/xcbuild.exe";
+        var xcbuild = "./tools/xcomponent.build.community/6.0.3/tools/XCBuild/xcbuild.exe";
         var cleanArgs = " --compilationmode=Debug --clean --env=Dev --vs=";
         var buildArgs = " --compilationmode=Debug --build --env=Dev --vs=";
 
@@ -163,7 +155,7 @@ Task("BuildIntegrationTests")
 Task("PackageDockerIntegrationTests")
   .Does(() =>
  {
-    Zip("./tools/XComponent.Build.Community/tools/XCBuild/XCRuntime", "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
+    Zip("./tools/xcomponent.build.community/6.0.3/tools/XCBuild/XCRuntime", "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/Debug", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
 	

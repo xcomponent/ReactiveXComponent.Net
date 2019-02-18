@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Cake.CoreCLR" Version="0.32.1" />
+    <PackageReference Include="XComponent.Build.Community" Version="6.0.3"/>
     <PackageReference Include="XComponent.MSBuild.Tasks" Version="1.0.0" />
   </ItemGroup>
 </Project>

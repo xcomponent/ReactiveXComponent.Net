@@ -25,36 +25,18 @@ Setup(context=> {
 Task("Clean")
     .Does(() =>
     {
-        if (DirectoryExists("nuget"))
-        {
-            CleanDirectory("nuget");
-        }
-
-        if (DirectoryExists("packages"))
-        {
-            CleanDirectory("packages");
-        }
-
-        // CleanSolution("ReactiveXComponent.sln", buildConfiguration);
+        CleanDirectory("nuget");
+        CleanDirectory("packages");
+        CleanDirectory("./ReactiveXComponent/bin");
+        CleanDirectory("./ReactiveXComponent/obj");
 
         var pathHelloWorldIntegrationTest = "./docker/integration_tests/XCProjects/HelloWorldV5/";
-        if (DirectoryExists(pathHelloWorldIntegrationTest + "xcr"))
-        {
-            CleanDirectory(pathHelloWorldIntegrationTest + "xcr");
-        }
-        if (DirectoryExists(pathHelloWorldIntegrationTest + "generated"))
-        {
-            CleanDirectory(pathHelloWorldIntegrationTest + "generated");
-        }
-        if (DirectoryExists(pathHelloWorldIntegrationTest + "rxcAssemblies"))
-        {
-            CleanDirectory(pathHelloWorldIntegrationTest + "rxcAssemblies");
-        }
-        if (DirectoryExists(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies"))
-        {
-            CleanDirectory(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies");
-        }
-        // CleanSolution(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances.sln", buildConfiguration);
+        CleanDirectory(pathHelloWorldIntegrationTest + "xcr");
+        CleanDirectory(pathHelloWorldIntegrationTest + "generated");
+        CleanDirectory(pathHelloWorldIntegrationTest + "rxcAssemblies");
+        CleanDirectory(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/xcassemblies");
+        CleanDirectory(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/bin");
+        CleanDirectory(pathHelloWorldIntegrationTest + "CreateInstancesReactiveApi/CreateInstances/obj");
     });
 
 Task("Build")

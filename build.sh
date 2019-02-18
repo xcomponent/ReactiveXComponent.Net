@@ -21,7 +21,7 @@ else
 fi
 
 # Define default arguments.
-SCRIPT="/home/circleci/project/build.cake"
+SCRIPT="./build.cake"
 TARGET="Build"
 CONFIGURATION="Release"
 VERBOSITY="verbose"
@@ -61,7 +61,7 @@ $MD5_EXE $PACKAGES_CSPROJ | awk '{ print $1 }' >| $PACKAGES_CSPROJ_MD5
 popd >/dev/null
 
 # Make sure that Cake has been installed.
-CAKE_DLL="$(find /home/circleci/project/tools/ -name Cake.dll)"
+CAKE_DLL="$(find ./tools/ -name Cake.dll)"
 if [ ! -f "$CAKE_DLL" ]; then
     echo "Could not find Cake.dll in tools folder."
     exit 1

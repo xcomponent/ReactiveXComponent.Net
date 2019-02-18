@@ -9,6 +9,7 @@
 # Define directories.
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TOOLS_DIR=$SCRIPT_DIR/tools
+NUGET_EXE=$TOOLS_DIR/nuget.exe
 PACKAGES_CSPROJ=$TOOLS_DIR/packages.csproj
 PACKAGES_CSPROJ_MD5=$TOOLS_DIR/packages.csproj.md5sum
 
@@ -43,6 +44,16 @@ for i in "$@"; do
     esac
     shift
 done
+
+# Download NuGet if it does not exist.
+if [ ! -f "$NUGET_EXE" ]; then
+    echo "Downloading NuGet..."
+    curl -Lsfo "$NUGET_EXE" https://dist.nuget.org/win-x86-commandline/v4.4.1/nuget.exe
+    if [ $? -ne 0 ]; then
+        echo "An error occured while downloading nuget.exe."
+        exit 1
+    fi
+fi
 
 # Restore tools from NuGet.
 pushd "$TOOLS_DIR" >/dev/null

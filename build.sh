@@ -45,7 +45,7 @@ for i in "$@"; do
     shift
 done
 
-echo "TEEEEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSSSSST: " + NUGET_EXE
+echo "TEEEEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSSSSST: " + $NUGET_EXE
 
 # Download NuGet if it does not exist.
 if [ ! -f "$NUGET_EXE" ]; then

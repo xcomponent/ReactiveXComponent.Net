@@ -40,7 +40,6 @@ jobs:
           paths:
             - .
 
-# Voir pour avoir le même path : /home/circleci/projet            
   build_sh_reactiveapi:
     docker:
       - image: microsoft/dotnet:2.1-sdk

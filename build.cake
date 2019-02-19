@@ -7,7 +7,6 @@
 
 var target = Argument("target", "Build");
 var buildConfiguration = Argument("buildConfiguration", "Release");
-var configuration = Argument("configuration", "Release");
 var version = Argument("buildVersion", "1.0.0-build1");
 var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
@@ -41,7 +40,7 @@ Task("Build")
         DotNetCoreBuild(
         "ReactiveXComponent.sln",
         new DotNetCoreBuildSettings {
-            Configuration = configuration,
+            Configuration = buildConfiguration,
         });
     });
 
@@ -51,7 +50,7 @@ Task("Test")
         var projectFiles = GetFiles("./**/*Test.csproj");
         foreach(var file in projectFiles)
         {
-                DotNetCoreTest(file.FullPath);
+            DotNetCoreTest(file.FullPath);
         }
     });
 
@@ -59,9 +58,20 @@ Task("Merge")
     .Does(() =>
     {
         CreateDirectory("packaging");
-        var filesXCReactive = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll");
+
+        var filesToMerge = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/*.dll");
+        var mergelib = @"/usr/share/dotnet/sdk/NuGetFallbackFolder/netstandard.library/2.0.3/build/netstandard2.0/ref/";
+
+        var ilRepackSettings = new ILRepackSettings { Parallel = true, Internalize = true, Libs = new List<DirectoryPath>{ new DirectoryPath(mergelib)} };
+
+        ILRepack(
+            "./packaging/ReactiveXComponent.dll",
+            "./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll",
+            filesToMerge,
+            ilRepackSettings
+        );
+
         var pdbFiles = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.pdb");
-        CopyFiles(filesXCReactive, "./packaging");
         CopyFiles(pdbFiles, "./packaging");
     });
 
@@ -72,7 +82,7 @@ Task("CreatePackage")
         DotNetCorePack(
             "ReactiveXComponent/ReactiveXComponent.csproj",
             new DotNetCorePackSettings  {
-                Configuration = configuration,
+                Configuration = buildConfiguration,
                 OutputDirectory = @"nuget",
                 VersionSuffix = packageVersion,
                 MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(packageVersion),
@@ -156,7 +166,7 @@ Task("PackageDockerIntegrationTests")
  {
     Zip("./tools/xcomponent.build.community/6.0.3/tools/XCBuild/XCRuntime", "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
-    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/Release", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
+    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration, "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
 	
 });
 

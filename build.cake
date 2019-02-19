@@ -54,29 +54,7 @@ Task("Test")
         }
     });
 
-Task("Merge")
-    .Does(() =>
-    {
-        CreateDirectory("packaging");
-
-        var filesToMerge = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/*.dll");
-        var mergelib = @"/usr/share/dotnet/sdk/NuGetFallbackFolder/netstandard.library/2.0.3/build/netstandard2.0/ref/";
-
-        var ilRepackSettings = new ILRepackSettings { Parallel = true, Internalize = true, Libs = new List<DirectoryPath>{ new DirectoryPath(mergelib)} };
-
-        ILRepack(
-            "./packaging/ReactiveXComponent.dll",
-            "./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.dll",
-            filesToMerge,
-            ilRepackSettings
-        );
-
-        var pdbFiles = GetFiles("./ReactiveXComponent/bin/"+ buildConfiguration + "/netstandard2.0/ReactiveXComponent.pdb");
-        CopyFiles(pdbFiles, "./packaging");
-    });
-
 Task("CreatePackage")
-    .IsDependentOn("Merge")
     .Does(() =>
     {
         DotNetCorePack(

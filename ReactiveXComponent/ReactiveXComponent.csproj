@@ -11,10 +11,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
     <PackageReference Include="SuperSocket.ClientEngine" Version="0.10.0" />
     <PackageReference Include="System.Reactive.Linq" Version="4.1.2" />
     <PackageReference Include="WebSocket4Net" Version="0.15.2" />
   </ItemGroup>
+
+
+  <Target Name="ILRepack" AfterTargets="Build">
+    <PropertyGroup>
+        <WorkingDirectory>$(MSBuildThisFileDirectory)$(OutputPath)</WorkingDirectory>
+    </PropertyGroup>
+
+    <ILRepack
+      OutputType="$(OutputType)"
+      MainAssembly="$(AssemblyName).dll"
+      OutputAssembly="$(MSBuildThisFileDirectory)\..\packaging\$(AssemblyName).dll"
+      InputAssemblies="$(WorkingDirectory)\*.dll"
+      WilcardInputAssemblies="true"
+      WorkingDirectory="$(WorkingDirectory)" />
+  </Target>
 </Project>

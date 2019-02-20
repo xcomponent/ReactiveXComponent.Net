@@ -1,5 +1,4 @@
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
-#tool "nuget:?package=ILRepack"
 #addin "Cake.FileHelpers&version=3.1.0"
 #addin "Cake.Incubator&version=3.0.0"
 #addin "Cake.DoInDirectory&version=3.2.0"
@@ -47,10 +46,15 @@ Task("Build")
 Task("Test")
     .Does(() =>
     {
+        var settings = new DotNetCoreTestSettings
+        {
+            Configuration = buildConfiguration
+        };
+
         var projectFiles = GetFiles("./**/*Test.csproj");
         foreach(var file in projectFiles)
         {
-            DotNetCoreTest(file.FullPath);
+            DotNetCoreTest(file.FullPath, settings);
         }
     });
 

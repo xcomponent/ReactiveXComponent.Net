@@ -5,12 +5,11 @@
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
-var buildConfiguration = Argument("buildConfiguration", "Release");
+var buildConfiguration = Argument("buildConfiguration", "Debug");
 var version = Argument("buildVersion", "1.0.0-build1");
 var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
-var packageVersion = Argument("PackageVersion", "8.8.8");
 
 Setup (context => {
     
@@ -77,13 +76,14 @@ Task("Test")
 Task("CreatePackage")
     .Does(() =>
     {
+        var formattedNugetVersion = FormatNugetVersion(version);
         DotNetCorePack(
             "ReactiveXComponent/ReactiveXComponent.csproj",
             new DotNetCorePackSettings  {
                 Configuration = buildConfiguration,
                 OutputDirectory = @"nuget",
-                VersionSuffix = packageVersion,
-                MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(packageVersion),
+                VersionSuffix = formattedNugetVersion,
+                MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(formattedNugetVersion),
             }
         );
     });
@@ -92,9 +92,10 @@ Task("PushPackage")
     .IsDependentOn("All")
     .Does(() =>
     {
+        var formattedNugetVersion = FormatNugetVersion(version);
         if (!string.IsNullOrEmpty(apiKey))
         {
-            var package = "./nuget/ReactiveXComponent.Net." + packageVersion + ".nupkg";
+            var package = "./nuget/ReactiveXComponent.Net." + formattedNugetVersion + ".nupkg";
             DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings 
             {
                 Source = "https://www.nuget.org/api/v2/package",

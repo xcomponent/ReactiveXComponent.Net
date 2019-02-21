@@ -38,7 +38,7 @@ namespace CreateInstances
                 }
                 catch (Exception e)
                 {
-                    throw new ReactiveXComponentException("Error while creating Rabbit Mq connection: " + e.Message, e);
+                    throw new ReactiveXComponentException("Error while running test: " + e.Message, e);
                 }
             }
             Console.WriteLine("Exited test, failed to run");

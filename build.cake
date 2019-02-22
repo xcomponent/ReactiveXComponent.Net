@@ -1,7 +1,7 @@
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
 #addin "Cake.FileHelpers&version=3.1.0"
+#addin "Cake.XComponent&version=6.0.0"
 #addin "Cake.Incubator&version=3.0.0"
-#addin "Cake.DoInDirectory&version=3.2.0"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
@@ -12,7 +12,6 @@ var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
 
 Setup (context => {
-    
     var formattedAssemblyVersion = FormatAssemblyVersion(version);
     Information("Resolving value {0} for tag {1} in source code", formattedAssemblyVersion, "[PRODUCT_VERSION]");
 
@@ -121,24 +120,9 @@ Task("BuildHelloWorld")
     .Does(() =>
     {
         NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
-        var exitCode = 0;
         var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
     
-        var mono = "mono";
-        var xcbuild = "./tools/xcomponent.build.community/6.0.3/tools/XCBuild/xcbuild.exe";
-        var cleanArgs = " --compilationmode=Debug --clean --env=Dev --vs=";
-        var buildArgs = " --compilationmode=Debug --build --env=Dev --vs=";
-
-        if (IsRunningOnUnix()) {
-            exitCode = StartProcess(mono, xcbuild + cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-            StartProcess(mono, xcbuild + buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-        } else {
-            exitCode =  StartProcess(xcbuild, cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-            StartProcess(xcbuild, buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
-        }
-        if (exitCode != 0) {
-            throw new Exception();
-        }
+        XcBuildBuild(helloWorldProjectPathParam, buildConfiguration, "Dev", vsVersion, GetXCBuildExtraParam());
     });
 
 Task("BuildIntegrationTests")
@@ -163,7 +147,7 @@ Task("BuildIntegrationTests")
 Task("PackageDockerIntegrationTests")
   .Does(() =>
  {
-    Zip("./tools/xcomponent.build.community/6.0.3/tools/XCBuild/XCRuntime", "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
+    Zip( GetXcRuntimePath().Replace("xcruntime.exe", ""), "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration, "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
 	

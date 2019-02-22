@@ -120,9 +120,24 @@ Task("BuildHelloWorld")
     .Does(() =>
     {
         NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
+        var exitCode = 0;
         var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
     
-        XcBuildBuild(helloWorldProjectPathParam, buildConfiguration, "Dev", vsVersion, GetXCBuildExtraParam());
+        var mono = "mono";
+        var xcbuild = GetXcBuildPath();
+        var cleanArgs = " --compilationmode=Debug --clean --env=Dev --vs=";
+        var buildArgs = " --compilationmode=Debug --build --env=Dev --vs=";
+
+        if (IsRunningOnUnix()) {
+            exitCode = StartProcess(mono, xcbuild + cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+            StartProcess(mono, xcbuild + buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+        } else {
+            exitCode =  StartProcess(xcbuild, cleanArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+            StartProcess(xcbuild, buildArgs + vsVersion + helloWorldProjectPathParam + GetXCBuildExtraParam());
+        }
+        if (exitCode != 0) {
+            throw new Exception();
+        }
     });
 
 Task("BuildIntegrationTests")

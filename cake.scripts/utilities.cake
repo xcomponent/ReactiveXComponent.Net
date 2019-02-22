@@ -129,30 +129,6 @@ var FormatNugetVersion = new Func<string, string>(currentVersion =>
     return result;
 });
 
-var BuildSolution = new Action<string, string, bool, string>((solutionPath, configuration, hasSetAssemblyVersion, targetVersion) =>
-{
-    var formattedAssemblyVersion = FormatAssemblyVersion(targetVersion);
-
-    if (IsRunningOnUnix())
-    {
-        var xBuildSettings = new XBuildSettings() { Configuration = configuration };
-        xBuildSettings.WithTarget("Rebuild");
-        xBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        xBuildSettings.WithProperty("SetAssemblyVersion", hasSetAssemblyVersion.ToString());
-        
-        XBuild(solutionPath, xBuildSettings);
-    }
-    else
-    {
-        var msBuildSettings = new MSBuildSettings() { Configuration = configuration };
-        msBuildSettings.WithTarget("Rebuild");
-        msBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        msBuildSettings.WithProperty("SetAssemblyVersion", hasSetAssemblyVersion.ToString());
-        
-        MSBuild(solutionPath, msBuildSettings);
-    }
-});
-
 public class Settings {
   public string Configuration { get; set; }
   public string Target { get; set; }

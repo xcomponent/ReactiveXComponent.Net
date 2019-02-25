@@ -19,7 +19,7 @@ services:
       args:
         - APPZIP=CreateInstanceReactiveApi.zip
     environment:
-      APP: CreateInstances.exe
+      APP: CreateInstances.dll
       HOST: rabbitmq
       PORT: 5672
       BUSTYPE: RABBIT_MQ

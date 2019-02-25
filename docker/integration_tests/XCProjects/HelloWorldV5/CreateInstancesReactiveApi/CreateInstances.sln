@@ -1,8 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateInstances", "CreateInstances\CreateInstances.csproj", "{1913E80B-BC0D-4AC6-8D05-C675D55627E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreateInstances", "CreateInstances\CreateInstances.csproj", "{1913E80B-BC0D-4AC6-8D05-C675D55627E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,12 +10,15 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Debug|x86.ActiveCfg = Debug|x86
-		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Debug|x86.Build.0 = Debug|x86
-		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Release|x86.ActiveCfg = Release|x86
-		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Release|x86.Build.0 = Release|x86
+		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{1913E80B-BC0D-4AC6-8D05-C675D55627E7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D81C8A5C-D0CA-46BF-A306-ACDB011E75A6}
 	EndGlobalSection
 EndGlobal

@@ -129,14 +129,6 @@ var FormatNugetVersion = new Func<string, string>(currentVersion =>
     return result;
 });
 
-public class Settings {
-  public string Configuration { get; set; }
-  public string Target { get; set; }
-  public string VersionNumber { get; set; }
-  public bool? IsCommunityEdition { get; set; }
-  public string VSVersion {get; set; }
-}
-
 Func<bool> IsRunningOnOsx = () => 
 {
     return DirectoryExists("/Applications");
@@ -159,55 +151,3 @@ Func<string> GetXCBuildExtraParam = () => {
 
     return "";
 };
-
-public MSBuildSettings GetDefaultMSBuildSettings() 
-{
-    if (IsRunningOnLinux()){
-        return new MSBuildSettings { ToolPath = new FilePath("/usr/bin/msbuild")};
-    }
-    return new MSBuildSettings();
-}
-
-public void CrossPlatformBuild(string filePath, Settings settings) 
-{  
-	if (settings == null)
-    {      
-		MSBuild(filePath, GetDefaultMSBuildSettings());
-    }
-    else
-    {
-		var msbuildSettings = GetDefaultMSBuildSettings();
-
-		if(!string.IsNullOrEmpty(settings.Target))
-		{
-			msbuildSettings.WithTarget(settings.Target);
-		}
-
-		if(!string.IsNullOrEmpty(settings.Configuration))
-		{
-			msbuildSettings.SetConfiguration(settings.Configuration);
-		}
-
-		if (settings.IsCommunityEdition.HasValue)
-		{
-			string assemblyProduct = settings.IsCommunityEdition.Value ? "\"XComponent Community Edition\"" : "\"XComponent Workgroup Edition\"";
-			msbuildSettings.WithProperty("AssemblyProduct", assemblyProduct);
-			if (settings.IsCommunityEdition.Value)
-			{
-				msbuildSettings.WithProperty("DefineConstants", "CommunityEdition");
-			}
-		}
-		
-		if (!string.IsNullOrEmpty(settings.VersionNumber)) 
-		{
-			msbuildSettings.WithProperty("VersionNumber", settings.VersionNumber);
-		}
-		
-		if (!string.IsNullOrEmpty(settings.VSVersion)) 
-		{
-			msbuildSettings.WithProperty("VSVersion", settings.VSVersion);
-		}
-		
-		MSBuild(filePath, msbuildSettings);
-    }
-}

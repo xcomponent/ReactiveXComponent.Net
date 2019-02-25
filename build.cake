@@ -104,7 +104,6 @@ Task("All")
 Task("BuildHelloWorld")
     .Does(() =>
     {
-        NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
         var exitCode = 0;
         var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
     
@@ -134,14 +133,19 @@ Task("BuildIntegrationTests")
         "./packaging/ReactiveXComponent.dll"
     };
 
+    var pathTIDirectory = "./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi";
     var pathrxcAssembliesDirectory = "./docker/integration_tests/XCProjects/HelloWorldV5/rxcAssemblies";
     var rxcAssemblies = GetFiles(rxcAssembliesPatterns);
 
     CreateDirectory(pathrxcAssembliesDirectory);
     CopyFiles(rxcAssemblies, pathrxcAssembliesDirectory);
-    var buildSettings = new Settings { Configuration = buildConfiguration, VSVersion = vsVersion };
 
-    CrossPlatformBuild(@"./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
+    DotNetCoreRestore(pathTIDirectory + "/CreateInstances.sln");
+    DotNetCoreBuild(
+    pathTIDirectory + "/CreateInstances.sln",
+    new DotNetCoreBuildSettings {
+        Configuration = buildConfiguration,
+    });
   });
 
 Task("PackageDockerIntegrationTests")
@@ -149,8 +153,7 @@ Task("PackageDockerIntegrationTests")
  {
     Zip( GetXcRuntimePath().Replace("xcruntime.exe", ""), "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
-    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration, "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
-	
+    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration + "/netcoreapp2.1", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");	
 });
 
 

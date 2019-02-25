@@ -153,7 +153,7 @@ Task("PackageDockerIntegrationTests")
  {
     Zip( GetXcRuntimePath().Replace("xcruntime.exe", ""), "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
-    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration, "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
+    Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration + "/netcoreapp2.1", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");
 	
 });
 

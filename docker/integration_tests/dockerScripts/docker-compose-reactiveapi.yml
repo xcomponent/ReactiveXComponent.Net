@@ -19,11 +19,11 @@ services:
       args:
         - APPZIP=CreateInstanceReactiveApi.zip
     environment:
-      APP: CreateInstances.exe
+      APP: CreateInstances.dll
       HOST: rabbitmq
       PORT: 5672
       BUSTYPE: RABBIT_MQ
-      XCAPIFILE: "/Debug/xcassemblies/HelloWorldV5Api.xcApi"
+      XCAPIFILE: "/netcoreapp2.1/xcassemblies/HelloWorldV5Api.xcApi"
     networks:
       - rabbitmq1  
   rabbitmq:

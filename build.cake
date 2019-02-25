@@ -104,7 +104,6 @@ Task("All")
 Task("BuildHelloWorld")
     .Does(() =>
     {
-        NuGetRestore("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", new NuGetRestoreSettings { NoCache = true });
         var exitCode = 0;
         var helloWorldProjectPathParam = " --project=\"./docker/integration_tests/XCProjects/HelloWorldV5/HelloWorldV5_Model.xcml\"";
     
@@ -134,14 +133,19 @@ Task("BuildIntegrationTests")
         "./packaging/ReactiveXComponent.dll"
     };
 
+    var pathTIDirectory = "./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi";
     var pathrxcAssembliesDirectory = "./docker/integration_tests/XCProjects/HelloWorldV5/rxcAssemblies";
     var rxcAssemblies = GetFiles(rxcAssembliesPatterns);
 
     CreateDirectory(pathrxcAssembliesDirectory);
     CopyFiles(rxcAssemblies, pathrxcAssembliesDirectory);
-    var buildSettings = new Settings { Configuration = buildConfiguration, VSVersion = vsVersion };
 
-    CrossPlatformBuild(@"./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances.sln", buildSettings);
+    DotNetCoreRestore(pathTIDirectory + "/CreateInstances.sln");
+    DotNetCoreBuild(
+    pathTIDirectory + "/CreateInstances.sln",
+    new DotNetCoreBuildSettings {
+        Configuration = buildConfiguration,
+    });
   });
 
 Task("PackageDockerIntegrationTests")

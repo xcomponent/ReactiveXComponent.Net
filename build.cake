@@ -11,21 +11,6 @@ var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
 
-Setup (context => {
-    var formattedAssemblyVersion = FormatAssemblyVersion(version);
-    Information("Resolving value {0} for tag {1} in source code", formattedAssemblyVersion, "[PRODUCT_VERSION]");
-
-    ReplaceTextInFiles("./ReactiveXComponent/Properties/AssemblyInfo.cs", "[PRODUCT_VERSION]", formattedAssemblyVersion);
-});
-
-Teardown (context => {
-    
-    var formattedAssemblyVersion = FormatAssemblyVersion(version);
-    Information("Reversing value {0} for tag {1} in source code", formattedAssemblyVersion, "[PRODUCT_VERSION]");
-
-    ReplaceTextInFiles("./ReactiveXComponent/Properties/AssemblyInfo.cs", formattedAssemblyVersion, "[PRODUCT_VERSION]");
-});
-
 Task("Clean")
     .Does(() =>
     {

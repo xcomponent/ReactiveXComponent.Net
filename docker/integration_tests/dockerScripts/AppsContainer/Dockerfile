@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:sdk AS build-env
+FROM microsoft/dotnet:sdk
 USER root
 
 RUN apt-get update && apt-get install -y unzip iputils-ping telnet net-tools dos2unix && rm -rf /var/lib/apt/lists/* /tmp/*

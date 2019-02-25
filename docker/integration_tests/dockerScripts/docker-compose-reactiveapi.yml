@@ -23,7 +23,7 @@ services:
       HOST: rabbitmq
       PORT: 5672
       BUSTYPE: RABBIT_MQ
-      XCAPIFILE: "/netcoreapp2.1/xcassemblies/HelloWorldV5Api.xcApi"
+      XCAPIFILE: "/Debug/xcassemblies/HelloWorldV5Api.xcApi"
     networks:
       - rabbitmq1  
   rabbitmq:

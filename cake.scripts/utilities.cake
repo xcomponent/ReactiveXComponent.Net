@@ -1,5 +1,4 @@
 #addin "Cake.Incubator&version=3.0.0"
-#addin "Cake.VsixSignTool&version=1.2.0"
 
 var FormatAssemblyVersion = new Func<string, string>(currentVersion =>
 {
@@ -128,50 +127,6 @@ var FormatNugetVersion = new Func<string, string>(currentVersion =>
     }
 
     return result;
-});
-
-var CleanSolution = new Action<string, string>((solutionPath, configuration) =>
-{
-    if (IsRunningOnUnix())
-    {
-        var xBuildSettings = new XBuildSettings();
-        xBuildSettings.SetConfiguration(configuration)
-        .WithTarget("Clean");
-
-        XBuild(solutionPath, xBuildSettings);
-    }
-    else
-    {
-        var msBuildSettings = new MSBuildSettings();
-        msBuildSettings.SetConfiguration(configuration)
-        .WithTarget("Clean");
-
-        MSBuild(solutionPath, msBuildSettings);
-    }
-});
-
-var BuildSolution = new Action<string, string, bool, string>((solutionPath, configuration, hasSetAssemblyVersion, targetVersion) =>
-{
-    var formattedAssemblyVersion = FormatAssemblyVersion(targetVersion);
-
-    if (IsRunningOnUnix())
-    {
-        var xBuildSettings = new XBuildSettings() { Configuration = configuration };
-        xBuildSettings.WithTarget("Rebuild");
-        xBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        xBuildSettings.WithProperty("SetAssemblyVersion", hasSetAssemblyVersion.ToString());
-        
-        XBuild(solutionPath, xBuildSettings);
-    }
-    else
-    {
-        var msBuildSettings = new MSBuildSettings() { Configuration = configuration };
-        msBuildSettings.WithTarget("Rebuild");
-        msBuildSettings.WithProperty("AssemblyVersion", formattedAssemblyVersion);
-        msBuildSettings.WithProperty("SetAssemblyVersion", hasSetAssemblyVersion.ToString());
-        
-        MSBuild(solutionPath, msBuildSettings);
-    }
 });
 
 public class Settings {

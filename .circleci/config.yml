@@ -4,17 +4,17 @@ references:
     restore_cache:
       name: Restore checked out code
       keys:
-        - v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
-        - v1-reactivexcomponent-net-repo-{{ .Branch }}-
-        - v1-reactivexcomponent-net-repo-
+        - v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+        - v2-reactivexcomponent-net-repo-{{ .Branch }}-
+        - v2-reactivexcomponent-net-repo-
 
   restore_nuget: &restore_nuget
     restore_cache:
       name: Restore nuget cache
       keys:
-        - v1-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
-        - v1-nuget-{{ .Branch }}-
-        - v1-nuget-
+        - v2-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
+        - v2-nuget-{{ .Branch }}-
+        - v2-nuget-
 
   generate_nuget_shasum: &generate_nuget_shasum
     run:
@@ -24,7 +24,7 @@ references:
   save_nuget: &save_nuget
     save_cache:
       name: Save nuget cache
-      key: v1-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
+      key: v2-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
       paths:
           - /home/circleci/.nuget
 
@@ -36,31 +36,53 @@ jobs:
       - *restore_repo
       - checkout
       - save_cache:
-          key: v1-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+          key: v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
           paths:
             - .
 
   build_sh_reactiveapi:
     docker:
-      - image: xcomponent/mono-git:1.3.0
+      - image: microsoft/dotnet:2.1-sdk
     steps:
       - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
       - run:
           name: ReactiveApi - Build All
-          command: ./build.sh -t All
+          command: cd /home/circleci/project/ && ./build.sh -t All
+      - *save_nuget
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - packaging
+
+  build_sh_intergration_test_reactiveapi:
+    docker:
+      - image: microsoft/dotnet:2.1-sdk
+    steps:
+      - *restore_repo
+      - *generate_nuget_shasum
+      - *restore_nuget
+      - run:
+          name: Install Key for mono
+          command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+      - run:
+          name: Install mono 5.16.0.179
+          command: echo "deb http://download.mono-project.com/repo/debian stable-stretch/snapshots/5.16.0.179 main" > /etc/apt/sources.list.d/mono-official-stable.list && apt-get update && apt-get install -y mono-devel
+      - attach_workspace:
+          at: /home/circleci/project
       - run:
           name: ReactiveApi - Build BuildIntegrationTests
-          command: ./build.sh -t BuildIntegrationTests
+          command: cd /home/circleci/project/ && ./build.sh -t BuildIntegrationTests
       - run:
           name: ReactiveApi - Build PackageDockerIntegrationTests
-          command: ./build.sh -t PackageDockerIntegrationTests
+          command: cd /home/circleci/project/ && ./build.sh -t PackageDockerIntegrationTests
       - *save_nuget
       - persist_to_workspace:
           root: /home/circleci/project
           paths:
             - docker
+  
   reactiveapi_integrationtests:
     docker:
       - image: circleci/node:10.12
@@ -83,6 +105,9 @@ workflows:
       - build_sh_reactiveapi:
           requires:
           - checkout_code
-      - reactiveapi_integrationtests:
+      - build_sh_intergration_test_reactiveapi:
           requires:
           - build_sh_reactiveapi
+      - reactiveapi_integrationtests:
+          requires:
+          - build_sh_intergration_test_reactiveapi

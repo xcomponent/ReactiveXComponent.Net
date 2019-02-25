@@ -8,4 +8,4 @@ chmod +x wait_for_it.sh
 
 echo "App launched"
 sleep 35
-cd ./Debug/ && bash ./../wait_for_it.sh rabbitmq:5672 -- mono $APP
+cd ./Debug/ && bash ./../wait_for_it.sh rabbitmq:5672 -- dotnet $APP

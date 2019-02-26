@@ -119,7 +119,7 @@ jobs:
               cd /home/circleci/project/ && ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
               # cd /home/circleci/project && ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
             fi
- 
+
 workflows:
   version: 2
   relase:

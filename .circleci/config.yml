@@ -113,6 +113,7 @@ jobs:
       - run:
           name: Deploy nuget package
           command: |
+            $CIRCLE_PROJECT_USERNAME = $CIRCLE_TAG
             if [ "${CIRCLE_TAG}" != "" ]; then
               cd /home/circleci/project && ./build.sh -t PushPackage -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
             fi
@@ -125,24 +126,18 @@ workflows:
           filters:
             tags:
               only: /.+/
-            branches:
-              ignore: /.*/
       - build_sh_reactiveapi:
           requires:
           - checkout_code
           filters:
             tags:
               only: /.+/
-            branches:
-              ignore: /.*/
       - deploy_nuget:
           requires:
           - build_sh_reactiveapi
           filters:
             tags:
               only: /.+/
-            branches:
-              ignore: /.*/
   xcomponent_reactive_api:
     jobs:
       - checkout_code

@@ -119,33 +119,33 @@ jobs:
 
 workflows:
   version: 2
-  xcomponent_reactive_api:
+  relase:
     jobs:
       - checkout_code:
-          filters:
-            tags:
-              only: /.*/
+        filters:
+          tags:
+            only: /.*/
+      - build_sh_reactiveapi:
+        requires:
+          - checkout_code
+        filters:
+          tags:
+            only: /.*/
+      - deploy_nuget:
+        requires:
+          - reactiveapi_integrationtests
+        filters:
+          tags:
+            only: /.*/
+  xcomponent_reactive_api:
+    jobs:
+      - checkout_code
       - build_sh_reactiveapi:
           requires:
-          - checkout_code
-          filters:
-            tags:
-              only: /.*/
+            - checkout_code
       - build_sh_intergration_test_reactiveapi:
           requires:
-          - build_sh_reactiveapi
-          filters:
-            tags:
-              only: /.*/
+            - build_sh_reactiveapi
       - reactiveapi_integrationtests:
           requires:
-          - build_sh_intergration_test_reactiveapi
-          filters:
-            tags:
-              only: /.*/
-      - deploy_nuget:
-          requires:
-          - reactiveapi_integrationtests
-          filters:
-            tags:
-              only: /^version-[6-9]\.[0-9]\.[0-9]/
+            - build_sh_intergration_test_reactiveapi

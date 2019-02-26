@@ -124,19 +124,19 @@ workflows:
       - checkout_code:
           filters:
             tags:
-              only: /.*/
+              only: /.+/
       - build_sh_reactiveapi:
           requires:
           - checkout_code
           filters:
             tags:
-              only: /.*/
+              only: /.+/
       - deploy_nuget:
           requires:
           - build_sh_reactiveapi
           filters:
             tags:
-              only: /.*/
+              only: /.+/
   xcomponent_reactive_api:
     jobs:
       - checkout_code

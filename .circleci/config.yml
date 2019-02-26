@@ -110,16 +110,16 @@ jobs:
           name: ReactiveApi - Build All
           command: |
             if [ "${CIRCLE_TAG}" != "" ]; then
-              cd /home/circleci/project/ && ./build.sh -t All
+              ./build.sh -t All
             fi
       - run:
           name: Deploy nuget package
           command: |
             if [ "${CIRCLE_TAG}" != "" ]; then
-              cd /home/circleci/project/ && ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
+              ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
               # cd /home/circleci/project && ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
             fi
- 
+
 workflows:
   version: 2
   relase:

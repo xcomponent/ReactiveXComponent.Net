@@ -102,7 +102,7 @@ jobs:
           command: |
             cd ./docker/integration_tests/dockerScripts
             docker-compose -f ./docker-compose-reactiveapi.yml up --exit-code-from clientapp
-
+ 
   deploy_nuget:
     docker:
       - image: microsoft/dotnet:2.1-sdk

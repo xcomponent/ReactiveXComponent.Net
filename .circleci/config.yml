@@ -53,7 +53,7 @@ jobs:
             if [ "${CIRCLE_TAG}" == "" ]; then
               cd /home/circleci/project/ && ./build.sh -t All
             else
-              cd /home/circleci/project/ && ./build.sh -t All -buildVersion $CIRCLE_TAG
+              cd /home/circleci/project/ && ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
             fi
       - *save_nuget
       - persist_to_workspace:
@@ -114,7 +114,8 @@ jobs:
           name: Deploy nuget package
           command: |
             if [ "${CIRCLE_TAG}" != "" ]; then
-              cd /home/circleci/project && ./build.sh -t PushPackage -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
+              cd /home/circleci/project/ && ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
+              # cd /home/circleci/project && ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
             fi
 
 workflows:

@@ -66,7 +66,7 @@ Task("CreatePackage")
                 Configuration = buildConfiguration,
                 OutputDirectory = @"nuget",
                 VersionSuffix = version,
-                MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(formattedNugetVersion),
+                MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(version<),
             }
         );
     });

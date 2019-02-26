@@ -136,4 +136,4 @@ workflows:
           - reactiveapi_integrationtests
           filters:
             tags:
-              only: /v[0-9]+\.[0-9]+\.[0-9]+/
+              only: /^[6-9]+\.[0-9]+\.[0-9]+/

@@ -113,7 +113,7 @@ jobs:
       - run:
           name: Deploy nuget package
           command: |
-            $CIRCLE_PROJECT_USERNAME = $CIRCLE_TAG
+            echo "${CIRCLE_TAG}"
             if [ "${CIRCLE_TAG}" != "" ]; then
               cd /home/circleci/project && ./build.sh -t PushPackage -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
             fi

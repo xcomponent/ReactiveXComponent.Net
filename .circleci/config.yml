@@ -50,11 +50,7 @@ jobs:
       - run:
           name: ReactiveApi - Build All
           command: |
-            if [ "${CIRCLE_TAG}" == "" ]; then
-              cd /home/circleci/project/ && ./build.sh -t All
-            else
-              cd /home/circleci/project/ && ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
-            fi
+            cd /home/circleci/project/ && ./build.sh -t All
       - *save_nuget
       - persist_to_workspace:
           root: /home/circleci/project
@@ -102,14 +98,20 @@ jobs:
           command: |
             cd ./docker/integration_tests/dockerScripts
             docker-compose -f ./docker-compose-reactiveapi.yml up --exit-code-from clientapp
- 
-  deploy_nuget:
+
+  build_deploy_nuget:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
-      - *restore_repo      
-      - attach_workspace:
-          at: /home/circleci/project
+      - checkout
+      - *generate_nuget_shasum
+      - *restore_nuget
+      - run:
+          name: ReactiveApi - Build All
+          command: |
+            if [ "${CIRCLE_TAG}" != "" ]; then
+              cd /home/circleci/project/ && ./build.sh -t All
+            fi
       - run:
           name: Deploy nuget package
           command: |
@@ -117,28 +119,12 @@ jobs:
               cd /home/circleci/project/ && ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
               # cd /home/circleci/project && ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
             fi
-
+ 
 workflows:
   version: 2
   relase:
     jobs:
-      - checkout_code:
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
-      - build_sh_reactiveapi:
-          requires:
-          - checkout_code
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
-      - deploy_nuget:
-          requires:
-          - build_sh_reactiveapi
+      - build_deploy_nuget:
           filters:
             tags:
               only: /.*/

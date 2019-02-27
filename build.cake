@@ -1,6 +1,6 @@
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
 #addin "Cake.FileHelpers&version=3.1.0"
-#addin "Cake.XComponent&version=6.0.0"
+#addin "Cake.XComponent&version=6.0.1"
 #addin "Cake.Incubator&version=3.0.0"
 #load "cake.scripts/utilities.cake"
 
@@ -148,7 +148,7 @@ Task("BuildIntegrationTests")
 Task("PackageDockerIntegrationTests")
   .Does(() =>
  {
-    Zip( GetXcRuntimePath().Replace("xcruntime.exe", ""), "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
+    Zip( GetXcRuntimeDirectory(), "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration + "/netcoreapp2.1", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");	
 });

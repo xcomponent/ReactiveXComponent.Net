@@ -27,7 +27,7 @@ references:
       key: v2-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
       paths:
           - /home/circleci/.nuget
-
+ 
 jobs:
   checkout_code:
     docker:
@@ -49,12 +49,18 @@ jobs:
       - *restore_nuget
       - run:
           name: ReactiveApi - Build All
-          command: cd /home/circleci/project/ && ./build.sh -t All
+          command: |
+            if [ "${CIRCLE_TAG}" == "" ]; then
+              cd /home/circleci/project/ && ./build.sh -t All
+            else
+              cd /home/circleci/project/ && ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
+            fi
       - *save_nuget
       - persist_to_workspace:
           root: /home/circleci/project
           paths:
             - packaging
+            - nuget
 
   build_sh_intergration_test_reactiveapi:
     docker:
@@ -97,41 +103,58 @@ jobs:
             cd ./docker/integration_tests/dockerScripts
             docker-compose -f ./docker-compose-reactiveapi.yml up --exit-code-from clientapp
 
-  build_deploy_nuget:
+  deploy_nuget:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
-      - checkout
+      - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
-      - run:
-          name: ReactiveApi - Build All
-          command: |
-            ./build.sh -t All -buildConfiguration=Release -buildVersion=$CIRCLE_TAG
+      - attach_workspace:
+          at: /home/circleci/project
       - run:
           name: Deploy nuget package
-          command: |
-            ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
-
+          command: cd /home/circleci/project/ && ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
+ 
 workflows:
   version: 2
-  relase:
+  xcomponent_reactive_api:
     jobs:
-      - build_deploy_nuget:
+      - checkout_code:
+          filters:
+            tags:
+              only: /^[0-9]++\.[0-9]++\.[0-9]++/
+            branches:
+              only: /.*/
+      - build_sh_reactiveapi:
+          requires:
+          - checkout_code
+          filters:
+            tags:
+              only: /^[0-9]++\.[0-9]++\.[0-9]++/
+            branches:
+              only: /.*/
+      - build_sh_intergration_test_reactiveapi:
+          requires:
+          - build_sh_reactiveapi
+          filters:
+            tags:
+              only: /^[0-9]++\.[0-9]++\.[0-9]++/
+            branches:
+              only: /.*/
+      - reactiveapi_integrationtests:
+          requires:
+          - build_sh_intergration_test_reactiveapi
+          filters:
+            tags:
+              only: /^[0-9]++\.[0-9]++\.[0-9]++/
+            branches:
+              only: /.*/
+      - deploy_nuget:
+          requires:
+          - reactiveapi_integrationtests
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
             branches:
               ignore: /.*/
-  xcomponent_reactive_api:
-    jobs:
-      - checkout_code
-      - build_sh_reactiveapi:
-          requires:
-          - checkout_code
-      - build_sh_intergration_test_reactiveapi:
-          requires:
-          - build_sh_reactiveapi
-      - reactiveapi_integrationtests:
-          requires:
-          - build_sh_intergration_test_reactiveapi

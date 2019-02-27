@@ -1,12 +1,12 @@
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
 #addin "Cake.FileHelpers&version=3.1.0"
-#addin "Cake.XComponent&version=6.0.0"
+#addin "Cake.XComponent&version=6.0.1"
 #addin "Cake.Incubator&version=3.0.0"
 #load "cake.scripts/utilities.cake"
 
 var target = Argument("target", "Build");
 var buildConfiguration = Argument("buildConfiguration", "Debug");
-var version = Argument("buildVersion", "1.0.0-build1");
+var version = Argument("buildVersion", "1.0.0");
 var vsVersion = Argument("vsVersion", "VS2017");
 var apiKey = Argument("nugetKey", "");
 var setAssemblyVersion = Argument<bool>("setAssemblyVersion", false);
@@ -60,26 +60,23 @@ Task("Test")
 Task("CreatePackage")
     .Does(() =>
     {
-        var formattedNugetVersion = FormatNugetVersion(version);
         DotNetCorePack(
             "ReactiveXComponent/ReactiveXComponent.csproj",
             new DotNetCorePackSettings  {
                 Configuration = buildConfiguration,
                 OutputDirectory = @"nuget",
-                VersionSuffix = formattedNugetVersion,
-                MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(formattedNugetVersion),
+                VersionSuffix = version,
+                MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(version),
             }
         );
     });
 
 Task("PushPackage")
-    .IsDependentOn("All")
     .Does(() =>
     {
-        var formattedNugetVersion = FormatNugetVersion(version);
         if (!string.IsNullOrEmpty(apiKey))
         {
-            var package = "./nuget/ReactiveXComponent.Net." + formattedNugetVersion + ".nupkg";
+            var package = "./nuget/ReactiveXComponent.Net." + version + ".nupkg";
             DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings 
             {
                 Source = "https://www.nuget.org/api/v2/package",
@@ -151,7 +148,7 @@ Task("BuildIntegrationTests")
 Task("PackageDockerIntegrationTests")
   .Does(() =>
  {
-    Zip( GetXcRuntimePath().Replace("xcruntime.exe", ""), "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
+    Zip( GetXcRuntimeDirectory(), "./docker/integration_tests/dockerScripts/XCContainer/XCRuntime.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/xcr/xcassemblies", "./docker/integration_tests/dockerScripts/XCContainer/HelloWorldV5XCassemblies.zip");
     Zip("./docker/integration_tests/XCProjects/HelloWorldV5/CreateInstancesReactiveApi/CreateInstances/bin/" + buildConfiguration + "/netcoreapp2.1", "./docker/integration_tests/dockerScripts/AppsContainer/CreateInstanceReactiveApi.zip");	
 });

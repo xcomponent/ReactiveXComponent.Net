@@ -111,7 +111,7 @@ jobs:
       - run:
           name: Deploy nuget package
           command: |
-            /build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
+            ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
 
 workflows:
   version: 2

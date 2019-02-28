@@ -76,7 +76,7 @@ Task("PushPackage")
     {
         if (!string.IsNullOrEmpty(apiKey))
         {
-            var package = "./nuget/ReactiveXComponent." + version + ".nupkg";
+            var package = "./nuget/ReactiveXComponent.Net." + version + ".nupkg";
             DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings 
             {
                 Source = "https://www.nuget.org/api/v2/package",

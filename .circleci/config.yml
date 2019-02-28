@@ -33,7 +33,6 @@ jobs:
     docker:
       - image: circleci/node:10.12
     steps:
-      - *restore_repo
       - checkout
       - save_cache:
           key: v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}

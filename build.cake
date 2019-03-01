@@ -39,6 +39,8 @@ Task("Build")
         "ReactiveXComponent.sln",
         new DotNetCoreBuildSettings {
             Configuration = buildConfiguration,
+            VersionSuffix = version,
+            MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(version),
         });
     });
 
@@ -64,6 +66,8 @@ Task("CreatePackage")
             "ReactiveXComponent/ReactiveXComponent.csproj",
             new DotNetCorePackSettings  {
                 Configuration = buildConfiguration,
+                IncludeSymbols = true,
+                NoBuild = true,
                 OutputDirectory = @"nuget",
                 VersionSuffix = version,
                 MSBuildSettings = new DotNetCoreMSBuildSettings{}.SetVersion(version),

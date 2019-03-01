@@ -85,7 +85,8 @@ Task("PushPackage")
             {
                 Source = "https://www.nuget.org/api/v2/package",
                 ApiKey = apiKey,
-                SymbolApiKey = apiKey
+                SymbolApiKey = apiKey,
+                SymbolSource = "https://www.nuget.org/api/v2/symbolpackage"
             });
         }
         else

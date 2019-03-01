@@ -84,7 +84,9 @@ Task("PushPackage")
             DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings 
             {
                 Source = "https://www.nuget.org/api/v2/package",
-                ApiKey = apiKey
+                ApiKey = apiKey,
+                SymbolApiKey = apiKey,
+                SymbolSource = "https://www.nuget.org/api/v2/symbolpackage"
             });
         }
         else

@@ -81,12 +81,16 @@ Task("PushPackage")
         if (!string.IsNullOrEmpty(apiKey))
         {
             var package = "./nuget/ReactiveXComponent.Net." + version + ".nupkg";
-            DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings 
+            DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings
             {
                 Source = "https://www.nuget.org/api/v2/package",
-                ApiKey = apiKey,
-                SymbolApiKey = apiKey,
-                SymbolSource = "https://www.nuget.org/api/v2/symbolpackage"
+                ApiKey = apiKey
+            });
+            var packageSnupkg = "./nuget/ReactiveXComponent.Net." + version + ".snupkg";
+            DotNetCoreNuGetPush(packageSnupkg, new DotNetCoreNuGetPushSettings
+            {
+                SymbolSource = "https://www.nuget.org/api/v2/symbolpackage",
+                SymbolApiKey = apiKey
             });
         }
         else

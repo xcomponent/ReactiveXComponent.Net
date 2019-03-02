@@ -84,13 +84,13 @@ Task("PushPackage")
             DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings
             {
                 Source = "https://www.nuget.org/api/v2/package",
-                ApiKey = apiKey,
+                ApiKey = apiKey
             });
             var packageSnupkg = "./nuget/ReactiveXComponent.Net." + version + ".snupkg";
             DotNetCoreNuGetPush(packageSnupkg, new DotNetCoreNuGetPushSettings
             {
                 SymbolSource = "https://www.nuget.org/api/v2/symbolpackage"
-                SymbolApiKey = apiKey,
+                SymbolApiKey = apiKey
             });
         }
         else

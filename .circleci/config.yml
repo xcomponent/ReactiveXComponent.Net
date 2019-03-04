@@ -19,7 +19,7 @@ references:
   generate_nuget_shasum: &generate_nuget_shasum
     run:
       name: Generate cache shasum
-      command: find . -name "packages.config" -exec shasum {} \+ | sort -n > shasum.tmp
+      command: find . -name "*.csproj" -exec shasum {} \+ | sort -n > shasum.tmp
 
   save_nuget: &save_nuget
     save_cache:

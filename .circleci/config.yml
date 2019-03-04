@@ -88,7 +88,7 @@ jobs:
           paths:
             - docker
   
-  run_reactiveapi_integrationtests:
+  run_reactiveapi_integration_test:
     docker:
       - image: circleci/node:10.12
     steps:
@@ -141,7 +141,7 @@ workflows:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
             branches:
               only: /.*/
-      - run_reactiveapi_integrationtests:
+      - run_reactiveapi_integration_test:
           requires:
           - build_integration_test
           filters:
@@ -151,7 +151,7 @@ workflows:
               only: /.*/
       - deploy_nuget:
           requires:
-          - run_reactiveapi_integrationtests
+          - run_reactiveapi_integration_test
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/

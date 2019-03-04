@@ -1,4 +1,5 @@
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
+#addin "nuget:?package=Cake.DoInDirectory&version=3.2.0"
 #addin "Cake.FileHelpers&version=3.1.0"
 #addin "Cake.XComponent&version=6.0.1"
 #addin "Cake.Incubator&version=3.0.0"

@@ -1,4 +1,5 @@
 #tool "nuget:?package=NUnit.ConsoleRunner&version=3.9.0"
+#addin "nuget:?package=Cake.DoInDirectory&version=3.2.0"
 #addin "Cake.FileHelpers&version=3.1.0"
 #addin "Cake.XComponent&version=6.0.1"
 #addin "Cake.Incubator&version=3.0.0"
@@ -20,7 +21,7 @@ Task("Clean")
         CleanDirectory("./ReactiveXComponent/bin");
         CleanDirectory("./ReactiveXComponent/obj");
         CleanDirectory("./ReactiveXComponentTest/bin");
-        CleanDirectory("./ReactiveXComponenttest/obj");
+        CleanDirectory("./ReactiveXComponentTest/obj");
 
         var pathHelloWorldIntegrationTest = "./docker/integration_tests/XCProjects/HelloWorldV5/";
         CleanDirectory(pathHelloWorldIntegrationTest + "xcr");
@@ -80,17 +81,14 @@ Task("PushPackage")
     {
         if (!string.IsNullOrEmpty(apiKey))
         {
-            var package = "./nuget/ReactiveXComponent.Net." + version + ".nupkg";
-            DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings
+            DoInDirectory("./nuget", () =>
             {
-                Source = "https://www.nuget.org/api/v2/package",
-                ApiKey = apiKey
-            });
-            var packageSnupkg = "./nuget/ReactiveXComponent.Net." + version + ".snupkg";
-            DotNetCoreNuGetPush(packageSnupkg, new DotNetCoreNuGetPushSettings
-            {
-                SymbolSource = "https://www.nuget.org/api/v2/symbolpackage",
-                SymbolApiKey = apiKey
+                var package = "./ReactiveXComponent.Net." + version + ".nupkg";
+                DotNetCoreNuGetPush(package, new DotNetCoreNuGetPushSettings
+                {
+                    Source = "https://api.nuget.org/v3/index.json",
+                    ApiKey = apiKey
+                });
             });
         }
         else

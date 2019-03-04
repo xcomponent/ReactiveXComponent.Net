@@ -39,7 +39,7 @@ jobs:
           paths:
             - .
 
-  build_sh_reactiveapi:
+  build_reactiveapi:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
@@ -61,7 +61,7 @@ jobs:
             - packaging
             - nuget
 
-  build_sh_intergration_test_reactiveapi:
+  build_intergration_test:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
@@ -88,7 +88,7 @@ jobs:
           paths:
             - docker
   
-  reactiveapi_integrationtests:
+  run_reactiveapi_integrationtests:
     docker:
       - image: circleci/node:10.12
     steps:
@@ -125,7 +125,7 @@ workflows:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
             branches:
               only: /.*/
-      - build_sh_reactiveapi:
+      - build_reactiveapi:
           requires:
           - checkout_code
           filters:
@@ -133,17 +133,17 @@ workflows:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
             branches:
               only: /.*/
-      - build_sh_intergration_test_reactiveapi:
+      - build_intergration_test:
           requires:
-          - build_sh_reactiveapi
+          - build_reactiveapi
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
             branches:
               only: /.*/
-      - reactiveapi_integrationtests:
+      - run_reactiveapi_integrationtests:
           requires:
-          - build_sh_intergration_test_reactiveapi
+          - build_intergration_test
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
@@ -151,7 +151,7 @@ workflows:
               only: /.*/
       - deploy_nuget:
           requires:
-          - reactiveapi_integrationtests
+          - run_reactiveapi_integrationtests
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/

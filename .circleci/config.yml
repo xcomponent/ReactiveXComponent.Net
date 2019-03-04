@@ -61,7 +61,7 @@ jobs:
             - packaging
             - nuget
 
-  build_intergration_test:
+  build_integration_test:
     docker:
       - image: microsoft/dotnet:2.1-sdk
     steps:
@@ -133,7 +133,7 @@ workflows:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
             branches:
               only: /.*/
-      - build_intergration_test:
+      - build_integration_test:
           requires:
           - build_reactiveapi
           filters:
@@ -143,7 +143,7 @@ workflows:
               only: /.*/
       - run_reactiveapi_integrationtests:
           requires:
-          - build_intergration_test
+          - build_integration_test
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/

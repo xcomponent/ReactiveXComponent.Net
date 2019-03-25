@@ -16,7 +16,6 @@ Task("Clean")
     .Does(() =>
     {
         CleanDirectory("nuget");
-        CleanDirectory("packages");
         CleanDirectory("packaging");
         CleanDirectory("./ReactiveXComponent/bin");
         CleanDirectory("./ReactiveXComponent/obj");

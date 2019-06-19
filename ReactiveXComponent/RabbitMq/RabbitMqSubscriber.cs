@@ -298,12 +298,19 @@ namespace ReactiveXComponent.RabbitMq
                     // clear managed resources
                     foreach (var subscriberInfo in _subscribersDico.Values)
                     {
-                        if (subscriberInfo.Channel.IsOpen)
+                        try
                         {
                             subscriberInfo.Channel.ModelShutdown -= ChannelOnModelShutdown;
-                            subscriberInfo.Channel.BasicCancel(subscriberInfo.Subscriber.ConsumerTag);
+                            if (subscriberInfo.Channel.IsOpen)
+                            {
+                                subscriberInfo.Channel.BasicCancel(subscriberInfo.Subscriber.ConsumerTag);
+                            }
                         }
-                            
+                        catch (Exception)
+                        {
+                            // Don't throw exception in Dispose
+                        }
+
                         subscriberInfo.Channel.Dispose();
 
                         foreach (var handler in subscriberInfo.Handlers)

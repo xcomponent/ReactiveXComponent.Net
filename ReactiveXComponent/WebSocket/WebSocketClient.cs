@@ -151,8 +151,8 @@ namespace ReactiveXComponent.WebSocket
                     _webSocket.Error -= WebSocketOnError;
                     _webSocket.MessageReceived -= WebSocketOnMessageReceived;
 
-                    _socketOpenEvent.Dispose();
-                    _socketCloseEvent.Dispose();
+                    _socketOpenEvent?.Dispose();
+                    _socketCloseEvent?.Dispose();
                 }
 
                 // clear unmanaged resources

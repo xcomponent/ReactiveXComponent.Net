@@ -41,7 +41,7 @@ jobs:
 
   build_reactiveapi:
     docker:
-      - image: microsoft/dotnet:2.1-sdk
+      - image: xcomponent/mono-dotnet-node-xvfb:1.2.0
     steps:
       - *restore_repo
       - *generate_nuget_shasum
@@ -63,7 +63,7 @@ jobs:
 
   build_integration_test:
     docker:
-      - image: xcomponent/mono-dotnet-node-xvfb:1.0.0
+      - image: xcomponent/mono-dotnet-node-xvfb:1.2.0
     steps:
       - *restore_repo
       - *generate_nuget_shasum
@@ -98,7 +98,7 @@ jobs:
 
   deploy_nuget:
     docker:
-      - image: microsoft/dotnet:2.1-sdk
+      - image: xcomponent/mono-dotnet-node-xvfb:1.2.0
     steps:
       - *restore_repo
       - *generate_nuget_shasum

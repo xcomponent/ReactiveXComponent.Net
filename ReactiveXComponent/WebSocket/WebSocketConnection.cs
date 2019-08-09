@@ -44,7 +44,7 @@ namespace ReactiveXComponent.WebSocket
                 endpoint.Type = configurationOverrides.WebSocketType.Value;
             }
 
-            return new WebSocketSession(_endpoint, _timeout, _xcConfiguration, _privateCommunicationIdentifier);
+            return new WebSocketSession(endpoint, _timeout, _xcConfiguration, _privateCommunicationIdentifier);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace ReactiveXComponent.WebSocket
                 h => SnapshotReceived -= h);
         }
         
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize = null, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, string filter = null, int? chunkSize = null, int timeout = 10000)
         {
             var replyTopic = Guid.NewGuid().ToString();
 
@@ -74,7 +74,7 @@ namespace ReactiveXComponent.WebSocket
             using (_snapshotStream.Subscribe(observer))
             {
                 SendWebSocketSnapshotSubscriptionResquest(replyTopic);
-                SendWebSocketSnapshotRequest(stateMachine, replyTopic, chunkSize);
+                SendWebSocketSnapshotRequest(stateMachine, replyTopic, filter, chunkSize);
                 lockEvent.WaitOne(timeout);
             }
 
@@ -84,12 +84,12 @@ namespace ReactiveXComponent.WebSocket
             return result;
         }
 
-        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize = null, int timeout = 10000)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, string filter = null, int? chunkSize = null, int timeout = 10000)
         {
-            return Task.Run(() => GetSnapshot(stateMachine, chunkSize, timeout));
+            return Task.Run(() => GetSnapshot(stateMachine, filter, chunkSize, timeout));
         }
 
-        private void SendWebSocketSnapshotRequest(string stateMachine, string replyTopic, int? chunkSize)
+        private void SendWebSocketSnapshotRequest(string stateMachine, string replyTopic, string filter = null, int? chunkSize = null)
         {
             if (!_webSocketClient.IsOpen) return;
 
@@ -101,7 +101,7 @@ namespace ReactiveXComponent.WebSocket
                 ComponentCode = componentCode,
                 StateMachineCode = stateMachineCode
             };
-            var snapshotMessage = new WebSocketSnapshotMessage(stateMachineCode, componentCode, replyTopic, _privateCommunicationIdentifier, chunkSize);
+            var snapshotMessage = new WebSocketSnapshotMessage(stateMachineCode, componentCode, replyTopic, _privateCommunicationIdentifier, chunkSize, filter);
             var webSocketRequest = WebSocketMessageHelper.SerializeRequest(
                     WebSocketCommand.Snapshot,
                     inputHeader,

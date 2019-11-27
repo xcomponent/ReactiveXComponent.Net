@@ -34,7 +34,6 @@
         <WorkingDirectory>$(MSBuildThisFileDirectory)$(OutputPath)</WorkingDirectory>
     </PropertyGroup>
     <ItemGroup>
-			<InputAssemblies Include="$(WorkingDirectory)\ReactiveXComponent.dll" />
 			<InputAssemblies Include="$(WorkingDirectory)\Newtonsoft.Json.dll" />
 			<InputAssemblies Include="$(WorkingDirectory)\RabbitMQ.Client.dll" />
 			<InputAssemblies Include="$(WorkingDirectory)\WebSocket4Net.dll" />

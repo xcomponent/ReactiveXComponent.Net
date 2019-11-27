@@ -403,7 +403,7 @@ namespace ReactiveXComponentTest.RabbitMq
                 List<MessageEventArgs> snapshotInstances = null;
                 Task.Run(async () =>
                 {
-                    snapshotInstances = await publisher.GetSnapshotAsync(StateMachineA, chunkSize);
+                    snapshotInstances = await publisher.GetSnapshotAsync(StateMachineA, chunkSize: chunkSize);
                 }).GetAwaiter().OnCompleted(() =>
                 {
                     snapshotReceivedEvent.Set();

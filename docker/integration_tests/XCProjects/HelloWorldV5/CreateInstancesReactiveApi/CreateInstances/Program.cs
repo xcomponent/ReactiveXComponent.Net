@@ -161,7 +161,7 @@ namespace CreateInstances
 
             for (int i = 0; i < NumberOfInstances; i++)
             {
-                var filter = $"OriginatorName == toto{i}";
+                var filter = $"OriginatorName == \"toto{i}\"";
                 var instances = publisher.GetSnapshot(ResponseStateMachineName, filter);
 
                 if (instances == null)

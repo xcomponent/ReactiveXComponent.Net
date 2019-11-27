@@ -10,10 +10,11 @@ namespace ReactiveXComponent.WebSocket
         public string ReplyTopic { get; set; }
         public string[] CallerPrivateTopic { get; set; }
         public int? ChunkSize { get; set; }
+        public string Filter { get; set; }
 
         public WebSocketSnapshotMessage() { }
 
-        public WebSocketSnapshotMessage(long stateMachineCode, long componentCode, string replyTopic, string callerPrivateTopic, int? chunkSize)
+        public WebSocketSnapshotMessage(long stateMachineCode, long componentCode, string replyTopic, string callerPrivateTopic, int? chunkSize, string filter = null)
         {
             StateMachineCode = stateMachineCode;
             ComponentCode = componentCode;
@@ -23,6 +24,7 @@ namespace ReactiveXComponent.WebSocket
                 CallerPrivateTopic = new []{ callerPrivateTopic };
             }
             ChunkSize = chunkSize;
+            Filter = filter;
         }
     }
 }

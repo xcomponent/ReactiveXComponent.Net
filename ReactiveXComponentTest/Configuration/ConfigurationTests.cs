@@ -83,7 +83,7 @@ namespace ReactiveXComponentTest.Configuration
             Check.That(busDetails.SslServerName).IsEqualTo("XComponent RMq");
             Check.That(busDetails.SslCertificatePath).IsEqualTo("some_cert_path");
             Check.That(busDetails.SslCertificatePassphrase).IsEqualTo("some_cert_pass");
-            Check.That(busDetails.SslProtocol).IsEqualTo(SslProtocols.Default);
+            Check.That(busDetails.SslProtocol).IsEqualTo(SslProtocols.Tls12);
             Check.That(busDetails.SslAllowUntrustedServerCertificate).IsTrue();
         }
 

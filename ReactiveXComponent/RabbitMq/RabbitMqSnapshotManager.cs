@@ -73,7 +73,7 @@ namespace ReactiveXComponent.RabbitMq
             return aggregatedResult;
         }
 
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize = null, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, string filter = null, int? chunkSize = null, int timeout = 10000)
         {
             var guid = Guid.NewGuid();
             var requestId = guid.ToString();
@@ -119,7 +119,7 @@ namespace ReactiveXComponent.RabbitMq
                 SnapshotReceived += snapshotListenerOnMessageReceived;
 
                 SubscribeSnapshot(stateMachine, requestId);
-                SendSnapshotRequest(stateMachine, requestId, chunkSize, _privateCommunicationIdentifier);
+                SendSnapshotRequest(stateMachine, requestId, filter, chunkSize, _privateCommunicationIdentifier);
 
                 if (receivedSnapshotChunksInitialized.WaitOne(timeout))
                 {
@@ -183,12 +183,12 @@ namespace ReactiveXComponent.RabbitMq
             return result;
         }
 
-        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize = null, int timeout = 10000)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, string filter = null, int? chunkSize = null, int timeout = 10000)
         {
-            return Task.Run(() => GetSnapshot(stateMachine, chunkSize, timeout));
+            return Task.Run(() => GetSnapshot(stateMachine, filter, chunkSize, timeout));
         }
 
-        private void SendSnapshotRequest(string stateMachine, string replyTopic, int? chunkSize, string privateCommunicationIdentifier = null)
+        private void SendSnapshotRequest(string stateMachine, string replyTopic, string filter = null, int? chunkSize = null, string privateCommunicationIdentifier = null)
         {
             if (_xcConfiguration == null)
                 return;
@@ -212,6 +212,7 @@ namespace ReactiveXComponent.RabbitMq
                 CallerPrivateTopic = !string.IsNullOrEmpty(privateCommunicationIdentifier)
                             ? new List<string>{ privateCommunicationIdentifier}
                             : null,
+                Filter = filter,
                 ChunkSize = chunkSize
             };
 

@@ -28,18 +28,25 @@ namespace CreateInstances
 
         static int Main()
         {
-            for (int i = 0; i < MaxNumberOfTries; i++)
+            var triesCount = 0;
+
+            while (triesCount < MaxNumberOfTries)
             {
                 try
                 {
+                    triesCount++;
                     int result = TryToRunTest();
                     return result;
                 }
                 catch (Exception e)
                 {
-                    throw new ReactiveXComponentException("Error while running test: " + e.Message, e);
+                    if (triesCount == MaxNumberOfTries)
+                    {
+                        throw new ReactiveXComponentException("Error while running test: " + e.Message, e);
+                    }
                 }
             }
+
             Console.WriteLine("Exited test, failed to run");
             return TooManyTriesExitCode;
         }
@@ -59,6 +66,8 @@ namespace CreateInstances
                 try
                 {
                     TestCreateInstanceReactiveApi(publisher, createdInstanceIds, subscriber);
+
+                    TestGetSnapshotWithFilter(publisher, createdInstanceIds);
 
                     TestDestroyInstanceReactiveApi(subscriber, createdInstanceIds, publisher);
                     
@@ -94,7 +103,7 @@ namespace CreateInstances
                 List<MessageEventArgs> instanceList = createdInstanceIds.Values.ToList();
                 foreach (var helloWorldResponseInstance in instanceList)
                 {
-                    publisher.SendEvent(helloWorldResponseInstance.StateMachineRefHeader, new SayGoodbye() {Name = "toto"});
+                    publisher.SendEvent(helloWorldResponseInstance.StateMachineRefHeader, new SayGoodbye());
                 }
 
                 if (!waitForInstanceDestruction.WaitOne(TimeToWaitForInstanceState))
@@ -133,7 +142,7 @@ namespace CreateInstances
             {
                 for (int i = 0; i < NumberOfInstances; i++)
                 {
-                    publisher.SendEvent(entryPointSnapshot.StateMachineRefHeader, new SayHello() {Name = "toto"});
+                    publisher.SendEvent(entryPointSnapshot.StateMachineRefHeader, new SayHello() {Name = $"toto{i}"});
                 }
 
                 if (!waitForInstanceCreation.WaitOne(TimeToWaitForInstanceState))
@@ -142,6 +151,32 @@ namespace CreateInstances
                     throw new Exception("Error all instance are not created");
                 }
             }
+        }
+
+        private static void TestGetSnapshotWithFilter(
+            IXCPublisher publisher, 
+            ConcurrentDictionary<string, MessageEventArgs> createdInstanceIds)
+        {
+            Console.WriteLine("Testing get snapshot with filter");
+
+            for (int i = 0; i < NumberOfInstances; i++)
+            {
+                var filter = $"OriginatorName == toto{i}";
+                var instances = publisher.GetSnapshot(ResponseStateMachineName, filter);
+
+                if (instances == null)
+                {
+                    Console.WriteLine($"Received a null snapshot for instance with filter = {filter}");
+                    throw new Exception("Error while testing snapshot");
+                }
+
+                if (instances.Count != 1)
+                {
+                    Console.WriteLine($"Received {instances.Count} instances for get snapshot for instance with filter = {filter}. Expected only one.");
+                    throw new Exception("Error while testing snapshot");
+                }
+            }
+            
         }
 
         private static void ObserverStateMachineExecuted(int instanceCount, AutoResetEvent waitForInstanceState, string stateInstance)

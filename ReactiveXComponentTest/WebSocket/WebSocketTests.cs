@@ -305,7 +305,7 @@ namespace ReactiveXComponentTest.WebSocket
                 List<MessageEventArgs> instances = new List<MessageEventArgs>();
                 Task.Run(async () =>
                 {
-                    instances = await webSocketPublisher.GetSnapshotAsync(stateMachineName, 2);
+                    instances = await webSocketPublisher.GetSnapshotAsync(stateMachineName, chunkSize:2);
                 }).GetAwaiter().OnCompleted(() =>
                 {
                     snapshotReceivedEvent.Set();

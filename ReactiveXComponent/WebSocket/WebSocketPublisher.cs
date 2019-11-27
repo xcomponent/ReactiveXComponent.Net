@@ -65,14 +65,14 @@ namespace ReactiveXComponent.WebSocket
             _webSocketClient.Send(webSocketRequest);
         }
 
-        public List<MessageEventArgs> GetSnapshot(string stateMachine, int? chunkSize, int timeout = 10000)
+        public List<MessageEventArgs> GetSnapshot(string stateMachine, string filter = null, int? chunkSize = null, int timeout = 10000)
         {
-            return _webSocketSnapshotManager.GetSnapshot(stateMachine, chunkSize, timeout);
+            return _webSocketSnapshotManager.GetSnapshot(stateMachine, filter, chunkSize, timeout);
         }
 
-        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, int? chunkSize, int timeout = 10000)
+        public Task<List<MessageEventArgs>> GetSnapshotAsync(string stateMachine, string filter = null, int? chunkSize = null, int timeout = 10000)
         {
-            return _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, chunkSize, timeout);
+            return _webSocketSnapshotManager.GetSnapshotAsync(stateMachine, filter, chunkSize, timeout);
         }
 
         #endregion

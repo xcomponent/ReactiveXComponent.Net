@@ -1,12 +1,10 @@
-version: 2
+version: 2.1
+
 references:
-  restore_repo: &restore_repo
-    restore_cache:
-      name: Restore checked out code
-      keys:
-        - v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
-        - v2-reactivexcomponent-net-repo-{{ .Branch }}-
-        - v2-reactivexcomponent-net-repo-
+  docker_auth: &docker_auth
+    auth:
+      username: xcomponentteam
+      password: $DOCKERHUB_PASSWORD
 
   restore_nuget: &restore_nuget
     restore_cache:
@@ -26,16 +24,18 @@ references:
       name: Save nuget cache
       key: v2-nuget-{{ .Branch }}-{{ checksum "shasum.tmp" }}
       paths:
-          - /home/circleci/.nuget
- 
+        - /home/circleci/.nuget
+
 jobs:
   checkout_code:
     docker:
-      - image: circleci/node:10.12
+      - image: circleci/node:15.14
+        <<: *docker_auth
+    resource_class: small
     steps:
       - checkout
-      - save_cache:
-          key: v2-reactivexcomponent-net-repo-{{ .Branch }}-{{ .Revision }}
+      - persist_to_workspace:
+          root: /home/circleci/project
           paths:
             - .
 
@@ -43,7 +43,6 @@ jobs:
     docker:
       - image: microsoft/dotnet:2.2-sdk
     steps:
-      - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
       - run:
@@ -64,8 +63,8 @@ jobs:
   build_integration_test:
     docker:
       - image: xcomponent/mono-dotnet-node-xvfb:1.2.0
+        <<: *docker_auth
     steps:
-      - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
       - attach_workspace:
@@ -81,13 +80,13 @@ jobs:
           root: /home/circleci/project
           paths:
             - docker
-  
+
   run_reactiveapi_integration_test:
     docker:
       - image: circleci/node:10.12
+        <<: *docker_auth
     steps:
-      - setup_remote_docker  
-      - *restore_repo      
+      - setup_remote_docker
       - attach_workspace:
           at: /home/circleci/project
       - run:
@@ -99,8 +98,8 @@ jobs:
   deploy_nuget:
     docker:
       - image: microsoft/dotnet:2.2-sdk
+        <<: *docker_auth
     steps:
-      - *restore_repo
       - *generate_nuget_shasum
       - *restore_nuget
       - attach_workspace:
@@ -108,7 +107,7 @@ jobs:
       - run:
           name: Deploy nuget package
           command: cd /home/circleci/project/ && ./build.sh -t PushPackage -buildConfiguration=Release -buildVersion=$CIRCLE_TAG -nugetkey=$NUGET_API_KEY
- 
+
 workflows:
   version: 2
   xcomponent_reactive_api:
@@ -121,7 +120,7 @@ workflows:
               only: /.*/
       - build_reactiveapi:
           requires:
-          - checkout_code
+            - checkout_code
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
@@ -129,7 +128,7 @@ workflows:
               only: /.*/
       - build_integration_test:
           requires:
-          - build_reactiveapi
+            - build_reactiveapi
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
@@ -137,7 +136,7 @@ workflows:
               only: /.*/
       - run_reactiveapi_integration_test:
           requires:
-          - build_integration_test
+            - build_integration_test
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/
@@ -145,7 +144,7 @@ workflows:
               only: /.*/
       - deploy_nuget:
           requires:
-          - run_reactiveapi_integration_test
+            - run_reactiveapi_integration_test
           filters:
             tags:
               only: /^[0-9]++\.[0-9]++\.[0-9]++/

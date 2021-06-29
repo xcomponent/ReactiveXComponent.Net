@@ -43,6 +43,8 @@ jobs:
     docker:
       - image: microsoft/dotnet:2.2-sdk
     steps:
+      - attach_workspace:
+          at: /home/circleci/project
       - *generate_nuget_shasum
       - *restore_nuget
       - run:
@@ -65,6 +67,8 @@ jobs:
       - image: xcomponent/mono-dotnet-node-xvfb:1.2.0
         <<: *docker_auth
     steps:
+      - attach_workspace:
+          at: /home/circleci/project
       - *generate_nuget_shasum
       - *restore_nuget
       - attach_workspace:
@@ -86,6 +90,8 @@ jobs:
       - image: circleci/node:10.12
         <<: *docker_auth
     steps:
+      - attach_workspace:
+          at: /home/circleci/project
       - setup_remote_docker
       - attach_workspace:
           at: /home/circleci/project
@@ -100,6 +106,8 @@ jobs:
       - image: microsoft/dotnet:2.2-sdk
         <<: *docker_auth
     steps:
+      - attach_workspace:
+          at: /home/circleci/project
       - *generate_nuget_shasum
       - *restore_nuget
       - attach_workspace:

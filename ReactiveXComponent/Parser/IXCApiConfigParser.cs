@@ -12,6 +12,8 @@ namespace ReactiveXComponent.Parser
         WebSocketEndpoint GetWebSocketEndpoint();
         int GetComponentCode(string component);
         int GetStateMachineCode(string component, string stateMachine);
+        int GetStateCode(string component, string stateMachine, string state);
+
         int GetPublisherEventCode(string eventName);
         string GetPublisherTopic(string component, string stateMachine);
         string GetPublisherTopic(long componentCode, long stateMachineCode);

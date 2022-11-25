@@ -21,6 +21,7 @@ namespace ReactiveXComponent.Parser
         private readonly Dictionary<string, List<StateMachineInfo>> _stateMachineInfoByComponentRepository =
             new Dictionary<string, List<StateMachineInfo>>();
         private readonly Dictionary<string, int> _componentCodeByComponentNameRepository = new Dictionary<string, int>();
+        private readonly Dictionary<string, Dictionary<string, Dictionary<string, int>>> _stateCodeByComponentNameAndStateMachineNameRepository = new Dictionary<string, Dictionary<string, Dictionary<string, int>>>();
 
 
         public void Parse(Stream xcApiStream)
@@ -59,22 +60,52 @@ namespace ReactiveXComponent.Parser
             if (_stateMachineInfoByComponentRepository.ContainsKey(componentName)) return;
 
             var stateMachines = component.Descendants(_xc + XCApiTags.StateMachine);
-            var statemachineInfoList = new List<StateMachineInfo>
-                (
-                    stateMachines
-                        .Where(stateMachine => 
-                                !string.IsNullOrEmpty(stateMachine?.Attribute(XCApiTags.Name)?.Value)
-                                && !string.IsNullOrEmpty(stateMachine.Attribute(XCApiTags.Id)?.Value))
-                        .Select(stateMachine =>
-                            new StateMachineInfo(stateMachine.Attribute(XCApiTags.Name)?.Value, 
-                            Convert.ToInt32(stateMachine.Attribute(XCApiTags.Id)?.Value))
-                ).ToList()
-            );
+            var statemachineInfoList = new List<StateMachineInfo>();
+            foreach (var stateMachine in stateMachines)
+            {
+                var stateMachineName = stateMachine.Attribute(XCApiTags.Name)?.Value;
+                var stateMachineCode = stateMachine.Attribute(XCApiTags.Id)?.Value;
+                if (!string.IsNullOrEmpty(stateMachineName) && !string.IsNullOrEmpty(stateMachineCode))
+                {
+                    statemachineInfoList.Add(new StateMachineInfo(stateMachine.Attribute(XCApiTags.Name)?.Value,
+                            Convert.ToInt32(stateMachine.Attribute(XCApiTags.Id)?.Value)));
+
+                    ParseStateNodes(stateMachine, componentName, stateMachineName);
+                }
+            }
 
             if (statemachineInfoList.Any())
             {
                 _stateMachineInfoByComponentRepository.Add(componentName, statemachineInfoList);
             }
+        }
+
+        private void ParseStateNodes(XElement stateMachine, string componentName, string stateMachineName)
+        {
+            if(_stateCodeByComponentNameAndStateMachineNameRepository.ContainsKey(componentName) && _stateCodeByComponentNameAndStateMachineNameRepository[componentName].ContainsKey(stateMachineName))
+            {
+                return;
+            }
+            if( !_stateCodeByComponentNameAndStateMachineNameRepository.ContainsKey(componentName))
+            {
+                _stateCodeByComponentNameAndStateMachineNameRepository.Add(componentName, new Dictionary<string, Dictionary<string, int>>());              
+            }
+            if (!_stateCodeByComponentNameAndStateMachineNameRepository[componentName].ContainsKey(stateMachineName))
+            {
+                _stateCodeByComponentNameAndStateMachineNameRepository[componentName].Add(stateMachineName, new Dictionary<string, int>());
+            }
+
+            var states = stateMachine.Descendants(_xc + XCApiTags.State);
+            foreach (var state in states)
+            {
+                var stateName = state.Attribute(XCApiTags.Name)?.Value;
+                var stateId = state.Attribute(XCApiTags.Id)?.Value;
+                if (!string.IsNullOrEmpty(stateName) && !string.IsNullOrEmpty(stateId))
+                {
+                    _stateCodeByComponentNameAndStateMachineNameRepository[componentName][stateMachineName][stateName] = Convert.ToInt32(stateId);
+                }
+            }
+
         }
 
         private Dictionary<string, int> CreateEventCodeByEventRepository(IEnumerable<XElement> publishNodes)
@@ -250,6 +281,22 @@ namespace ReactiveXComponent.Parser
             int componentCode;
             _componentCodeByComponentNameRepository.TryGetValue(component, out componentCode);
             return componentCode;
+        }
+
+        public int GetStateCode(string component, string stateMachine, string state)
+        {
+            if(_stateCodeByComponentNameAndStateMachineNameRepository.ContainsKey(component))
+            {
+                if (_stateCodeByComponentNameAndStateMachineNameRepository[component].ContainsKey(stateMachine))
+                {
+                    if (_stateCodeByComponentNameAndStateMachineNameRepository[component][stateMachine].ContainsKey(state))
+                    {
+                        return _stateCodeByComponentNameAndStateMachineNameRepository[component][stateMachine][state];
+                    }
+                }
+            }
+
+            return -1;
         }
 
         public int GetStateMachineCode(string component, string stateMachine)

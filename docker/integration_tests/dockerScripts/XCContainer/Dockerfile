@@ -2,13 +2,14 @@ FROM xcomponent/mono:1.0.0
 USER root
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update && apt-get install -y \
+    apt-transport-https \
 	iputils-ping \
 	telnet \
 	net-tools \
 	dos2unix \
 	unzip \
 	nodejs \
-	&& rm -rf /var/lib/apt/lists/* /tmp/*
+	&& rm -rf /var/lib/apt/lists/* /tmp/* 
 COPY XCRuntime.zip ./
 RUN rm -rf XCRuntime
 RUN unzip /XCRuntime.zip -d XCRuntime

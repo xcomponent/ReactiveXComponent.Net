@@ -41,7 +41,7 @@ jobs:
 
   build_reactiveapi:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+      - image: mcr.microsoft.com/dotnet/sdk:3.1
     steps:
       - attach_workspace:
           at: /home/circleci/project
@@ -103,7 +103,7 @@ jobs:
 
   deploy_nuget:
     docker:
-      - image: mcr.microsoft.com/dotnet/core/sdk:3.1
+      - image: mcr.microsoft.com/dotnet/sdk:3.1
         <<: *docker_auth
     steps:
       - attach_workspace:

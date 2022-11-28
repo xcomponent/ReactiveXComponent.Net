@@ -1,8 +1,7 @@
 FROM xcomponent/mono:1.0.0
 USER root
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get update && apt-get install -y \
-    apt-transport-https \
 	iputils-ping \
 	telnet \
 	net-tools \

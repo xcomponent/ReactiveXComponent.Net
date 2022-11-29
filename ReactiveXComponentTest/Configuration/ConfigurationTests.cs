@@ -107,6 +107,14 @@ namespace ReactiveXComponentTest.Configuration
         }
 
         [Test]
+        public void GetStateCodeTest()
+        {
+            var stateCode = _webSocketConfiguration.GetStateCode("HelloWorld", "HelloWorldManager", "EntryPoint");
+
+            Check.That(stateCode).IsEqualTo(0);
+        }
+
+        [Test]
         public void GetComponentCodeTest()
         {
             var componentCode = _webSocketConfiguration.GetComponentCode("HelloWorld");

@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:sdk
+FROM mcr.microsoft.com/dotnet/sdk:2.1
 USER root
 
 RUN apt-get update && apt-get install -y unzip iputils-ping telnet net-tools dos2unix && rm -rf /var/lib/apt/lists/* /tmp/*

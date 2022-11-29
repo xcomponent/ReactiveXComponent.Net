@@ -53,6 +53,11 @@ namespace ReactiveXComponent.Configuration
             return _parser.GetStateMachineCode(component, stateMachine);
         }
 
+        public int GetStateCode(string component, string stateMachine, string state)
+        {
+            return _parser.GetStateCode(component, stateMachine, state);
+        }
+
         public int GetComponentCode(string component)
         {
             return _parser.GetComponentCode(component);

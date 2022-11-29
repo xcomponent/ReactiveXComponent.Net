@@ -41,7 +41,7 @@ jobs:
 
   build_reactiveapi:
     docker:
-      - image: microsoft/dotnet:2.2-sdk
+      - image: mcr.microsoft.com/dotnet/sdk:2.1
     steps:
       - attach_workspace:
           at: /home/circleci/project
@@ -103,7 +103,7 @@ jobs:
 
   deploy_nuget:
     docker:
-      - image: microsoft/dotnet:2.2-sdk
+      - image: mcr.microsoft.com/dotnet/sdk:2.1
         <<: *docker_auth
     steps:
       - attach_workspace:
